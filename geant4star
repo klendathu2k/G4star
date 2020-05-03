@@ -1,0 +1,4 @@
+#!/bin/csh -f 
+root -l initStar.C geant4star.C $argv 
+
+
