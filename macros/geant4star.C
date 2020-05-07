@@ -24,14 +24,14 @@ void addGenerator( const char* name, const char* maker ) {
 void loadStar(const Char_t *mytag="dev2021", Bool_t agml = true  )
 {
 
-  gROOT->ProcessLine("StLoggerManager::StarLoggerInit();");
+//  gROOT->ProcessLine("StLoggerManager::StarLoggerInit();");
 
-  Load("StChain.so"); 
-  Load("StBFChain.so"); 
+//  Load("StChain.so"); 
+//  Load("StBFChain.so"); 
 
   gROOT->ProcessLine("chain = new StBFChain();");
 
-  TString chainOpts = "agml geant4 geant4vmc stargen geant4mk pythia8.1.86 kinematics nodefault ";
+  TString chainOpts = "agml geant4 geant4vmc stargen geant4mk pythia8.1.86 kinematics -emc_t -ftpcT nodefault ";
 
   // pickup command line options ala "--" and add them as a chain option
   for ( int i=0; i<gApplication->Argc();i++ ) {
