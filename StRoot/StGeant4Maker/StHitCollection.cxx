@@ -8,6 +8,46 @@
 #include <StMCParticleStack.h>
 #include <StMessMgr.h>
 
+//____________________________________________________________________________________________
+ostream&  operator<<(ostream& os,  const TrackerHit& hit) {
+   // Printout hit information
+   os << Form( "Tracker Hit [%i %i]\n\t[%s]\n\tpos:(%f,%f,%f)(%f,%f,%f)\n\tmom:(%f,%f,%f),(%f,%f,%f) \n\tde=%f nstep=%i",
+               hit.id, hit.idtruth,
+               hit.path.Data(),
+	       hit.position_in[0],  
+               hit.position_in[1],  
+               hit.position_in[2],  
+               hit.position_out[0],  
+               hit.position_out[1],  
+               hit.position_out[2],  
+	       hit.momentum_in[0],  
+               hit.momentum_in[1],  
+               hit.momentum_in[2],  
+               hit.momentum_out[0],  
+               hit.momentum_out[1],  
+               hit.momentum_out[2],  
+               hit.de,
+               hit.nsteps );
+   return os; 
+   
+}
+//____________________________________________________________________________________________
+ostream&  operator<<(ostream& os,  const CalorimeterHit& hit) {
+   // Printout hit information
+   os << Form( "Calorimeter Hit [%i %i]\n\t[%s]\n\tpos:(%f,%f,%f)\n\tde=%f nstep=%i",
+               hit.id, hit.idtruth,
+               hit.path.Data(),
+	       hit.position_in[0],  
+               hit.position_in[1],  
+               hit.position_in[2],  
+	       hit.de,
+               hit.nsteps );
+   return os; 
+   
+}
+
+
+
 //_____________________________________________________________________________________________
 StHitCollection::StHitCollection( const char* name, const char* title ) : TNamed(name,title){ }
 //_____________________________________________________________________________________________
@@ -110,7 +150,10 @@ void StTrackerHitCollection::ProcessHits() {
 }
 //_____________________________________________________________________________________________
 void StTrackerHitCollection::EndOfEvent() {
-
+  for ( auto hit : mHits ) {
+    LOG_INFO << *hit << endm;
+  }
+  mHits.clear();
 }
 //_____________________________________________________________________________________________
 
@@ -204,6 +247,9 @@ void StCalorimeterHitCollection::ProcessHits() {
 }
 //_____________________________________________________________________________________________
 void StCalorimeterHitCollection::EndOfEvent() {
-
+  for ( auto hit : mHits ) {
+    LOG_INFO << *hit << endm;
+  }
+  mHits.clear();
 }
 //_____________________________________________________________________________________________

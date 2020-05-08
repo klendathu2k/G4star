@@ -6,6 +6,9 @@
 #include <vector>
 #include <TString.h>
 
+class AgMLExtension;
+class StHitCollection;
+
 class DetectorHit {
 public:
 
@@ -17,6 +20,7 @@ public:
   unsigned int idtruth;         /// unique ID of the track
            int volu[maxdepth];  /// volume numbers specifying path to hit
            int copy[maxdepth];  /// copy numbers specifying path to the hit
+           int numbv[maxdepth]; /// "Reduced" numbering
 
   TString path;
 
@@ -62,14 +66,23 @@ public:
   void ProcessHits();
   void EndOfEvent();
 
-  void addVolume(TGeoVolume *v){ mVolumes.push_back(v); }
+  void addVolume(TGeoVolume *v);
   int  numberOfVolumes(){ return mVolumes.size(); }
+
+  int numberOfHits(){ return int( mHits.size() ); }
+
+  enum class DetectorType { kUninitialized, kCalorimeter, kTracker };
+
+  DetectorType detectorType();
 
 private:
 protected:
 
-  std::vector<TGeoVolume*>  mVolumes;
-  std::vector<TrackerHit*>  mHits;
+  std::vector<TGeoVolume*>   mVolumes;
+  std::vector<DetectorHit*>  mHits;
+  AgMLExtension* mAgMLInfo;
+
+  StHitCollection* mCollection;
 
 };
 
