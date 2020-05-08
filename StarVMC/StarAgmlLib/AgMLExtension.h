@@ -24,12 +24,16 @@ public:
     };
   }
 
+  void SetBranchings( int b ) { mBranchings=b; }  
+
+
   TString GetModuleName(){ return mModuleName; }
   TString GetFamilyName(){ return mFamilyName; }
   TString GetVolumeName(){ return mVolumeName; }
 
   bool GetSensitive() { return mSensitive; }
   short GetTracking() { return mTracking; }
+  int GetBranchings(){ return mBranchings; }
  
 private:
 protected:
@@ -40,6 +44,7 @@ protected:
 
   bool    mSensitive;  // volume sensitivity
   short   mTracking;   // 0=blackhole, 1=calorimeter, 2=tracking region
+  int     mBranchings; // number of branchings (placed family members)
 
   ClassDef(AgMLExtension,1);
 

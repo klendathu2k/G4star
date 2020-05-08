@@ -874,12 +874,14 @@ Bool_t StarTGeoStacker::Position( AgBlock *block, AgPosition position )
   //
   //////////////////////////////////////////////////////////////////////////////
   //
-  AgBlock    *mother_block = AgBlock::Find( position.mother() );
-  TString     mother_name  = mother_block -> nickname();
-  TString     group_name   = position.group();
-  TGeoVolume *mother       = mVolumeTable[ mother_name ];
-  TGeoVolume *group        = mVolumeTable[ group_name ];
-  TGeoVolume *daughter     = 0;
+  AgMLExtension* agmlext      = gAgMLExt[ block_name ]; 
+  AgBlock*       mother_block = AgBlock::Find( position.mother() );
+  TString        mother_name  = mother_block -> nickname();
+  TString        group_name   = position.group();
+  TGeoVolume*    mother       = mVolumeTable[ mother_name ];
+  TGeoVolume*    group        = mVolumeTable[ group_name ];
+  TGeoVolume*    daughter     = 0;
+
 
   //
   //////////////////////////////////////////////////////////////////////////////
@@ -892,8 +894,7 @@ Bool_t StarTGeoStacker::Position( AgBlock *block, AgPosition position )
   //////////////////////////////////////////////////////////////////////////////
   //
   AgShape *shape = block->shape();
-  if ( shape->type() == AgShape::kDivision )
-    {
+  if ( shape->type() == AgShape::kDivision )    {
       Warning("Position(...)",Form("Attempt to position %s which is a division of %s",block->GetName(),mother->GetName()));
       return true;
     }
@@ -908,8 +909,7 @@ Bool_t StarTGeoStacker::Position( AgBlock *block, AgPosition position )
   //
   AgAttribute *attribute  = block->attribute();
   Double_t     att_serial = -999.0;
-  if ( attribute -> isSet("serial") )
-    {
+  if ( attribute -> isSet("serial") )    {
       att_serial = attribute->par("serial");
     }
 
@@ -942,8 +942,7 @@ Bool_t StarTGeoStacker::Position( AgBlock *block, AgPosition position )
   AgShape pos_shape = *block->shape();
   AgShape sav_shape = *block->shape();
   Int_t   nshape = 0;
-  for ( UInt_t i=0;i<pos_shape.parList().size();i++ )
-    {
+  for ( UInt_t i=0;i<pos_shape.parList().size();i++ )    {
       TString key=pos_shape.parList()[i];
       if ( position.isSet(key) )
 	{
@@ -962,8 +961,7 @@ Bool_t StarTGeoStacker::Position( AgBlock *block, AgPosition position )
   //////////////////////////////////////////////////////////////////////////////
   //
   Bool_t parameterized = false;
-  if ( nshape )
-    {
+  if ( nshape )    {
 
       if ( !block->shape()->parameterized() ) // [ERROR]: Block placed with position arguements but is not a parameterized block
 	{ gErrorIgnoreLevel=1; 
@@ -1027,14 +1025,12 @@ Bool_t StarTGeoStacker::Position( AgBlock *block, AgPosition position )
   //
   //////////////////////////////////////////////////////////////////////////////
   //
-  if ( nshape )
-    {
+  if ( nshape )    {
       block->SetShape( pos_shape );
     }
 
   std::vector< TGeoVolume * > sisters; // list of similar volumes for error detection/debug purposes below
-  while ( (vol=(TGeoVolume*)next() ) )
-    {
+  while ( (vol=(TGeoVolume*)next() ) )    {
 
       TString volume_name = realname( vol->GetName() );
 
@@ -1078,8 +1074,7 @@ Bool_t StarTGeoStacker::Position( AgBlock *block, AgPosition position )
 
   if ( !daughter )
 
-    while ( (vol=(TGeoVolume*)nextG() ) )
-      {
+    while ( (vol=(TGeoVolume*)nextG() ) )      {
 
 	TString volume_name = realname( vol->GetName() );
 
@@ -1152,8 +1147,7 @@ Bool_t StarTGeoStacker::Position( AgBlock *block, AgPosition position )
   //////////////////////////////////////////////////////////////////////////////
   //
   Int_t copy = 1;
-  for ( Int_t i=0;i<mother->GetNdaughters();i++ )
-    {
+  for ( Int_t i=0;i<mother->GetNdaughters();i++ )    {
       TGeoNode *node   = mother->GetNode(i);
       TString   name   = node->GetVolume()->GetName();
       TString   myname = realname(name);
@@ -1255,21 +1249,14 @@ Bool_t StarTGeoStacker::Position( AgBlock *block, AgPosition position )
 
   // Increment the number of branches on the block
   block->branch();
+
+  // Record currnent number of branchings in the extension
+  agmlext->SetBranchings( block->numberBranches() );
   
-
-//   //
-//   // In the case of parameterized blocks, restore the previous state of the shape
-//   //
-//   if ( nshape )
-//     {
-//       block->SetShape( sav_shape );
-//     }
-
 
   // If the shape is a parameterized shape, reset all of the shape
   // paramters to zero
-  if ( parameterized )
-    {
+  if ( parameterized )    {
 
       std::vector<TString> pars = block->shape()->parList();
       for ( UInt_t i=0;i<pars.size();i++ )
@@ -1299,12 +1286,13 @@ Bool_t StarTGeoStacker::Position( AgBlock *block, AgPlacement position )
   //
   //////////////////////////////////////////////////////////////////////////////
   //
-  AgBlock    *mother_block = AgBlock::Find( position.mother() );
-  TString     mother_name  = mother_block -> nickname();
-  TString     group_name   = position.group();
-  TGeoVolume *mother       = mVolumeTable[ mother_name ];
-  TGeoVolume *group        = mVolumeTable[ group_name ];
-  TGeoVolume *daughter     = 0;
+  AgMLExtension* agmlext      = gAgMLExt[ block_name ]; 
+  AgBlock*       mother_block = AgBlock::Find( position.mother() );
+  TString        mother_name  = mother_block -> nickname();
+  TString        group_name   = position.group();
+  TGeoVolume*    mother       = mVolumeTable[ mother_name ];
+  TGeoVolume*    group        = mVolumeTable[ group_name ];
+  TGeoVolume*    daughter     = 0;
 
   //
   //////////////////////////////////////////////////////////////////////////////
@@ -1671,13 +1659,9 @@ Bool_t StarTGeoStacker::Position( AgBlock *block, AgPlacement position )
   // Increment the number of branches on the block
   block->branch();
 
-//   //
-//   // In the case of parameterized blocks, restore the previous state of the shape
-//   //
-//   if ( nshape )
-//     {
-//       block->SetShape( sav_shape );
-//     }
+  // Store number of branchings
+  //  LOG_INFO << "Number of brancghings: " << block->numberOfBranchings() << endm;
+  agmlext->SetBranchings( block->numberBranches() );
 
 
   // If the shape is a parameterized shape, reset all of the shape
