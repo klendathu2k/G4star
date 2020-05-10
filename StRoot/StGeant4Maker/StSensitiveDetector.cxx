@@ -96,6 +96,9 @@ void StSensitiveDetector::ProcessHits(){
   mCollection->ProcessHits();
 
 
+  return;
+
+
   // Energy deposited in this tracking step
   double Edep = mc->Edep();
 
@@ -141,11 +144,6 @@ void StSensitiveDetector::ProcessHits(){
 
      // Assign the hit the ID truth of the current track (index + 1)
      hit->idtruth = truthTable.size();
-
-     // // Score entrance momentum and 
-     // mc->TrackMomentum( hit->momentum_in[0], hit->momentum_in[1],  hit->momentum_in[2],  hit->momentum_in[3] ); 
-     // mc->TrackPosition( hit->position_in[0], hit->position_in[1],  hit->position_in[2] );
-     // hit->position_in[3] = mc->TrackTime();
  
   } 
 
@@ -155,7 +153,6 @@ void StSensitiveDetector::ProcessHits(){
   }
 
   hit = mHits.back();
-
   hit -> nsteps += 1; 
 
   // // For all other tracking states, update the exit momentum and position 

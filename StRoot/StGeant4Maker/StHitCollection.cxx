@@ -10,10 +10,28 @@
 
 //____________________________________________________________________________________________
 ostream&  operator<<(ostream& os,  const TrackerHit& hit) {
+
+  TString mypath("");
+
+  int i=0;
+  int volu=hit.volu[i];
+  int copy=hit.copy[i];
+  while ( volu>0 ) {
+
+    mypath += "/"; mypath += gGeoManager->GetVolume(volu)->GetName(); mypath += "_"; mypath += copy;
+
+    i++;
+
+    volu=hit.volu[i];
+    copy=hit.copy[i];
+
+  }
+
    // Printout hit information
-   os << Form( "Tracker Hit [%i %i]\n\t[%s]\n\tpos:(%f,%f,%f)(%f,%f,%f)\n\tmom:(%f,%f,%f),(%f,%f,%f) \n\tde=%f nstep=%i",
+   os << Form( "Tracker Hit [%i %i]\n\t[%s]\n\t[%s]\n\tpos:(%f,%f,%f)(%f,%f,%f)\n\tmom:(%f,%f,%f),(%f,%f,%f) \n\tde=%f nstep=%i",
                hit.id, hit.idtruth,
                hit.path.Data(),
+	       mypath.Data(),
 	       hit.position_in[0],  
                hit.position_in[1],  
                hit.position_in[2],  
@@ -34,9 +52,28 @@ ostream&  operator<<(ostream& os,  const TrackerHit& hit) {
 //____________________________________________________________________________________________
 ostream&  operator<<(ostream& os,  const CalorimeterHit& hit) {
    // Printout hit information
-   os << Form( "Calorimeter Hit [%i %i]\n\t[%s]\n\tpos:(%f,%f,%f)\n\tde=%f nstep=%i",
+
+  TString mypath("");
+  
+  int i=0;
+  int volu=hit.volu[i];
+  int copy=hit.copy[i];
+
+  while ( volu>0 ) {
+    
+    mypath += "/"; mypath += gGeoManager->GetVolume(volu)->GetName(); mypath += "_"; mypath += copy;
+
+    i++;
+
+    volu=hit.volu[i];
+    copy=hit.copy[i];
+
+  }
+
+   os << Form( "Calorimeter Hit [%i %i]\n\t[%s]\n\t[%s]\n\tpos:(%f,%f,%f)\n\tde=%f nstep=%i",
                hit.id, hit.idtruth,
                hit.path.Data(),
+	       mypath.Data(),
 	       hit.position_in[0],  
                hit.position_in[1],  
                hit.position_in[2],  
@@ -107,8 +144,28 @@ void StTrackerHitCollection::ProcessHits() {
     }
     mHits.push_back( hit = new TrackerHit );
 
+    // Get the current path to the sensitive volume
     hit->path = mc->CurrentVolPath(); 
 
+    // Get the current volume / copy numbers to the sensitive volume.  n.b. GetBranchNumbers 
+    // only writes to the current level, so if hit is not new or cleared, need to clear by hand.
+    gGeoManager->GetBranchNumbers( hit->copy, hit->volu );
+
+    // Except... 
+
+
+    // for ( int i=0;i<navigator->GetLevel(); i++ ) {
+    //   hit->copy[i] = copy[i];
+    //   hit->volu[i] = volu[i];
+    // }
+    //    delete copy;
+    //    delete volu;
+
+    // But for some reason the copy numbers are not right, so...
+    //    TGeoNodeCache* cache = navigator->GetCache();
+    
+
+    
     // Assign the hit a unqiue ID (index + 1)
     hit->id = mHits.size();
 
@@ -214,7 +271,12 @@ void StCalorimeterHitCollection::ProcessHits() {
 
     mHits.push_back( hit = new CalorimeterHit );
 
+    // Get the current path to the sensitive volume
     hit->path = mc->CurrentVolPath(); 
+
+    // Get the current volume / copy numbers to the sensitive volume.  n.b. GetBranchNumbers 
+    // only writes to the current level, so if hit is not new or cleared, need to clear by hand.
+    gGeoManager->GetBranchNumbers( hit->copy, hit->volu );
 
     // Assign the hit a unqiue ID (index + 1)
     hit->id = mHits.size();
