@@ -35,7 +35,8 @@
                          "libVMC.so,/star/simu/simu/geant4vmc/lib64/libgeant4vmc.so", "Load G4 VMC libs", false},
   // agml etc...
   {"ag4ml",       "","", "g4geometry, agml"            ,"","", "AgML + g4",false},
-  {"stargen",     "","", "tables",                      "", "libStarGeneratorUtil.so,libStarGeneratorEvent.so,libStarGeneratorBase.so,libStarGeneratorFilt.so,libMathMore.so","STAR Generator BASE",false},
+  //  {"stargen",     "","", "tables",                      "", "libStarGeneratorUtil.so,libStarGeneratorEvent.so,libStarGeneratorBase.so,libStarGeneratorFilt.so,libMathMore.so","STAR Generator BASE",false},
+  {"stargen",     "","", "gen_T,sim_T"/*+++*/,                     "", "libStarGeneratorUtil.so,libStarGeneratorEvent.so,libStarGeneratorBase.so,libStarGeneratorFilt.so,libMathMore.so","STAR Generator BASE",false},
   {"geant4mk",    "","", "stargen,geant4vmc", "", "StGeant4Maker.so,StarMagField.so", "Load G4 VMC libs", false},
 
   // event generators
