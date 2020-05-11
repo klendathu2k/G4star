@@ -8,6 +8,8 @@
 #include <StMCParticleStack.h>
 #include <StMessMgr.h>
 
+#include <StarVMC/StarAgmlLib/AgMLExtension.h>
+
 //____________________________________________________________________________________________
 ostream&  operator<<(ostream& os,  const TrackerHit& hit) {
 
@@ -17,21 +19,24 @@ ostream&  operator<<(ostream& os,  const TrackerHit& hit) {
   int volu=hit.volu[i];
   int copy=hit.copy[i];
   while ( volu>0 ) {
-
     mypath += "/"; mypath += gGeoManager->GetVolume(volu)->GetName(); mypath += "_"; mypath += copy;
-
     i++;
-
     volu=hit.volu[i];
     copy=hit.copy[i];
+  }
 
+  TString numbv;
+  for ( int iv=0;iv<DetectorHit::maxdepth;iv++ ) {
+    int nv = hit.numbv[iv];
+    if ( 0==nv ) break;
+    numbv += nv; numbv+="    ";
   }
 
    // Printout hit information
    os << Form( "Tracker Hit [%i %i]\n\t[%s]\n\t[%s]\n\tpos:(%f,%f,%f)(%f,%f,%f)\n\tmom:(%f,%f,%f),(%f,%f,%f) \n\tde=%f nstep=%i",
                hit.id, hit.idtruth,
                hit.path.Data(),
-	       mypath.Data(),
+	       numbv.Data(),
 	       hit.position_in[0],  
                hit.position_in[1],  
                hit.position_in[2],  
@@ -70,10 +75,18 @@ ostream&  operator<<(ostream& os,  const CalorimeterHit& hit) {
 
   }
 
+  TString numbv;
+  for ( int iv=0;iv<DetectorHit::maxdepth;iv++ ) {
+    int nv = hit.numbv[iv];
+    if ( 0==nv ) break;
+    numbv += nv; numbv+="    ";
+  }
+
+
    os << Form( "Calorimeter Hit [%i %i]\n\t[%s]\n\t[%s]\n\tpos:(%f,%f,%f)\n\tde=%f nstep=%i",
                hit.id, hit.idtruth,
                hit.path.Data(),
-	       mypath.Data(),
+	       numbv.Data(),
 	       hit.position_in[0],  
                hit.position_in[1],  
                hit.position_in[2],  
@@ -106,7 +119,6 @@ void StTrackerHitCollection::ProcessHits() {
 
   // Is this a charged particle?  If not, skip it...
   if ( 0 == mc->TrackCharge() ) return;
-
 
   // Energy deposited in this tracking step
   double Edep = mc->Edep();
@@ -151,19 +163,15 @@ void StTrackerHitCollection::ProcessHits() {
     // only writes to the current level, so if hit is not new or cleared, need to clear by hand.
     gGeoManager->GetBranchNumbers( hit->copy, hit->volu );
 
-    // Except... 
-
-
-    // for ( int i=0;i<navigator->GetLevel(); i++ ) {
-    //   hit->copy[i] = copy[i];
-    //   hit->volu[i] = volu[i];
-    // }
-    //    delete copy;
-    //    delete volu;
-
-    // But for some reason the copy numbers are not right, so...
-    //    TGeoNodeCache* cache = navigator->GetCache();
-    
+    // Set reduced volume path
+    int inumbv = 0;
+    for ( int ilvl=0; ilvl<navigator->GetLevel()+1;ilvl++ ) {
+      TGeoVolume* volume = gGeoManager->GetVolume( hit->volu[ilvl] );
+      AgMLExtension* agmlext = dynamic_cast<AgMLExtension*> ( volume->GetUserExtension() );
+      if ( 0 == agmlext )                  continue; // but probably an error
+      if ( agmlext->GetBranchings() <= 1 ) continue; // skip unique volumes (and HALL)
+      hit->numbv[ inumbv++ ] = hit->copy[ilvl];
+    }
 
     
     // Assign the hit a unqiue ID (index + 1)
@@ -277,6 +285,17 @@ void StCalorimeterHitCollection::ProcessHits() {
     // Get the current volume / copy numbers to the sensitive volume.  n.b. GetBranchNumbers 
     // only writes to the current level, so if hit is not new or cleared, need to clear by hand.
     gGeoManager->GetBranchNumbers( hit->copy, hit->volu );
+
+
+    // Set reduced volume path
+    int inumbv = 0;
+    for ( int ilvl=0; ilvl<navigator->GetLevel()+1;ilvl++ ) {
+      TGeoVolume* volume = gGeoManager->GetVolume( hit->volu[ilvl] );
+      AgMLExtension* agmlext = dynamic_cast<AgMLExtension*> ( volume->GetUserExtension() );
+      if ( 0 == agmlext )                  continue; // but probably an error
+      if ( agmlext->GetBranchings() <= 1 ) continue; // skip unique volumes (and HALL)
+      hit->numbv[ inumbv++ ] = hit->copy[ilvl];
+    }
 
     // Assign the hit a unqiue ID (index + 1)
     hit->id = mHits.size();
