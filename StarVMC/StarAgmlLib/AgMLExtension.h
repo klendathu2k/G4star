@@ -3,6 +3,14 @@
 
 #include <TGeoExtension.h>
 #include <TString.h>
+#include <TMath.h>
+#include <vector>
+
+// Volume ID functor (for sensitive volumes)
+class AgMLVolumeId {
+public:
+  virtual int operator()( int* numbv ) const { return 0; }
+};
 
 class AgMLExtension : public TGeoRCExtension {
 
@@ -26,10 +34,15 @@ public:
 
   void SetBranchings( int b ) { mBranchings=b; }  
 
+  void SetVolumeIdentifier( AgMLVolumeId* identifier ){ mVolumeId = identifier; }
+
 
   TString GetModuleName(){ return mModuleName; }
   TString GetFamilyName(){ return mFamilyName; }
   TString GetVolumeName(){ return mVolumeName; }
+
+  int GetVolumeId( int* numbv ){ return (*mVolumeId)( numbv ); }
+
 
   bool GetSensitive() { return mSensitive; }
   short GetTracking() { return mTracking; }
@@ -45,6 +58,8 @@ protected:
   bool    mSensitive;  // volume sensitivity
   short   mTracking;   // 0=blackhole, 1=calorimeter, 2=tracking region
   int     mBranchings; // number of branchings (placed family members)
+
+  AgMLVolumeId* mVolumeId; // Functor to calculate volume ID given reduced numbering scheme
 
   ClassDef(AgMLExtension,1);
 

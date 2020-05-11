@@ -6,7 +6,8 @@ AgMLExtension::AgMLExtension() : TGeoRCExtension(),
 				 mVolumeName("none"), 
 				 mSensitive(0), 
 				 mTracking(0),
-				 mBranchings(0)
+				 mBranchings(0),
+				 mVolumeId( new AgMLVolumeId )
 {
   Grab();
 }
