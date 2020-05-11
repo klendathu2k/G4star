@@ -9,7 +9,7 @@
 // Volume ID functor (for sensitive volumes)
 class AgMLVolumeId {
 public:
-  virtual int operator()( int* numbv ) const { return 0; }
+  virtual int id( int* numbv ) const { return 0; }
 };
 
 class AgMLExtension : public TGeoRCExtension {
@@ -41,12 +41,24 @@ public:
   TString GetFamilyName(){ return mFamilyName; }
   TString GetVolumeName(){ return mVolumeName; }
 
-  int GetVolumeId( int* numbv ){ return (*mVolumeId)( numbv ); }
+  int GetVolumeId( int* numbv ){ return mVolumeId->id( numbv ); }
 
 
   bool GetSensitive() { return mSensitive; }
   short GetTracking() { return mTracking; }
   int GetBranchings(){ return mBranchings; }
+
+
+  AgMLExtension( const AgMLExtension& other ) {
+    mModuleName = other.mModuleName;
+    mFamilyName = other.mFamilyName;
+    mVolumeName = other.mVolumeName;
+    mSensitive  = other.mSensitive;
+    mTracking   = other.mTracking;
+    mBranchings = other.mBranchings;
+    mVolumeId   = other.mVolumeId;
+  }
+
  
 private:
 protected:

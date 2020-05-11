@@ -178,7 +178,6 @@ void StTrackerHitCollection::ProcessHits() {
     assert(agmlext);
     hit->volId = agmlext->GetVolumeId( hit->numbv );
 
-    
     // Assign the hit a unqiue ID (index + 1)
     hit->id = mHits.size();
 
