@@ -21,6 +21,7 @@ public:
            int volu[maxdepth];  /// volume numbers specifying path to hit
            int copy[maxdepth];  /// copy numbers specifying path to the hit
            int numbv[maxdepth]; /// "Reduced" numbering
+           int volId;           /// Unique volume ID
 
   TString path;
 

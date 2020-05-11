@@ -33,8 +33,8 @@ ostream&  operator<<(ostream& os,  const TrackerHit& hit) {
   }
 
    // Printout hit information
-   os << Form( "Tracker Hit [%i %i]\n\t[%s]\n\t[%s]\n\tpos:(%f,%f,%f)(%f,%f,%f)\n\tmom:(%f,%f,%f),(%f,%f,%f) \n\tde=%f nstep=%i",
-               hit.id, hit.idtruth,
+   os << Form( "Tracker Hit [%i %i %i]\n\t[%s]\n\t[%s]\n\tpos:(%f,%f,%f)(%f,%f,%f)\n\tmom:(%f,%f,%f),(%f,%f,%f) \n\tde=%f nstep=%i",
+               hit.id, hit.idtruth,hit.volId,
                hit.path.Data(),
 	       numbv.Data(),
 	       hit.position_in[0],  
@@ -83,8 +83,8 @@ ostream&  operator<<(ostream& os,  const CalorimeterHit& hit) {
   }
 
 
-   os << Form( "Calorimeter Hit [%i %i]\n\t[%s]\n\t[%s]\n\tpos:(%f,%f,%f)\n\tde=%f nstep=%i",
-               hit.id, hit.idtruth,
+   os << Form( "Calorimeter Hit [%i %i %i]\n\t[%s]\n\t[%s]\n\tpos:(%f,%f,%f)\n\tde=%f nstep=%i",
+               hit.id, hit.idtruth,hit.volId,
                hit.path.Data(),
 	       numbv.Data(),
 	       hit.position_in[0],  
@@ -165,13 +165,18 @@ void StTrackerHitCollection::ProcessHits() {
 
     // Set reduced volume path
     int inumbv = 0;
+    AgMLExtension* agmlext = 0;
     for ( int ilvl=0; ilvl<navigator->GetLevel()+1;ilvl++ ) {
       TGeoVolume* volume = gGeoManager->GetVolume( hit->volu[ilvl] );
-      AgMLExtension* agmlext = dynamic_cast<AgMLExtension*> ( volume->GetUserExtension() );
+      agmlext = dynamic_cast<AgMLExtension*> ( volume->GetUserExtension() );
       if ( 0 == agmlext )                  continue; // but probably an error
       if ( agmlext->GetBranchings() <= 1 ) continue; // skip unique volumes (and HALL)
       hit->numbv[ inumbv++ ] = hit->copy[ilvl];
     }
+
+    // Set the volume unique ID
+    assert(agmlext);
+    hit->volId = agmlext->GetVolumeId( hit->numbv );
 
     
     // Assign the hit a unqiue ID (index + 1)
@@ -289,13 +294,18 @@ void StCalorimeterHitCollection::ProcessHits() {
 
     // Set reduced volume path
     int inumbv = 0;
+    AgMLExtension* agmlext = 0;
     for ( int ilvl=0; ilvl<navigator->GetLevel()+1;ilvl++ ) {
       TGeoVolume* volume = gGeoManager->GetVolume( hit->volu[ilvl] );
-      AgMLExtension* agmlext = dynamic_cast<AgMLExtension*> ( volume->GetUserExtension() );
+      agmlext = dynamic_cast<AgMLExtension*> ( volume->GetUserExtension() );
       if ( 0 == agmlext )                  continue; // but probably an error
       if ( agmlext->GetBranchings() <= 1 ) continue; // skip unique volumes (and HALL)
       hit->numbv[ inumbv++ ] = hit->copy[ilvl];
     }
+
+    // Set the volume unique ID
+    assert(agmlext);
+    hit->volId = agmlext->GetVolumeId( hit->numbv );
 
     // Assign the hit a unqiue ID (index + 1)
     hit->id = mHits.size();
