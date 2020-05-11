@@ -19,7 +19,7 @@ void initStar() {
   gSystem->SetAclicMode(TSystem::kDebug);
 
   // ADdress sanitizer 
-  Load("/usr/lib64/libasan.so.0"); 
+//  Load("/usr/lib64/libasan.so.0"); 
   
   // Preload a few libraries
   Load("libGeom.so");
@@ -28,6 +28,7 @@ void initStar() {
 
   Load("libPhysics.so");
   Load("libTable.so");
+
   Load("StarRoot.so"); 
   Load("St_base.so"); 
   Load("StStarLogger.so"); 
