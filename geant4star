@@ -1,4 +1,6 @@
 #!/bin/csh -f 
-root -l initStar.C geant4star.C $argv 
+
+
+root -l macros/initStar.C macros/geant4star.C $argv 
 
 
