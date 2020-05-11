@@ -18,7 +18,7 @@ void test_particle_decay(int n=1,const char* particles="pi0") {
   particleGun(n,particles,ptmn,ptmx,etamn,etamx);
 
   //  gROOT->ProcessLine("chain->Clear();");
-
+#if 0
   StMCParticleStack* stack = (StMCParticleStack *)TVirtualMC::GetMC()->GetStack();
 
   LOG_INFO << "Stack: ntrack   = " << stack->GetNtrack() << endm;
@@ -42,6 +42,6 @@ void test_particle_decay(int n=1,const char* particles="pi0") {
         LOG_INFO << "       " << *d << endm; 
     } 
   }
-
+#endif
 
 };
