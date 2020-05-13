@@ -101,9 +101,9 @@ StGeant4Maker::StGeant4Maker( const char* nm ) :
 
   SetAttr( "AgMLOpt:TopVolume", "HALL" );
 
-  SetAttr( "Stepping:Punchout:Stop", 1 ); // 1=track stopped, 2=track stopped and recreated for ID truth
+  SetAttr( "Stepping:Punchout:Stop", 1 ); // 0=no action, 1=track stopped, 2=track stopped and re-injected            
 
-  SetAttr( "Random:G4", 0); // Allows G4 to use its own RNG 
+  SetAttr( "Random:G4", 0); // 1=allows G4 to use its own RNG 
 
 
   SetAttr( "field", -5.0 );
