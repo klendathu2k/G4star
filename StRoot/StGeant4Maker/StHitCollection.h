@@ -40,6 +40,8 @@ public:
 
   virtual int numberOfHits(){ return mHits.size(); } 
 
+  std::vector<TrackerHit*>& hits(){ return mHits; }
+
 private:
 protected:
 
@@ -61,6 +63,8 @@ public:
   virtual void EndOfEvent();
 
   virtual int numberOfHits(){ return mHits.size(); } 
+
+  std::vector<CalorimeterHit*>& hits(){ return mHits; }
 
 private:
 protected:

@@ -22,7 +22,8 @@ class TGeoNode;
 class TGeoVolume;
 
 class TG4RunConfiguration;
-//class StVMCStepManager;
+
+class St_g2t_track; 
 
 //______________________________________________________________________________________
 class StarMagFieldAdaptor : public TVirtualMagField {
@@ -161,15 +162,25 @@ protected:
   /// @param T specifies the type of the table   
   /// @param F specifies the functor class which retrieves the hits from geant  
   template<typename T, typename F>
-  int AddHits( std::string name, std::vector<std::string> volumes, std::string gname ) {
+  int AddHits( std::string name, std::vector<std::string> volumes, std::string gname, F sd2table ) {
+
     int nhits = 0;
+    StSensitiveDetector* sd = 0;
     for ( auto v : volumes ) {
-      StSensitiveDetector* sd = dynamic_cast<StSensitiveDetector*>(TVirtualMC::GetMC()->GetSensitiveDetector( v.c_str() )); 
+      sd = dynamic_cast<StSensitiveDetector*>(TVirtualMC::GetMC()->GetSensitiveDetector( v.c_str() )); 
       if ( 0==sd ) { LOG_INFO << "no SD for " << v << endm; continue; } 
       nhits += sd->numberOfHits(); 
+      break;
     }
+    if ( 0==sd ) return 0;
+
     LOG_INFO << name << " adding number of hits = " << nhits << endm;
-    T* table = new T( gname.c_str(), nhits );                                                                                       
+    auto* table     = new T( gname.c_str(), nhits );
+    auto* g2t_track = (St_g2t_track*)FindByName("g2t_track"); 
+
+    // Copy data from the sensitive detector to the table
+    sd2table( sd, table, g2t_track ); 
+                                    
     AddData( table ); 
     return nhits;
   };

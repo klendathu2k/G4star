@@ -66,7 +66,37 @@
 #include "g2t/St_g2t_fts_Module.h"
 #include "g2t/St_g2t_stg_Module.h"
 #include "g2t/St_g2t_epd_Module.h"
+//________________________________________________________________________________________________
+#include <StHitCollection.h> 
+struct SD2Table_STGC {
+void operator()( StSensitiveDetector* sd, St_g2t_fts_hit* table, St_g2t_track* track ) {
+   // Retrieve the hit collection 
+   StTrackerHitCollection* collection = (StTrackerHitCollection *)sd->hits();
+   // Iterate over all hits
+   for ( auto hit : collection->hits() ) {
 
+       g2t_fts_hit_st g2t_hit; memset(&g2t_hit,0,sizeof(g2t_fts_hit_st)); 
+
+       g2t_hit.id        = hit->id;
+       // TODO: add pointer to next hit on the track 
+       g2t_hit.track_p   = hit->idtruth;
+       g2t_hit.volume_id = hit->volId;
+       g2t_hit.de        = hit->de;
+       g2t_hit.ds        = hit->ds;
+       for ( int i=0; i<3; i++ ) {
+           g2t_hit.p[i]  = 0.5 * ( hit->momentum_in[i] + hit->momentum_out[i] );
+           g2t_hit.x[i]  = 0.5 * ( hit->position_in[i] + hit->position_out[i] );
+       }
+       g2t_hit.tof       = 0.5 * ( hit->position_in[3] + hit->position_out[3] ); 
+
+       table -> AddAt( &g2t_hit ); 
+
+   } 
+   // TODO: increment hit count on track 
+
+
+}   
+} sd2table_stgc; 
 
 //________________________________________________________________________________________________
 TGeant4* gG4 = 0;
@@ -466,13 +496,13 @@ void StGeant4Maker::FinishEvent(){
   }
   
   // Copy hits to tables
-  AddHits<St_g2t_tpc_hit,B>( "TPCH", {"TPAD"}, "g2t_tpc_hit" );
-  AddHits<St_g2t_epd_hit,B>( "EPDH", {"EPDT"}, "g2t_epd_hit" );
-  AddHits<St_g2t_fts_hit,B>( "FSTH", {"FTUS"}, "g2t_fsi_hit" );
-  AddHits<St_g2t_fts_hit,B>( "STGH", {"TGCG"}, "g2t_stg_hit" );
-  AddHits<St_g2t_emc_hit,B>( "PREH", {"PSCI"}, "g2t_pre_hit" );
-  AddHits<St_g2t_emc_hit,B>( "WCAH", {"WSCI"}, "g2t_wca_hit" );
-  AddHits<St_g2t_emc_hit,B>( "HCAH", {"HSCI"}, "g2t_hca_hit" ); 
+  //AddHits<St_g2t_tpc_hit,B>( "TPCH", {"TPAD"}, "g2t_tpc_hit" );
+  //AddHits<St_g2t_epd_hit,B>( "EPDH", {"EPDT"}, "g2t_epd_hit" );
+  //AddHits<St_g2t_fts_hit,B>( "FSTH", {"FTUS"}, "g2t_fsi_hit" );
+  AddHits<St_g2t_fts_hit>( "STGH", {"TGCG"}, "g2t_stg_hit", sd2table_stgc );
+  //AddHits<St_g2t_emc_hit,B>( "PREH", {"PSCI"}, "g2t_pre_hit" );
+  //AddHits<St_g2t_emc_hit,B>( "WCAH", {"WSCI"}, "g2t_wca_hit" );
+  //AddHits<St_g2t_emc_hit,B>( "HCAH", {"HSCI"}, "g2t_hca_hit" ); 
 
 }
 //________________________________________________________________________________________________
