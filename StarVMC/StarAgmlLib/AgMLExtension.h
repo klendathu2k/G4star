@@ -48,17 +48,6 @@ public:
   short GetTracking() { return mTracking; }
   int GetBranchings(){ return mBranchings; }
 
-
-  AgMLExtension( const AgMLExtension& other ) {
-    mModuleName = other.mModuleName;
-    mFamilyName = other.mFamilyName;
-    mVolumeName = other.mVolumeName;
-    mSensitive  = other.mSensitive;
-    mTracking   = other.mTracking;
-    mBranchings = other.mBranchings;
-    mVolumeId   = other.mVolumeId;
-  }
-
  
 private:
 protected:
