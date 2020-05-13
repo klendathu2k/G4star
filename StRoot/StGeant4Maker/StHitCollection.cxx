@@ -26,7 +26,7 @@ ostream&  operator<<(ostream& os,  const TrackerHit& hit) {
   }
 
   TString numbv;
-  for ( int iv=0;iv<DetectorHit::maxdepth;iv++ ) {
+  for ( unsigned int iv=0;iv<DetectorHit::maxdepth;iv++ ) {
     int nv = hit.numbv[iv];
     if ( 0==nv ) break;
     numbv += nv; numbv+="    ";
@@ -76,7 +76,7 @@ ostream&  operator<<(ostream& os,  const CalorimeterHit& hit) {
   }
 
   TString numbv;
-  for ( int iv=0;iv<DetectorHit::maxdepth;iv++ ) {
+  for ( unsigned int iv=0;iv<DetectorHit::maxdepth;iv++ ) {
     int nv = hit.numbv[iv];
     if ( 0==nv ) break;
     numbv += nv; numbv+="    ";
