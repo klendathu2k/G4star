@@ -25,13 +25,13 @@ public:
       
      */
 
-    int id = 0;
-    id += 100000 * epdm;
-    id +=   1000 * epss;
-    id +=     10 * ( epdt%2 + epdt/2 );
-    id +=      1 * ( epdt%2 );
+    int _id = 0;
+    _id += 100000 * epdm;
+    _id +=   1000 * epss;
+    _id +=     10 * ( epdt%2 + epdt/2 );
+    _id +=      1 * ( epdt%2 );
 
-    return id;
+    return _id;
 
   };
 };

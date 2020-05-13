@@ -70,7 +70,7 @@ StarParticleData &particleData = StarParticleData::instance();
 //________________________________________________________________________________________________
 StarVMCApplication::StarVMCApplication( const Char_t *name, const Char_t *title ) : TVirtualMCApplication(name,title) {
 
-};
+}
 //________________________________________________________________________________________________
 StGeant4Maker::StGeant4Maker( const char* nm ) : 
   StMaker(nm),
@@ -270,7 +270,7 @@ int  StGeant4Maker::InitGeom() {
 //________________________________________________________________________________________________
 int StGeant4Maker::InitHits() {
   return kStOK;
-};
+}
 //________________________________________________________________________________________________
 int StGeant4Maker::Make() {
 
@@ -292,7 +292,7 @@ void StarVMCApplication::InitGeometry(){
   _g4maker -> ConfigureGeometry(); 
   //  _g4maker -> InitHits();
 
-};
+}
 //________________________________________________________________________________________________
 void StarVMCApplication::ConstructSensitiveDetectors() {
 
@@ -359,17 +359,18 @@ void StarVMCApplication::ConstructSensitiveDetectors() {
 
 
 
-};
+}
+//________________________________________________________________________________________________
 int  StGeant4Maker::ConfigureGeometry() {
   return kStOK;
-};
+}
 //________________________________________________________________________________________________
 void StarVMCApplication::BeginEvent(){ _g4maker->BeginEvent(); }
 void StGeant4Maker::BeginEvent(){
 
   mTruthTable->BeginEvent();
 
-};
+}
 //________________________________________________________________________________________________
 void StarVMCApplication::FinishEvent(){ _g4maker -> FinishEvent(); }
 void StGeant4Maker::FinishEvent(){
@@ -415,7 +416,7 @@ void StGeant4Maker::FinishEvent(){
   for ( auto v : vertex ) {
 
     // partial fill of vertex table ________________________
-    g2t_vertex_st myvertex = {0};
+    g2t_vertex_st myvertex;   memset(&myvertex, 0, sizeof(g2t_vertex_st));    
     myvertex.id = ivertex;
     myvertex.eg_x[0] = myvertex.ge_x[0] = v->vx();
     myvertex.eg_x[1] = myvertex.ge_x[1] = v->vy();
@@ -442,7 +443,7 @@ void StGeant4Maker::FinishEvent(){
   for ( auto t : particle ) {
 
     // partial fill of track table _______________________
-    g2t_track_st mytrack = {0};
+    g2t_track_st mytrack;   memset(&mytrack, 0, sizeof(g2t_track_st));    
     mytrack.id     = itrack;
     mytrack.eg_pid = t->GetPdg();
     mytrack.p[0]   = t->px();
@@ -462,20 +463,20 @@ void StGeant4Maker::FinishEvent(){
 
   
 
-};
+}
 //________________________________________________________________________________________________
 void StarVMCApplication::BeginPrimary(){ _g4maker -> BeginPrimary(); }
 void StGeant4Maker::BeginPrimary()
 {
 
 
-};
+}
 //________________________________________________________________________________________________
 void StarVMCApplication::FinishPrimary(){ _g4maker->FinishPrimary(); }
 void StGeant4Maker::FinishPrimary()
 {
 
-};
+}
 //________________________________________________________________________________________________
 void StarVMCApplication::PreTrack(){ _g4maker->PreTrack(); }
 void StGeant4Maker::PreTrack()
@@ -485,13 +486,13 @@ void StGeant4Maker::PreTrack()
   mPreviousVolume = mCurrentVolume = 0;
   mCurrentTrackingRegion=2;
   mPreviousTrackingRegion=2;
-};
+}
 //________________________________________________________________________________________________
 void StarVMCApplication::PostTrack(){ _g4maker->PostTrack(); }
 void StGeant4Maker::PostTrack()
 {
 
-};
+}
 //________________________________________________________________________________________________
 void StGeant4Maker::UpdateHistory() {
 
@@ -539,7 +540,7 @@ int regionTransition( int curr, int prev ) {
 void StarVMCApplication::Stepping(){ _g4maker -> Stepping(); }
 void StGeant4Maker::Stepping(){                                           
 
-  static auto* navigator    = gGeoManager->GetCurrentNavigator();
+  //  static auto* navigator    = gGeoManager->GetCurrentNavigator();
   //  static auto* trackManager = TG4TrackManager::Instance();
   static auto* mc = TVirtualMC::GetMC(); 
   static auto* stack = (StMCParticleStack* )mc->GetStack();
@@ -590,7 +591,7 @@ void StGeant4Maker::Stepping(){
   }
 
 
-};
+}
 //________________________________________________________________________________________________
 void StarVMCApplication::GeneratePrimaries() { _g4maker -> PushPrimaries(); }
 void StGeant4Maker::PushPrimaries() {
@@ -646,5 +647,5 @@ void StGeant4Maker::PushPrimaries() {
   LOG_INFO << "Pushed " << ntr << " tracks from primary event generator" << endm;
 
 
-};
+}
 //________________________________________________________________________________________________

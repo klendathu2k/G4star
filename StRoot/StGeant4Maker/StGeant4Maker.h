@@ -167,25 +167,30 @@ protected:
   /// @param tablename is the name of the table to be created                                                                                  
   /// @param g2t is the functor of class F passed 
   template<typename T, typename F>                                                                                                             
-  int AddHits( std::string container, std::vector<std::string> volumes, std::string tablename, F g2t, bool verbose=false ){                    
+  int AddHits( std::vector<std::string> volumes, std::string tablename, F g2t, bool verbose=false ){                    
     int ntotal = 0, nhits = 0;                                                                                                               
     for ( auto v : volumes ) {
+      // Obtain the sensitive detector defined on the volume name
       StSensitiveDetector* sd = TVirtualMC::GetMC()->GetSensitiveDetector( v.c_str() );
-      //GetNumberOfHits( container.c_str(), v.c_str(), nhits );
+      // Get the number of hits
       nhits = sd->numberOfHits();
-      std::string key = container + ":" + v;                                                                                                 
+      std::string key = v;                                                                                                 
       LOG_DEBUG << key << " found nhits=" << nhits << endm;                                                                                  
-      if (nhits) { mHitCounts[key] += nhits; mHitCounts["ALL"] += nhits; }                                                                   
+      if (nhits) { 
+	mHitCounts[ key ] += nhits; 
+	mHitCounts["ALL"] += nhits; 
+      }                                                                   
       ntotal += nhits;                                                                                                                       
     }                                                                                                                                        
     if ( ntotal <= 0 ) return ntotal;                                                                                                        
-    T* table = new T( tablename.c_str(), ntotal );                                                                                           
-    auto* g2t_track = (St_g2t_track*)FindByName("g2t_track");                                                                                
 
-    g2t( sd, g2t_track, table );
-    AddData( table );                                                                                                                        
+    // T* table = new T( tablename.c_str(), ntotal );                                                                                           
+    // auto* g2t_track = (St_g2t_track*)FindByName("g2t_track");                                                                                
 
-    if ( Debug() > 1 || verbose ) table->Print(0,10);                                                                                        
+    // g2t( sd, g2t_track, table );
+    // AddData( table );                                                                                                                        
+
+    // if ( Debug() > 1 || verbose ) table->Print(0,10);                                                                                        
     return ntotal;                                                                                                                           
   }                                                                                                                                            
   std::map<std::string, int> mHitCounts;    
