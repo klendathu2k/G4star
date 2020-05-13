@@ -24,8 +24,8 @@
 #include "TString.h"
 
 
-#include <AgMLTpcVolumeId.h>
-
+//_______________________________________________________________________________________________
+#include <AgMLVolumeIdFactory.h>
 
 
 
@@ -322,16 +322,16 @@ void StarVMCApplication::ConstructSensitiveDetectors() {
 
     // Name of the volume
     TString vname=volume->GetName();
-
-    // TODO: Define these via AgML
-    if ( vname == "TPAD" ) {
-      ae -> SetVolumeIdentifier( new AgMLTpcVolumeId() );
-    }
-
-
-    // Family name and module name
     TString fname=ae->GetFamilyName();
     TString mname=ae->GetModuleName();
+
+    
+    AgMLVolumeId* identifier = AgMLVolumeIdFactory::Create( fname );
+    if ( identifier ) {
+      LOG_INFO << "Setting volume identifier for " << fname.Data() << " " << vname.Data() << endm;
+      ae -> SetVolumeIdentifier( identifier );
+    }
+
 
     //
     // Get the sensitive detector.  If we don't have one registered
