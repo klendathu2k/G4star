@@ -161,7 +161,7 @@ protected:
   /// @param T specifies the type of the table   
   /// @param F specifies the functor class which retrieves the hits from geant  
   template<typename T, typename F>
-  int AddHits( std::string name, std::vector<std::string> volumes ) {
+  int AddHits( std::string name, std::vector<std::string> volumes, std::string gname ) {
     int nhits = 0;
     for ( auto v : volumes ) {
       StSensitiveDetector* sd = dynamic_cast<StSensitiveDetector*>(TVirtualMC::GetMC()->GetSensitiveDetector( v.c_str() )); 
@@ -169,6 +169,8 @@ protected:
       nhits += sd->numberOfHits(); 
     }
     LOG_INFO << name << " adding number of hits = " << nhits << endm;
+    T* table = new T( gname.c_str(), nhits );                                                                                       
+    AddData( table ); 
     return nhits;
   };
 

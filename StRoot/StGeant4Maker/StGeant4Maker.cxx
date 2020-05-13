@@ -26,6 +26,7 @@
 
 //_______________________________________________________________________________________________
 #include <AgMLVolumeIdFactory.h>
+//_______________________________________________________________________________________________
 
 
 
@@ -58,6 +59,13 @@
 #include "tables/St_g2t_vertex_Table.h"
 #include "tables/St_g2t_track_Table.h"
 //________________________________________________________________________________________________
+#include "g2t/St_g2t_tpc_Module.h"
+#include "g2t/St_g2t_hca_Module.h"
+#include "g2t/St_g2t_wca_Module.h"
+#include "g2t/St_g2t_pre_Module.h"
+#include "g2t/St_g2t_fts_Module.h"
+#include "g2t/St_g2t_stg_Module.h"
+#include "g2t/St_g2t_epd_Module.h"
 
 
 //________________________________________________________________________________________________
@@ -279,14 +287,6 @@ int StGeant4Maker::Make() {
   // Process one single event.  Control handed off to VMC application.
   gG4 -> ProcessRun( 1 );
 
-  // Copy hits to tables
-  AddHits<A,B>( "TPCH", {"TPAD"} );
-  AddHits<A,B>( "EPDH", {"EPDT"} );
-  AddHits<A,B>( "FSTH", {"FTUS"} );
-  AddHits<A,B>( "STGH", {"TGCG"} );
-  AddHits<A,B>( "PREH", {"PSCI"} );
-  AddHits<A,B>( "WCAH", {"WSCI"} );
-  AddHits<A,B>( "HCAH", {"HSCI"} ); 
 
   return kStOK; 
 }
@@ -352,10 +352,6 @@ void StarVMCApplication::ConstructSensitiveDetectors() {
     if ( 0==sd ) {
       // add sensitive detector to local map
       sd = sdmap[fname] = new StSensitiveDetector( fname, mname );
-
-      //      // and add to local object array      
-      //      AddObj( sd, fname );
-
     }
 
     // Register this volume to the sensitive detector
@@ -404,7 +400,6 @@ void StGeant4Maker::FinishEvent(){
 
   // Add tracks and vertices to the data structures...
 
-
   std::map<const StarMCParticle*,int> truthTrack;
   std::map<const StarMCVertex*,int>  truthVertex;
 
@@ -420,7 +415,6 @@ void StGeant4Maker::FinishEvent(){
   for ( auto t : particle ) {
     truthTrack[t] = itrack;
     itrack++;
-
   }
 
   ivertex = 1;
@@ -470,9 +464,15 @@ void StGeant4Maker::FinishEvent(){
     g2t_track->AddAt(&mytrack);
     itrack++;
   }
-
-
   
+  // Copy hits to tables
+  AddHits<St_g2t_tpc_hit,B>( "TPCH", {"TPAD"}, "g2t_tpc_hit" );
+  AddHits<St_g2t_epd_hit,B>( "EPDH", {"EPDT"}, "g2t_epd_hit" );
+  AddHits<St_g2t_fts_hit,B>( "FSTH", {"FTUS"}, "g2t_fsi_hit" );
+  AddHits<St_g2t_fts_hit,B>( "STGH", {"TGCG"}, "g2t_stg_hit" );
+  AddHits<St_g2t_emc_hit,B>( "PREH", {"PSCI"}, "g2t_pre_hit" );
+  AddHits<St_g2t_emc_hit,B>( "WCAH", {"WSCI"}, "g2t_wca_hit" );
+  AddHits<St_g2t_emc_hit,B>( "HCAH", {"HSCI"}, "g2t_hca_hit" ); 
 
 }
 //________________________________________________________________________________________________
