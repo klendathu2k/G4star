@@ -26,6 +26,7 @@
 
 //_______________________________________________________________________________________________
 #include <AgMLVolumeIdFactory.h>
+//_______________________________________________________________________________________________
 
 
 
@@ -58,7 +59,44 @@
 #include "tables/St_g2t_vertex_Table.h"
 #include "tables/St_g2t_track_Table.h"
 //________________________________________________________________________________________________
+#include "g2t/St_g2t_tpc_Module.h"
+#include "g2t/St_g2t_hca_Module.h"
+#include "g2t/St_g2t_wca_Module.h"
+#include "g2t/St_g2t_pre_Module.h"
+#include "g2t/St_g2t_fts_Module.h"
+#include "g2t/St_g2t_stg_Module.h"
+#include "g2t/St_g2t_epd_Module.h"
+//________________________________________________________________________________________________
+#include <StHitCollection.h> 
+struct SD2Table_STGC {
+void operator()( StSensitiveDetector* sd, St_g2t_fts_hit* table, St_g2t_track* track ) {
+   // Retrieve the hit collection 
+   StTrackerHitCollection* collection = (StTrackerHitCollection *)sd->hits();
+   // Iterate over all hits
+   for ( auto hit : collection->hits() ) {
 
+       g2t_fts_hit_st g2t_hit; memset(&g2t_hit,0,sizeof(g2t_fts_hit_st)); 
+
+       g2t_hit.id        = hit->id;
+       // TODO: add pointer to next hit on the track 
+       g2t_hit.track_p   = hit->idtruth;
+       g2t_hit.volume_id = hit->volId;
+       g2t_hit.de        = hit->de;
+       g2t_hit.ds        = hit->ds;
+       for ( int i=0; i<3; i++ ) {
+           g2t_hit.p[i]  = 0.5 * ( hit->momentum_in[i] + hit->momentum_out[i] );
+           g2t_hit.x[i]  = 0.5 * ( hit->position_in[i] + hit->position_out[i] );
+       }
+       g2t_hit.tof       = 0.5 * ( hit->position_in[3] + hit->position_out[3] ); 
+
+       table -> AddAt( &g2t_hit ); 
+
+   } 
+   // TODO: increment hit count on track 
+
+
+}   
+} sd2table_stgc; 
 
 //________________________________________________________________________________________________
 TGeant4* gG4 = 0;
@@ -70,7 +108,7 @@ StarParticleData &particleData = StarParticleData::instance();
 //________________________________________________________________________________________________
 StarVMCApplication::StarVMCApplication( const Char_t *name, const Char_t *title ) : TVirtualMCApplication(name,title) {
 
-};
+}
 //________________________________________________________________________________________________
 StGeant4Maker::StGeant4Maker( const char* nm ) : 
   StMaker(nm),
@@ -101,9 +139,9 @@ StGeant4Maker::StGeant4Maker( const char* nm ) :
 
   SetAttr( "AgMLOpt:TopVolume", "HALL" );
 
-  SetAttr( "Stepping:Punchout:Stop", 1 ); // 1=track stopped, 2=track stopped and recreated for ID truth
+  SetAttr( "Stepping:Punchout:Stop", 1 ); // 0=no action, 1=track stopped, 2=track stopped and re-injected            
 
-  SetAttr( "Random:G4", 0); // Allows G4 to use its own RNG 
+  SetAttr( "Random:G4", 0); // 1=allows G4 to use its own RNG 
 
 
   SetAttr( "field", -5.0 );
@@ -270,12 +308,15 @@ int  StGeant4Maker::InitGeom() {
 //________________________________________________________________________________________________
 int StGeant4Maker::InitHits() {
   return kStOK;
-};
+}
 //________________________________________________________________________________________________
+struct A { };
+struct B { };
 int StGeant4Maker::Make() {
 
   // Process one single event.  Control handed off to VMC application.
   gG4 -> ProcessRun( 1 );
+
 
   return kStOK; 
 }
@@ -292,7 +333,7 @@ void StarVMCApplication::InitGeometry(){
   _g4maker -> ConfigureGeometry(); 
   //  _g4maker -> InitHits();
 
-};
+}
 //________________________________________________________________________________________________
 void StarVMCApplication::ConstructSensitiveDetectors() {
 
@@ -341,10 +382,6 @@ void StarVMCApplication::ConstructSensitiveDetectors() {
     if ( 0==sd ) {
       // add sensitive detector to local map
       sd = sdmap[fname] = new StSensitiveDetector( fname, mname );
-
-      //      // and add to local object array      
-      //      AddObj( sd, fname );
-
     }
 
     // Register this volume to the sensitive detector
@@ -359,17 +396,18 @@ void StarVMCApplication::ConstructSensitiveDetectors() {
 
 
 
-};
+}
+//________________________________________________________________________________________________
 int  StGeant4Maker::ConfigureGeometry() {
   return kStOK;
-};
+}
 //________________________________________________________________________________________________
 void StarVMCApplication::BeginEvent(){ _g4maker->BeginEvent(); }
 void StGeant4Maker::BeginEvent(){
 
   mTruthTable->BeginEvent();
 
-};
+}
 //________________________________________________________________________________________________
 void StarVMCApplication::FinishEvent(){ _g4maker -> FinishEvent(); }
 void StGeant4Maker::FinishEvent(){
@@ -392,7 +430,6 @@ void StGeant4Maker::FinishEvent(){
 
   // Add tracks and vertices to the data structures...
 
-
   std::map<const StarMCParticle*,int> truthTrack;
   std::map<const StarMCVertex*,int>  truthVertex;
 
@@ -408,14 +445,13 @@ void StGeant4Maker::FinishEvent(){
   for ( auto t : particle ) {
     truthTrack[t] = itrack;
     itrack++;
-
   }
 
   ivertex = 1;
   for ( auto v : vertex ) {
 
     // partial fill of vertex table ________________________
-    g2t_vertex_st myvertex = {0};
+    g2t_vertex_st myvertex;   memset(&myvertex, 0, sizeof(g2t_vertex_st));    
     myvertex.id = ivertex;
     myvertex.eg_x[0] = myvertex.ge_x[0] = v->vx();
     myvertex.eg_x[1] = myvertex.ge_x[1] = v->vy();
@@ -442,7 +478,7 @@ void StGeant4Maker::FinishEvent(){
   for ( auto t : particle ) {
 
     // partial fill of track table _______________________
-    g2t_track_st mytrack = {0};
+    g2t_track_st mytrack;   memset(&mytrack, 0, sizeof(g2t_track_st));    
     mytrack.id     = itrack;
     mytrack.eg_pid = t->GetPdg();
     mytrack.p[0]   = t->px();
@@ -458,24 +494,30 @@ void StGeant4Maker::FinishEvent(){
     g2t_track->AddAt(&mytrack);
     itrack++;
   }
-
-
   
+  // Copy hits to tables
+  //AddHits<St_g2t_tpc_hit,B>( "TPCH", {"TPAD"}, "g2t_tpc_hit" );
+  //AddHits<St_g2t_epd_hit,B>( "EPDH", {"EPDT"}, "g2t_epd_hit" );
+  //AddHits<St_g2t_fts_hit,B>( "FSTH", {"FTUS"}, "g2t_fsi_hit" );
+  AddHits<St_g2t_fts_hit>( "STGH", {"TGCG"}, "g2t_stg_hit", sd2table_stgc );
+  //AddHits<St_g2t_emc_hit,B>( "PREH", {"PSCI"}, "g2t_pre_hit" );
+  //AddHits<St_g2t_emc_hit,B>( "WCAH", {"WSCI"}, "g2t_wca_hit" );
+  //AddHits<St_g2t_emc_hit,B>( "HCAH", {"HSCI"}, "g2t_hca_hit" ); 
 
-};
+}
 //________________________________________________________________________________________________
 void StarVMCApplication::BeginPrimary(){ _g4maker -> BeginPrimary(); }
 void StGeant4Maker::BeginPrimary()
 {
 
 
-};
+}
 //________________________________________________________________________________________________
 void StarVMCApplication::FinishPrimary(){ _g4maker->FinishPrimary(); }
 void StGeant4Maker::FinishPrimary()
 {
 
-};
+}
 //________________________________________________________________________________________________
 void StarVMCApplication::PreTrack(){ _g4maker->PreTrack(); }
 void StGeant4Maker::PreTrack()
@@ -485,13 +527,13 @@ void StGeant4Maker::PreTrack()
   mPreviousVolume = mCurrentVolume = 0;
   mCurrentTrackingRegion=2;
   mPreviousTrackingRegion=2;
-};
+}
 //________________________________________________________________________________________________
 void StarVMCApplication::PostTrack(){ _g4maker->PostTrack(); }
 void StGeant4Maker::PostTrack()
 {
 
-};
+}
 //________________________________________________________________________________________________
 void StGeant4Maker::UpdateHistory() {
 
@@ -539,7 +581,7 @@ int regionTransition( int curr, int prev ) {
 void StarVMCApplication::Stepping(){ _g4maker -> Stepping(); }
 void StGeant4Maker::Stepping(){                                           
 
-  static auto* navigator    = gGeoManager->GetCurrentNavigator();
+  //  static auto* navigator    = gGeoManager->GetCurrentNavigator();
   //  static auto* trackManager = TG4TrackManager::Instance();
   static auto* mc = TVirtualMC::GetMC(); 
   static auto* stack = (StMCParticleStack* )mc->GetStack();
@@ -590,7 +632,7 @@ void StGeant4Maker::Stepping(){
   }
 
 
-};
+}
 //________________________________________________________________________________________________
 void StarVMCApplication::GeneratePrimaries() { _g4maker -> PushPrimaries(); }
 void StGeant4Maker::PushPrimaries() {
@@ -646,5 +688,5 @@ void StGeant4Maker::PushPrimaries() {
   LOG_INFO << "Pushed " << ntr << " tracks from primary event generator" << endm;
 
 
-};
+}
 //________________________________________________________________________________________________

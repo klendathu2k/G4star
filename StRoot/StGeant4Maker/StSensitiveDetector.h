@@ -70,7 +70,9 @@ public:
   void addVolume(TGeoVolume *v);
   int  numberOfVolumes(){ return mVolumes.size(); }
 
-  int numberOfHits(){ return int( mHits.size() ); }
+  int numberOfHits();//{ return int( mCollection->size() ); }
+
+  StHitCollection* hits(){ return mCollection; } 
 
   enum class DetectorType { kUninitialized, kCalorimeter, kTracker };
 

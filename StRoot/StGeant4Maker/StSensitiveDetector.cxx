@@ -211,3 +211,5 @@ StSensitiveDetector::DetectorType StSensitiveDetector::detectorType() {
 
 }
 //____________________________________________________________________________________________
+int StSensitiveDetector::numberOfHits(){ return int( mCollection->numberOfHits() ); }
+//____________________________________________________________________________________________

@@ -95,7 +95,7 @@ public:
 
   TMCProcess process() const { return mMechanism; }
 
-  void setParent  ( StarMCParticle* parent   ){ mParent = parent; } 
+  void setParent  ( StarMCParticle* _parent   ){ mParent = _parent; } 
   void addDaughter( StarMCParticle* daughter ){ mDaughters.push_back( daughter ); } 
 
   const             StarMCParticle*   parent()   { return mParent; } 

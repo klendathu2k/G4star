@@ -26,7 +26,7 @@ ostream&  operator<<(ostream& os,  const TrackerHit& hit) {
   }
 
   TString numbv;
-  for ( int iv=0;iv<DetectorHit::maxdepth;iv++ ) {
+  for ( unsigned int iv=0;iv<DetectorHit::maxdepth;iv++ ) {
     int nv = hit.numbv[iv];
     if ( 0==nv ) break;
     numbv += nv; numbv+="    ";
@@ -76,7 +76,7 @@ ostream&  operator<<(ostream& os,  const CalorimeterHit& hit) {
   }
 
   TString numbv;
-  for ( int iv=0;iv<DetectorHit::maxdepth;iv++ ) {
+  for ( unsigned int iv=0;iv<DetectorHit::maxdepth;iv++ ) {
     int nv = hit.numbv[iv];
     if ( 0==nv ) break;
     numbv += nv; numbv+="    ";
@@ -219,10 +219,10 @@ void StTrackerHitCollection::ProcessHits() {
 }
 //_____________________________________________________________________________________________
 void StTrackerHitCollection::EndOfEvent() {
-  for ( auto hit : mHits ) {
-    LOG_INFO << *hit << endm;
-  }
-  mHits.clear();
+//  for ( auto hit : mHits ) {
+//   LOG_INFO << *hit << endm;
+//  }
+//  mHits.clear();
 }
 //_____________________________________________________________________________________________
 
@@ -337,9 +337,9 @@ void StCalorimeterHitCollection::ProcessHits() {
 }
 //_____________________________________________________________________________________________
 void StCalorimeterHitCollection::EndOfEvent() {
-  for ( auto hit : mHits ) {
-    LOG_INFO << *hit << endm;
-  }
-  mHits.clear();
+//  for ( auto hit : mHits ) {
+//    LOG_INFO << *hit << endm;
+//  }
+//  mHits.clear();
 }
 //_____________________________________________________________________________________________

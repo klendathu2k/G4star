@@ -19,6 +19,8 @@ public:
   virtual void ProcessHits() = 0;
   virtual void EndOfEvent()  = 0;
 
+  virtual int  numberOfHits()  = 0;
+
 private:
 protected:
   
@@ -35,6 +37,10 @@ public:
   virtual void Initialize();
   virtual void ProcessHits();
   virtual void EndOfEvent();
+
+  virtual int numberOfHits(){ return mHits.size(); } 
+
+  std::vector<TrackerHit*>& hits(){ return mHits; }
 
 private:
 protected:
@@ -55,6 +61,10 @@ public:
   virtual void Initialize();
   virtual void ProcessHits();
   virtual void EndOfEvent();
+
+  virtual int numberOfHits(){ return mHits.size(); } 
+
+  std::vector<CalorimeterHit*>& hits(){ return mHits; }
 
 private:
 protected:
