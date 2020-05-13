@@ -219,10 +219,10 @@ void StTrackerHitCollection::ProcessHits() {
 }
 //_____________________________________________________________________________________________
 void StTrackerHitCollection::EndOfEvent() {
-  for ( auto hit : mHits ) {
-    LOG_INFO << *hit << endm;
-  }
-  mHits.clear();
+//  for ( auto hit : mHits ) {
+//   LOG_INFO << *hit << endm;
+//  }
+//  mHits.clear();
 }
 //_____________________________________________________________________________________________
 
@@ -337,9 +337,9 @@ void StCalorimeterHitCollection::ProcessHits() {
 }
 //_____________________________________________________________________________________________
 void StCalorimeterHitCollection::EndOfEvent() {
-  for ( auto hit : mHits ) {
-    LOG_INFO << *hit << endm;
-  }
-  mHits.clear();
+//  for ( auto hit : mHits ) {
+//    LOG_INFO << *hit << endm;
+//  }
+//  mHits.clear();
 }
 //_____________________________________________________________________________________________

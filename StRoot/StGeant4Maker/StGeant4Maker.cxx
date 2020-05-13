@@ -272,10 +272,21 @@ int StGeant4Maker::InitHits() {
   return kStOK;
 }
 //________________________________________________________________________________________________
+struct A { };
+struct B { };
 int StGeant4Maker::Make() {
 
   // Process one single event.  Control handed off to VMC application.
   gG4 -> ProcessRun( 1 );
+
+  // Copy hits to tables
+  AddHits<A,B>( "TPCH", {"TPAD"} );
+  AddHits<A,B>( "EPDH", {"EPDT"} );
+  AddHits<A,B>( "FSTH", {"FTUS"} );
+  AddHits<A,B>( "STGH", {"TGCG"} );
+  AddHits<A,B>( "PREH", {"PSCI"} );
+  AddHits<A,B>( "WCAH", {"WSCI"} );
+  AddHits<A,B>( "HCAH", {"HSCI"} ); 
 
   return kStOK; 
 }

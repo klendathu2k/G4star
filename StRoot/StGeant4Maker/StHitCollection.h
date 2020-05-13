@@ -19,6 +19,8 @@ public:
   virtual void ProcessHits() = 0;
   virtual void EndOfEvent()  = 0;
 
+  virtual int  numberOfHits()  = 0;
+
 private:
 protected:
   
@@ -35,6 +37,8 @@ public:
   virtual void Initialize();
   virtual void ProcessHits();
   virtual void EndOfEvent();
+
+  virtual int numberOfHits(){ return mHits.size(); } 
 
 private:
 protected:
@@ -55,6 +59,8 @@ public:
   virtual void Initialize();
   virtual void ProcessHits();
   virtual void EndOfEvent();
+
+  virtual int numberOfHits(){ return mHits.size(); } 
 
 private:
 protected:

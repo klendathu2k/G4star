@@ -8,6 +8,7 @@
 #include "TVirtualMCApplication.h"
 #include "TVirtualMagField.h"
 #include "StarMagField.h"
+#include <StSensitiveDetector.h> 
 
 
 
@@ -156,6 +157,21 @@ protected:
 
   AgMLExtension* acurr;
   AgMLExtension* aprev;
+
+  /// @param T specifies the type of the table   
+  /// @param F specifies the functor class which retrieves the hits from geant  
+  template<typename T, typename F>
+  int AddHits( std::string name, std::vector<std::string> volumes ) {
+    int nhits = 0;
+    for ( auto v : volumes ) {
+      StSensitiveDetector* sd = dynamic_cast<StSensitiveDetector*>(TVirtualMC::GetMC()->GetSensitiveDetector( v.c_str() )); 
+      if ( 0==sd ) { LOG_INFO << "no SD for " << v << endm; continue; } 
+      nhits += sd->numberOfHits(); 
+    }
+    LOG_INFO << name << " adding number of hits = " << nhits << endm;
+    return nhits;
+  };
+
 
 #if 0
   /// Given a list of sensitive volumes within the (G3) hit container, loop over all
