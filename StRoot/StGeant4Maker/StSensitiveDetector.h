@@ -27,6 +27,8 @@ public:
 
   unsigned int nsteps; /// number of steps inside volume 
 
+  std::vector<double> user; /// user specified hits
+
 };
 
 class TrackerHit : public DetectorHit {

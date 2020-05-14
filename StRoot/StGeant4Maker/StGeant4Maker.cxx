@@ -68,35 +68,178 @@
 #include "g2t/St_g2t_epd_Module.h"
 //________________________________________________________________________________________________
 #include <StHitCollection.h> 
+//________________________________________________________________________________________________
+
+// Functors used to copy the hits from the sensitive detector hit collections into the g2t tables.
+// There's an explitive-load of boilerplate in these things
+
+struct SD2Table_TPC {
+  void operator()( StSensitiveDetector* sd, St_g2t_tpc_hit* table, St_g2t_track* track ) {
+    // Retrieve the hit collection 
+    StTrackerHitCollection* collection = (StTrackerHitCollection *)sd->hits();
+    // Iterate over all hits
+    for ( auto hit : collection->hits() ) {
+      
+      g2t_tpc_hit_st g2t_hit; memset(&g2t_hit,0,sizeof(g2t_tpc_hit_st)); 
+      
+      g2t_hit.id        = hit->id;
+      // TODO: add pointer to next hit on the track 
+      g2t_hit.track_p   = hit->idtruth;
+      g2t_hit.volume_id = hit->volId;
+      g2t_hit.de        = hit->de;
+      g2t_hit.ds        = hit->ds;
+      for ( int i=0; i<3; i++ ) {
+	g2t_hit.p[i]  = 0.5 * ( hit->momentum_in[i] + hit->momentum_out[i] );
+	g2t_hit.x[i]  = 0.5 * ( hit->position_in[i] + hit->position_out[i] );
+      }
+      g2t_hit.tof       = 0.5 * ( hit->position_in[3] + hit->position_out[3] ); 
+      g2t_hit.length    = hit->length;
+      /*
+      g2t_hit.lgam = ...;
+
+      // these are used downstream by the slow simulator
+      g2t_hit.adc = ...;
+      g2t_hit.pad = ...;
+      g2t_hit.timebucket = ...;
+      g2t_hit.np = ...; // number of primary electrons
+
+      */
+      
+      table -> AddAt( &g2t_hit );     
+
+      int idtruth = hit->idtruth;
+      g2t_track_st* trk = (g2t_track_st*)track->At(idtruth-1);
+      trk->n_tpc_hit++;
+      
+    }
+    // TODO: increment hit count on track 
+  } 
+} sd2table_tpc; 
+
+struct SD2Table_EPD {
+  void operator()( StSensitiveDetector* sd, St_g2t_epd_hit* table, St_g2t_track* track ) {
+    // Retrieve the hit collection 
+    StTrackerHitCollection* collection = (StTrackerHitCollection *)sd->hits();
+    // Iterate over all hits
+    for ( auto hit : collection->hits() ) {
+      
+      g2t_epd_hit_st g2t_hit; memset(&g2t_hit,0,sizeof(g2t_epd_hit_st)); 
+      
+      g2t_hit.id        = hit->id;
+      // TODO: add pointer to next hit on the track 
+      g2t_hit.track_p   = hit->idtruth;
+      g2t_hit.volume_id = hit->volId;
+      g2t_hit.de        = hit->de;
+      g2t_hit.ds        = hit->ds;
+      for ( int i=0; i<3; i++ ) {
+	g2t_hit.p[i]  = 0.5 * ( hit->momentum_in[i] + hit->momentum_out[i] );
+	g2t_hit.x[i]  = 0.5 * ( hit->position_in[i] + hit->position_out[i] );
+      }
+      g2t_hit.tof       = 0.5 * ( hit->position_in[3] + hit->position_out[3] ); 
+      
+      table -> AddAt( &g2t_hit );     
+
+      int idtruth = hit->idtruth;
+      g2t_track_st* trk = (g2t_track_st*)track->At(idtruth-1);
+      //      trk->n_epd_hit++;
+      
+    }
+
+  } 
+} sd2table_epd; 
+
+// Copy to sTGC and FST structures
 struct SD2Table_STGC {
-void operator()( StSensitiveDetector* sd, St_g2t_fts_hit* table, St_g2t_track* track ) {
-   // Retrieve the hit collection 
-   StTrackerHitCollection* collection = (StTrackerHitCollection *)sd->hits();
-   // Iterate over all hits
-   for ( auto hit : collection->hits() ) {
+  void operator()( StSensitiveDetector* sd, St_g2t_fts_hit* table, St_g2t_track* track ) {
+    // Retrieve the hit collection 
+    StTrackerHitCollection* collection = (StTrackerHitCollection *)sd->hits();
+    // Iterate over all hits
+    for ( auto hit : collection->hits() ) {
+      
+      g2t_fts_hit_st g2t_hit; memset(&g2t_hit,0,sizeof(g2t_fts_hit_st)); 
+      
+      g2t_hit.id        = hit->id;
+      // TODO: add pointer to next hit on the track 
+      g2t_hit.track_p   = hit->idtruth;
+      g2t_hit.volume_id = hit->volId;
+      g2t_hit.de        = hit->de;
+      g2t_hit.ds        = hit->ds;
+      for ( int i=0; i<3; i++ ) {
+	g2t_hit.p[i]  = 0.5 * ( hit->momentum_in[i] + hit->momentum_out[i] );
+	g2t_hit.x[i]  = 0.5 * ( hit->position_in[i] + hit->position_out[i] );
+      }
+      g2t_hit.tof       = 0.5 * ( hit->position_in[3] + hit->position_out[3] ); 
+      
+      table -> AddAt( &g2t_hit );     
 
-       g2t_fts_hit_st g2t_hit; memset(&g2t_hit,0,sizeof(g2t_fts_hit_st)); 
-
-       g2t_hit.id        = hit->id;
-       // TODO: add pointer to next hit on the track 
-       g2t_hit.track_p   = hit->idtruth;
-       g2t_hit.volume_id = hit->volId;
-       g2t_hit.de        = hit->de;
-       g2t_hit.ds        = hit->ds;
-       for ( int i=0; i<3; i++ ) {
-           g2t_hit.p[i]  = 0.5 * ( hit->momentum_in[i] + hit->momentum_out[i] );
-           g2t_hit.x[i]  = 0.5 * ( hit->position_in[i] + hit->position_out[i] );
-       }
-       g2t_hit.tof       = 0.5 * ( hit->position_in[3] + hit->position_out[3] ); 
-
-       table -> AddAt( &g2t_hit ); 
-
-   } 
-   // TODO: increment hit count on track 
-
-
-}   
+      int idtruth = hit->idtruth;
+      g2t_track_st* trk = (g2t_track_st*)track->At(idtruth-1);
+      trk->n_stg_hit++;
+      
+    }
+  } 
 } sd2table_stgc; 
+
+struct SD2Table_FST {
+  void operator()( StSensitiveDetector* sd, St_g2t_fts_hit* table, St_g2t_track* track ) {
+    // Retrieve the hit collection 
+    StTrackerHitCollection* collection = (StTrackerHitCollection *)sd->hits();
+    // Iterate over all hits
+    for ( auto hit : collection->hits() ) {
+      
+      g2t_fts_hit_st g2t_hit; memset(&g2t_hit,0,sizeof(g2t_fts_hit_st)); 
+      
+      g2t_hit.id        = hit->id;
+      // TODO: add pointer to next hit on the track 
+      g2t_hit.track_p   = hit->idtruth;
+      g2t_hit.volume_id = hit->volId;
+      g2t_hit.de        = hit->de;
+      g2t_hit.ds        = hit->ds;
+      for ( int i=0; i<3; i++ ) {
+	g2t_hit.p[i]  = 0.5 * ( hit->momentum_in[i] + hit->momentum_out[i] );
+	g2t_hit.x[i]  = 0.5 * ( hit->position_in[i] + hit->position_out[i] );
+      }
+      g2t_hit.tof       = 0.5 * ( hit->position_in[3] + hit->position_out[3] ); 
+      
+      table -> AddAt( &g2t_hit );     
+
+      int idtruth = hit->idtruth;
+      g2t_track_st* trk = (g2t_track_st*)track->At(idtruth-1);
+      trk->n_fts_hit++;
+
+    }
+  } 
+} sd2table_fst; 
+
+
+// Generic EMC copy (no increment on track hits)
+struct SD2Table_EMC {
+  void operator()( StSensitiveDetector* sd, St_g2t_emc_hit* table, St_g2t_track* track ) {
+    // Retrieve the hit collection 
+    StCalorimeterHitCollection* collection = (StCalorimeterHitCollection *)sd->hits();
+    // Iterate over all hits
+    for ( auto hit : collection->hits() ) {
+      
+      g2t_emc_hit_st g2t_hit; memset(&g2t_hit,0,sizeof(g2t_emc_hit_st)); 
+      
+      g2t_hit.id        = hit->id;
+      // TODO: add pointer to next hit on the track 
+      g2t_hit.track_p   = hit->idtruth;
+      g2t_hit.volume_id = hit->volId;
+      g2t_hit.de        = hit->de;
+      g2t_hit.x         = hit->position_in[0];
+      g2t_hit.y         = hit->position_in[1];
+      g2t_hit.z         = hit->position_in[2];
+      
+      table -> AddAt( &g2t_hit );     
+
+      int idtruth = hit->idtruth;
+      g2t_track_st* trk = (g2t_track_st*)track->At(idtruth-1);
+      //      trk->n_fts_hit++;
+
+    }
+  } 
+} sd2table_emc; 
 
 //________________________________________________________________________________________________
 TGeant4* gG4 = 0;
@@ -135,7 +278,8 @@ StGeant4Maker::StGeant4Maker( const char* nm ) :
   SetAttr( "G4VmcOpt:Name",  "Geant4"  );
   SetAttr( "G4VmcOpt:Title", "The Geant4 Monte Carlo" );
   SetAttr( "G4VmcOpt:Phys",  "FTFP_BERT" ); // default physics list
-  SetAttr( "G4VmcOpt:Process", "stepLimit+specialCuts" ); // special process
+  //  SetAttr( "G4VmcOpt:Process", "stepLimit+specialCuts" ); // special process
+  SetAttr( "G4VmcOpt:Process", "stepLimit+specialCuts+stackPopper" ); // special process
 
   SetAttr( "AgMLOpt:TopVolume", "HALL" );
 
@@ -479,13 +623,15 @@ void StGeant4Maker::FinishEvent(){
 
     // partial fill of track table _______________________
     g2t_track_st mytrack;   memset(&mytrack, 0, sizeof(g2t_track_st));    
-    mytrack.id     = itrack;
-    mytrack.eg_pid = t->GetPdg();
-    mytrack.p[0]   = t->px();
-    mytrack.p[1]   = t->px();
-    mytrack.p[2]   = t->px();
-    mytrack.e      = t->E();
-    mytrack.pt     = t->pt(); // NOTE: starsim secondaries have pt = -999
+    mytrack.id       = itrack;
+    mytrack.eg_pid   = t->GetPdg();
+    mytrack.p[0]     = t->px();
+    mytrack.p[1]     = t->py();
+    mytrack.p[2]     = t->pz();
+    mytrack.e        = t->E();
+    mytrack.pt       = t->pt(); // NOTE: starsim secondaries have pt = -999
+    mytrack.eta      = t->particle()->Eta();
+    mytrack.rapidity = t->particle()->Y();
     // index of the start and stop vertices.
     // TODO: particle stop vertices need to be scored
     mytrack.start_vertex_p = truthVertex[ t->start() ];
@@ -496,13 +642,16 @@ void StGeant4Maker::FinishEvent(){
   }
   
   // Copy hits to tables
-  //AddHits<St_g2t_tpc_hit,B>( "TPCH", {"TPAD"}, "g2t_tpc_hit" );
-  //AddHits<St_g2t_epd_hit,B>( "EPDH", {"EPDT"}, "g2t_epd_hit" );
-  //AddHits<St_g2t_fts_hit,B>( "FSTH", {"FTUS"}, "g2t_fsi_hit" );
+  AddHits<St_g2t_tpc_hit>( "TPCH", {"TPAD"}, "g2t_tpc_hit", sd2table_tpc  );
+  AddHits<St_g2t_emc_hit>( "CALH", {"CSCI"}, "g2t_emc_hit", sd2table_emc  );
+  AddHits<St_g2t_emc_hit>( "ECAH", {"ESCI"}, "g2t_eem_hit", sd2table_emc  );
+
+  AddHits<St_g2t_epd_hit>( "EPDH", {"EPDT"}, "g2t_epd_hit", sd2table_epd  );
+  AddHits<St_g2t_fts_hit>( "FSTH", {"FTUS"}, "g2t_fsi_hit", sd2table_fst  );
   AddHits<St_g2t_fts_hit>( "STGH", {"TGCG"}, "g2t_stg_hit", sd2table_stgc );
-  //AddHits<St_g2t_emc_hit,B>( "PREH", {"PSCI"}, "g2t_pre_hit" );
-  //AddHits<St_g2t_emc_hit,B>( "WCAH", {"WSCI"}, "g2t_wca_hit" );
-  //AddHits<St_g2t_emc_hit,B>( "HCAH", {"HSCI"}, "g2t_hca_hit" ); 
+  AddHits<St_g2t_emc_hit>( "PREH", {"PSCI"}, "g2t_pre_hit", sd2table_emc  );
+  AddHits<St_g2t_emc_hit>( "WCAH", {"WSCI"}, "g2t_wca_hit", sd2table_emc  );
+  AddHits<St_g2t_emc_hit>( "HCAH", {"HSCI"}, "g2t_hca_hit", sd2table_emc  ); 
 
 }
 //________________________________________________________________________________________________
@@ -601,14 +750,15 @@ void StGeant4Maker::Stepping(){
   // Check if option to stop punchout tracks is enabled
   if ( IAttr("Stepping:Punchout:Stop") && 1==transit) {
     
-    mc->StopTrack();
-
     if ( 2==IAttr("Stepping:Punchout:Stop") ) {
 
-        // Inject the stopped particle at the current vertex 
-        //
+      assert(truth);
+
         // Parent track is the ID known to the particle stack
         int parent = truth->idStack(); 
+
+      assert(current);
+
         // PDG of the track has not changed
         int pdg = current->GetPdgCode();
         // We will use the current momentum of the particle
@@ -623,11 +773,11 @@ void StGeant4Maker::Stepping(){
         TMCProcess mech = kPUserDefined;
         int ntr;
         
-        LOG_INFO << "Punchout track reinjected, parent = " << parent << endm; 
-
         stack->PushTrack( 1, parent, pdg, px, py, pz, e, vx, vy, vz, tof, 0., 0., 0., mech, ntr, 1.0, 1 ); 
 
     } 
+
+    mc->StopTrack();
     
   }
 
