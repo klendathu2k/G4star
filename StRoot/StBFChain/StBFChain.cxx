@@ -1930,6 +1930,9 @@ void StBFChain::SetTreeOptions()
       treeMk->IntoBranch("geantBranch","geant/.data/g2t_rch_hit");
     }
   }
+
+  if (GetOption("Geant4Out")) treeMk->IntoBranch("geantBranch","geant4star");
+
 }
 //________________________________________________________________________________
 Long_t  StBFChain::ProcessLine(const char *line) {
