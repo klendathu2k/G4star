@@ -103,7 +103,7 @@ protected:
 //______________________________________________________________________________________
 class StGeant4Maker : public StMaker {
 public:
-  StGeant4Maker( const char* nm="geant4" );
+  StGeant4Maker( const char* nm="geant4star" );
   ~StGeant4Maker(){ /* nada */ };
 
   /// Initialize maker
