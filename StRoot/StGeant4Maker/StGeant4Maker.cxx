@@ -278,7 +278,8 @@ StGeant4Maker::StGeant4Maker( const char* nm ) :
   SetAttr( "G4VmcOpt:Name",  "Geant4"  );
   SetAttr( "G4VmcOpt:Title", "The Geant4 Monte Carlo" );
   SetAttr( "G4VmcOpt:Phys",  "FTFP_BERT" ); // default physics list
-  SetAttr( "G4VmcOpt:Process", "stepLimit+specialCuts" ); // special process
+  //  SetAttr( "G4VmcOpt:Process", "stepLimit+specialCuts" ); // special process
+  SetAttr( "G4VmcOpt:Process", "stepLimit+specialCuts+stackPopper" ); // special process
 
   SetAttr( "AgMLOpt:TopVolume", "HALL" );
 
@@ -746,14 +747,15 @@ void StGeant4Maker::Stepping(){
   // Check if option to stop punchout tracks is enabled
   if ( IAttr("Stepping:Punchout:Stop") && 1==transit) {
     
-    mc->StopTrack();
-
     if ( 2==IAttr("Stepping:Punchout:Stop") ) {
 
-        // Inject the stopped particle at the current vertex 
-        //
+      assert(truth);
+
         // Parent track is the ID known to the particle stack
         int parent = truth->idStack(); 
+
+      assert(current);
+
         // PDG of the track has not changed
         int pdg = current->GetPdgCode();
         // We will use the current momentum of the particle
@@ -768,11 +770,11 @@ void StGeant4Maker::Stepping(){
         TMCProcess mech = kPUserDefined;
         int ntr;
         
-        LOG_INFO << "Punchout track reinjected, parent = " << parent << endm; 
-
         stack->PushTrack( 1, parent, pdg, px, py, pz, e, vx, vy, vz, tof, 0., 0., 0., mech, ntr, 1.0, 1 ); 
 
     } 
+
+    mc->StopTrack();
     
   }
 
