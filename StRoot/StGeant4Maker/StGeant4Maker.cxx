@@ -622,13 +622,15 @@ void StGeant4Maker::FinishEvent(){
 
     // partial fill of track table _______________________
     g2t_track_st mytrack;   memset(&mytrack, 0, sizeof(g2t_track_st));    
-    mytrack.id     = itrack;
-    mytrack.eg_pid = t->GetPdg();
-    mytrack.p[0]   = t->px();
-    mytrack.p[1]   = t->px();
-    mytrack.p[2]   = t->px();
-    mytrack.e      = t->E();
-    mytrack.pt     = t->pt(); // NOTE: starsim secondaries have pt = -999
+    mytrack.id       = itrack;
+    mytrack.eg_pid   = t->GetPdg();
+    mytrack.p[0]     = t->px();
+    mytrack.p[1]     = t->py();
+    mytrack.p[2]     = t->pz();
+    mytrack.e        = t->E();
+    mytrack.pt       = t->pt(); // NOTE: starsim secondaries have pt = -999
+    mytrack.eta      = t->particle()->Eta();
+    mytrack.rapidity = t->particle()->Y();
     // index of the start and stop vertices.
     // TODO: particle stop vertices need to be scored
     mytrack.start_vertex_p = truthVertex[ t->start() ];
