@@ -5,11 +5,18 @@
 #include <TString.h>
 #include <TMath.h>
 #include <vector>
+#include <map>
 
 // Volume ID functor (for sensitive volumes)
 class AgMLVolumeId {
 public:
   virtual int id( int* numbv ) const { return 0; }
+};
+
+// User-defined hit scoring functor (for sensitive volumes)
+class AgMLScoring {
+public:
+  virtual float hit() const { return 0; }
 };
 
 class AgMLExtension : public TGeoRCExtension {
@@ -43,11 +50,11 @@ public:
 
   int GetVolumeId( int* numbv ){ return mVolumeId->id( numbv ); }
 
-
   bool GetSensitive() { return mSensitive; }
   short GetTracking() { return mTracking; }
   int GetBranchings(){ return mBranchings; }
 
+  std::vector<AgMLScoring*> GetUserHits(){ return mHitScoring; }
  
 private:
 protected:
@@ -61,6 +68,8 @@ protected:
   int     mBranchings; // number of branchings (placed family members)
 
   AgMLVolumeId* mVolumeId; // Functor to calculate volume ID given reduced numbering scheme
+
+  std::vector<AgMLScoring*> mHitScoring; // Vector of functors for hit scoring
 
   ClassDef(AgMLExtension,1);
 

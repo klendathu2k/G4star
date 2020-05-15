@@ -7,7 +7,8 @@ AgMLExtension::AgMLExtension() : TGeoRCExtension(),
 				 mSensitive(0), 
 				 mTracking(0),
 				 mBranchings(0),
-				 mVolumeId( new AgMLVolumeId )
+				 mVolumeId( new AgMLVolumeId ),
+				 mHitScoring()
 {
   Grab();
 }
