@@ -44,4 +44,8 @@
   {"pythia8.2.35","","","stargen", "", "Pythia8_2_35.so", "Load Pythia 8.1.86 generator", false },
   {"hijing1.383" ,"","","stargen", "", "Hijing1_383.so",  "Load Hijing  1.383 generator", false },
   {"kinematics"  ,"","","stargen", "", "Kinematics.so",   "Load STAR Particle Gun", false },
+
+  // support IO
+  {"Geant4Out"    ,""  ,"","Tree"                                ,"","","Write g2t tables to StTree",kFALSE},
+
  

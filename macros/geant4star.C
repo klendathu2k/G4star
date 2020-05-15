@@ -30,10 +30,12 @@ void loadStar(const Char_t *mytag="dev2021", Bool_t agml = true  )
 //  Load("StBFChain.so"); 
 
   gROOT->ProcessLine("chain = new StBFChain();");
-
+  gROOT->ProcessLine("chain->cd();");
+  gROOT->ProcessLine("chain->SetDebug(1);");  
   TString chainOpts = "agml geant4 geant4vmc stargen geant4mk pythia8.1.86 kinematics -emc_t -ftpcT nodefault ";
 
   // pickup command line options ala "--" and add them as a chain option
+
   for ( int i=0; i<gApplication->Argc();i++ ) {
     TString arg = gApplication->Argv(i);
     if ( arg.Contains("--web") || arg.Contains("notebook") ) continue;
@@ -51,16 +53,43 @@ void loadStar(const Char_t *mytag="dev2021", Bool_t agml = true  )
     }
   }
 
-
-
+  // Set the chain options
   gROOT->ProcessLine(Form("chain->SetFlags(\"%s\");",chainOpts.Data()));
 
+  gROOT->ProcessLine("chain->Set_IO_Files(\"\",\"output.geant4.root\");");
+  // Find the output filename, if given, and set as the output
+  TString output = "";
+  for ( int i=0; i<gApplication->Argc();i++ ) {
+    TString arg = gApplication->Argv(i);  
+    if ( arg.Contains("--") ) {
+      arg.ReplaceAll("--"," ");
+      // If the option matches key=value, treat this as an attribute to be
+      // set on the G4 maker...
+      if ( arg.Contains("=") ) {
+	TString key = arg.Tokenize("=")->At(0)->GetName();
+	TString val = arg.Tokenize("=")->At(0)->GetName();
+	if ( key=="output" ){
+	  output = val;
+	  gROOT->ProcessLine(Form("chain->Set_IO_Files(\"\",\"%s\");",output.Data()));
+	  break;
+	}
+      }
+    }
+  }
   // Load shared libraries
   gROOT->ProcessLine("chain->Load();");
 
   // Add in star mag field
   Load("libStarMagFieldNoDict.so");
 
+
+
+  //  gROOT->ProcessLine(Form("chain->Set_IO_Files(0,\"%s\");",output.Data()));
+	
+  //  gMessMgr->Info() << "Instantiate Makers" << endm;
+  gROOT->ProcessLine( "int __result = chain->Instantiate();" );
+
+  // Now add makers...
   addMaker( "primary", "StarPrimaryMaker()" );
   addMaker( "geant4",  "StGeant4Maker()" );
   //  addMaker( "pythia8", "StarPythia8()" );
@@ -69,21 +98,34 @@ void loadStar(const Char_t *mytag="dev2021", Bool_t agml = true  )
   gROOT->ProcessLine("_primary->AddGenerator( _kine );");
 
 
+  // Move outputStream after the geant maker
+  gROOT->ProcessLine("StMaker* __outputStream = chain->GetMaker(\"outputStream\");");
+  // gROOT->ProcessLine("LOG_INFO << "
+  // 		     "\"outputStream = \" << __outputStream << endm;")
+
+  gROOT->ProcessLine("chain->AddAfter( _geant4->GetName(), __outputStream ); ");
+
+
+
+
+  //  gROOT->ProcessLine("auto* __outputStream = chain->GetMaker(\"outputStream\"\);
+
+
+  gROOT->ProcessLine("StMaker::lsMakers(chain);");
+
 
   // set attributes for arguements matching --x=y
-  for ( int i=0; i<gApplication->Argc();i++ ) {                                                                                           
+  for ( int i=0; i<gApplication->Argc();i++ ) {
 
-    TString arg = gApplication->Argv(i);                                                                                                  
-    if ( arg.Contains("--web") || arg.Contains("notebook") ) continue;                                                                    
-    // Parse "--" style options for ourselves                                                                                             
+    TString arg = gApplication->Argv(i);
+    if ( arg.Contains("--web") || arg.Contains("notebook") ) continue;
+    // Parse "--" style options for ourselves
+    if ( arg.Contains("--") ) {
+      arg.ReplaceAll("--"," ");
 
-    if ( arg.Contains("--") ) {                                                                                                           
-
-      arg.ReplaceAll("--"," ");                                                                                                           
-
-      // If the option matches key=value, treat this as an attribute to be                                                                
-      // set on the G4 maker...                                                                                                           
-      if ( arg.Contains("=") ) {                                                                                                          
+      // If the option matches key=value, treat this as an attribute to be
+      // set on the G4 maker...                                        
+      if ( arg.Contains("=") ) {
 
 	TString key = arg.Tokenize("=")->At(0)->GetName();
 	TString val = arg.Tokenize("=")->At(0)->GetName();
@@ -94,13 +136,19 @@ void loadStar(const Char_t *mytag="dev2021", Bool_t agml = true  )
 	  continue;
 	}
 
+	// Process output file
+	if ( arg.Contains("output") ) {
+	  /* nada */ 
+	  continue;
+	}
+
 	// All other variables pass through to G4 maker
 	
 	gROOT->ProcessLine(Form("_geant4->SetAttr(\"%s\",%s);",
 				arg.Tokenize("=")->At(0)->GetName(),
 				arg.Tokenize("=")->At(1)->GetName()));
-      }                                                                                                                                   
-    }                                                                                                                                     
+      }                                                               
+    } 
   } 
 
 

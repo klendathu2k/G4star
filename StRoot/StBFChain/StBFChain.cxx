@@ -1668,6 +1668,7 @@ void StBFChain::SetOutputFile (const Char_t *outfile){
 	else if (GetOption("hijing")) fFileOut = "hijing.root";
 	else if (GetOption("VMC"))    fFileOut = "VMC.root";
 	else if (GetOption("gstar"))  fFileOut = "gtrack.root";
+	else if (GetOption("geant4mk")) fFileOut = "geant4.root";
       }
       if (  fFileOut != "") {
 	fFileOut.ReplaceAll("*","");
@@ -1930,6 +1931,9 @@ void StBFChain::SetTreeOptions()
       treeMk->IntoBranch("geantBranch","geant/.data/g2t_rch_hit");
     }
   }
+
+  if (GetOption("Geant4Out")) treeMk->IntoBranch("geantBranch","geant4star");
+
 }
 //________________________________________________________________________________
 Long_t  StBFChain::ProcessLine(const char *line) {
