@@ -101,19 +101,17 @@ void loadStar(const Char_t *mytag="dev2021", Bool_t agml = true  )
 
 
   // set attributes for arguements matching --x=y
-  for ( int i=0; i<gApplication->Argc();i++ ) {                                                                                           
+  for ( int i=0; i<gApplication->Argc();i++ ) {
 
-    TString arg = gApplication->Argv(i);                                                                                                  
-    if ( arg.Contains("--web") || arg.Contains("notebook") ) continue;                                                                    
-    // Parse "--" style options for ourselves                                                                                             
+    TString arg = gApplication->Argv(i);
+    if ( arg.Contains("--web") || arg.Contains("notebook") ) continue;
+    // Parse "--" style options for ourselves
+    if ( arg.Contains("--") ) {
+      arg.ReplaceAll("--"," ");
 
-    if ( arg.Contains("--") ) {                                                                                                           
-
-      arg.ReplaceAll("--"," ");                                                                                                           
-
-      // If the option matches key=value, treat this as an attribute to be                                                                
-      // set on the G4 maker...                                                                                                           
-      if ( arg.Contains("=") ) {                                                                                                          
+      // If the option matches key=value, treat this as an attribute to be
+      // set on the G4 maker...                                        
+      if ( arg.Contains("=") ) {
 
 	TString key = arg.Tokenize("=")->At(0)->GetName();
 	TString val = arg.Tokenize("=")->At(0)->GetName();
@@ -135,8 +133,8 @@ void loadStar(const Char_t *mytag="dev2021", Bool_t agml = true  )
 	gROOT->ProcessLine(Form("_geant4->SetAttr(\"%s\",%s);",
 				arg.Tokenize("=")->At(0)->GetName(),
 				arg.Tokenize("=")->At(1)->GetName()));
-      }                                                                                                                                   
-    }                                                                                                                                     
+      }                                                               
+    } 
   } 
 
 
