@@ -3723,9 +3723,11 @@ class Instrument(Handler):
                 toimpl = """
                 {  // Create and register new user-based hit scoring routine
                    auto* userScoring = new %sScoring;
-                   module()->AddHitScoring(GetName(),userScoring);
+                   TString bname = GetName();
+                
+                   module()->AddHitScoring(bname + ": %s" ,userScoring);
                 }
-                """%(meas)
+                """%(meas,meas)
                 document.impl( toimpl, unit=current )
 
 
