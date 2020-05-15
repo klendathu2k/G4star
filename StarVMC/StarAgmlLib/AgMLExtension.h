@@ -43,6 +43,8 @@ public:
 
   void SetVolumeIdentifier( AgMLVolumeId* identifier ){ mVolumeId = identifier; }
 
+  void AddHitScoring( AgMLScoring* sc ){ mHitScoring.push_back( sc ); }
+
 
   TString GetModuleName(){ return mModuleName; }
   TString GetFamilyName(){ return mFamilyName; }
