@@ -3629,6 +3629,7 @@ class Cut(Handler):
 
         #document.impl( '// _medium.par("%s") = %s;'%(name,val), unit=current )
         document.impl( 'module()->AddCut(active()->GetName(),"%s",%s);'%(name.lower(),value.lower()), unit=current )
+
 class Hits(Handler):
 # TODO        
     def __init__(self):
@@ -3672,6 +3673,7 @@ class Hits(Handler):
         for i,hit in enumerate(self.hit_list):
             arg = self.arg_list[i]
             declare += "%s:%s "%( hit, arg )
+
 class Hit(Handler):
     def __init__(self):
         Handler.__init__(self)
@@ -3710,6 +3712,44 @@ class Instrument(Handler):
             mx   =replacements(mx).lower()
             document.impl( 'module()->AddHit( "%s", "%s", %s, %s, %s, "%s");'%( block, meas, nbits, mn, mx, opts ), unit=current )
 
+class UserHit(Handler):
+    def __init__(self): Handler.__init__(self)
+    def setParent(self,p): self.parent = p
+    def startElement(self,tag,attr):
+        self.name = attr.get('name', None )
+        self.comment = attr.get('comment', "" )
+        # Open the user hit scoring block
+        toimpl = """
+        // execute user hit scoring
+        float %sScoring::hit() {
+        """%self.name
+        document.impl( toimpl, unit=current )        
+        
+    def characters(self,content):
+        toimpl = replacements(content)
+        content = content.lower()        
+        document.impl(content,unit=current)
+        
+    def endElement(self,tag):
+        toheader = """
+        // Add user hit class to header file
+        class %sScoring : public AgMLScoring {
+        public:
+            virtual float hit() const;
+        };
+        """%(self.name)
+        document.head( toheader )
+
+        toimpl = """
+        // end hit scoring
+        std::cout << "Hit scoring for %s" << std::endl;
+        return 0.0; // but user should return before we get here...
+        }
+        """%(self.name)
+        document.impl( toimpl, unit=current )
+        
+        pass
+            
 
 class Gsckov(Handler):
 # TODO            

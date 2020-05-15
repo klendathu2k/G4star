@@ -5,6 +5,7 @@
 #include "Mortran.h"
 #include "AgDetp.h"
 #include <string>
+#include <StarVMC/StarAgmlLib/AgMLExtension.h>
 using namespace std;
 
 class TDataSet;
