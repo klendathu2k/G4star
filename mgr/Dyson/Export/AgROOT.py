@@ -3696,12 +3696,19 @@ class Instrument(Handler):
     def addHit(self,hit):
         self.hit_list.append(hit)
     def startElement(self,tag,attr):
-        self.block = attr.get('block', attr.get('volume', None))        
+        self.block = attr.get('block', attr.get('volume', None))
+    def userHit(self,name):
+        mylist = [ 'xx', 'yy', 'zz','pz', 'py', 'pz','cx', 'cy', 'cz','x',  'y',  'z','eta','slen', 'tof', 'step','sleng', 'lptot','birk', 'eloss', 'elos','user', 'etsp', 'ptot', 'lgam' ]
+        for tag in mylist:
+            if tag == name.lower(): return False
+        return True
+           
+        
     def endElement(self,tag):
         block = self.block
         for hit in self.hit_list:
             attr = hit.attr
-            meas = attr.get('meas',None)
+            meas = attr.get('meas',None)                
             nbits=attr.get('nbits', attr.get('bins', '0') )
             mn   = attr.get('min','0')
             mx   = attr.get('max','0')
@@ -3710,7 +3717,17 @@ class Instrument(Handler):
             nbits=replacements(nbits).lower()
             mn   =replacements(mn).lower()
             mx   =replacements(mx).lower()
+            # This could be deprecated...
             document.impl( 'module()->AddHit( "%s", "%s", %s, %s, %s, "%s");'%( block, meas, nbits, mn, mx, opts ), unit=current )
+            if self.userHit(meas):
+                toimpl = """
+                {  // Create and register new user-based hit scoring routine
+                   auto* userScoring = new %sScoring;
+                   module()->AddHitScoring(GetName(),userScoring);
+                }
+                """%(meas)
+                document.impl( toimpl, unit=current )
+
 
 class UserHit(Handler):
     def __init__(self): Handler.__init__(self)
@@ -3721,7 +3738,7 @@ class UserHit(Handler):
         # Open the user hit scoring block
         toimpl = """
         // execute user hit scoring
-        float %sScoring::hit() {
+        float %sScoring::hit() const {
         """%self.name
         document.impl( toimpl, unit=current )        
         
