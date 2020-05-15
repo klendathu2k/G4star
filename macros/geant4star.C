@@ -97,6 +97,20 @@ void loadStar(const Char_t *mytag="dev2021", Bool_t agml = true  )
   addMaker( "kine",        "StarKinematics()" );
   gROOT->ProcessLine("_primary->AddGenerator( _kine );");
 
+
+  // Move outputStream after the geant maker
+  gROOT->ProcessLine("StMaker* __outputStream = chain->GetMaker(\"outputStream\");");
+  // gROOT->ProcessLine("LOG_INFO << "
+  // 		     "\"outputStream = \" << __outputStream << endm;")
+
+  gROOT->ProcessLine("chain->AddAfter( _geant4->GetName(), __outputStream ); ");
+
+
+
+
+  //  gROOT->ProcessLine("auto* __outputStream = chain->GetMaker(\"outputStream\"\);
+
+
   gROOT->ProcessLine("StMaker::lsMakers(chain);");
 
 
