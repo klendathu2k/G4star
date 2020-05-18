@@ -342,6 +342,8 @@
     auto dx = hgeo.dxsci / 2.0;
     auto dy = hgeo.dysci / 2.0;
     auto dz = hgeo.nlayer * hgeo.dzlay / 2.0;
+
+    return 1.0;
     
   </UserHit>
 
@@ -351,6 +353,8 @@
     auto dx = hgeo.dxsci / 2.0;
     auto dy = hgeo.dysci / 2.0;
     auto dz = hgeo.nlayer * hgeo.dzlay / 2.0;
+
+    return 2.0;    
     
   </UserHit>
 
@@ -361,6 +365,8 @@
     auto dy = hgeo.dysci / 2.0;
     auto dz = hgeo.nlayer * hgeo.dzlay / 2.0;
     
+    return 3.0;
+
   </UserHit>
 
   <UserHit name="HSCD">
@@ -369,6 +375,8 @@
     auto dx = hgeo.dxsci / 2.0;
     auto dy = hgeo.dysci / 2.0;
     auto dz = hgeo.nlayer * hgeo.dzlay / 2.0;
+
+    return 4.0;
     
   </UserHit>
   
