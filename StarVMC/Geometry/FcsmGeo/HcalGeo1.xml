@@ -335,6 +335,42 @@
       Set EmCuts (HCUT)
     </Export>
   </Block>
+
+  <UserHit name="HSCA">
+    <Use struct="HGEO" />
+
+    auto dx = hgeo.dxsci / 2.0;
+    auto dy = hgeo.dysci / 2.0;
+    auto dz = hgeo.nlayer * hgeo.dzlay / 2.0;
+    
+  </UserHit>
+
+  <UserHit name="HSCB">
+    <Use struct="HGEO" />
+
+    auto dx = hgeo.dxsci / 2.0;
+    auto dy = hgeo.dysci / 2.0;
+    auto dz = hgeo.nlayer * hgeo.dzlay / 2.0;
+    
+  </UserHit>
+
+  <UserHit name="HSCC">
+    <Use struct="HGEO" />
+
+    auto dx = hgeo.dxsci / 2.0;
+    auto dy = hgeo.dysci / 2.0;
+    auto dz = hgeo.nlayer * hgeo.dzlay / 2.0;
+    
+  </UserHit>
+
+  <UserHit name="HSCD">
+    <Use struct="HGEO" />
+
+    auto dx = hgeo.dxsci / 2.0;
+    auto dy = hgeo.dysci / 2.0;
+    auto dz = hgeo.nlayer * hgeo.dzlay / 2.0;
+    
+  </UserHit>
   
 </Module>
 
