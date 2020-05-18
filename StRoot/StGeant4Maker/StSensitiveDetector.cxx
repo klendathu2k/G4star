@@ -184,12 +184,11 @@ void StSensitiveDetector::ProcessHits(){
 //____________________________________________________________________________________________
 void StSensitiveDetector::EndOfEvent(){ 
 
-  // for ( auto hit : mHits ) {
-  //    LOG_INFO << *hit << endm; 
-  // }
-  mCollection->EndOfEvent();
-  mHits.clear(); 
 
+}
+//____________________________________________________________________________________________
+void StSensitiveDetector::Clear() {
+  mCollection->Clear();
 }
 //____________________________________________________________________________________________
 StSensitiveDetector::DetectorType StSensitiveDetector::detectorType() {
@@ -213,3 +212,4 @@ StSensitiveDetector::DetectorType StSensitiveDetector::detectorType() {
 //____________________________________________________________________________________________
 int StSensitiveDetector::numberOfHits(){ return int( mCollection->numberOfHits() ); }
 //____________________________________________________________________________________________
+

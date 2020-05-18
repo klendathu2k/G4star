@@ -461,14 +461,15 @@ int StGeant4Maker::Make() {
   // Process one single event.  Control handed off to VMC application.
   gG4 -> ProcessRun( 1 );
 
-
   return kStOK; 
 }
 //________________________________________________________________________________________________
 void StGeant4Maker::Clear( const Option_t* opts ){
-  // Clear the MC stack
-  LOG_INFO << "Clear" << endm;
-  mMCStack -> Clear();
+
+  mMCStack -> Clear(); // Clear the MC stack
+  acurr = aprev = 0;   // zero out pointers to the current and previous agml extensions
+
+
   StMaker::Clear();
 }
 //________________________________________________________________________________________________

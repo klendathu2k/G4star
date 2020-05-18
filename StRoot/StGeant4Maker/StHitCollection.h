@@ -18,6 +18,7 @@ public:
   virtual void Initialize()  = 0;
   virtual void ProcessHits() = 0;
   virtual void EndOfEvent()  = 0;
+  virtual void Clear()       = 0;
 
   virtual int  numberOfHits()  = 0;
 
@@ -37,6 +38,7 @@ public:
   virtual void Initialize();
   virtual void ProcessHits();
   virtual void EndOfEvent();
+  virtual void Clear();
 
   virtual int numberOfHits(){ return mHits.size(); } 
 
@@ -61,6 +63,7 @@ public:
   virtual void Initialize();
   virtual void ProcessHits();
   virtual void EndOfEvent();
+  virtual void Clear();
 
   virtual int numberOfHits(){ return mHits.size(); } 
 
