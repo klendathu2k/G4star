@@ -639,7 +639,16 @@ Bool_t StarTGeoStacker::Build( AgBlock *block )
 
       // AgML extented volume information
       AgMLExtension* agmlExt = gAgMLExt[ block->GetName() ]; 
-      if ( 0==agmlExt ) { gAgMLExt[ block->GetName() ] = agmlExt = new AgMLExtension(); }
+      if ( 0==agmlExt ) { 
+	// Create new agml extension
+	gAgMLExt[ block->GetName() ] = agmlExt = new AgMLExtension(); 
+	// Add user hits to the extension
+	for ( auto kv : module->GetHitScoring() ) {
+	  TString key          = kv.first;
+	  AgMLScoring* scoring = kv.second;
+	  agmlExt -> AddHitScoring( scoring );
+	}
+      }
       agmlExt->SetVolumeName( nn );
       agmlExt->SetFamilyName( block->GetName() );
       agmlExt->SetModuleName( module->GetName() );
@@ -720,7 +729,16 @@ Bool_t StarTGeoStacker::Build( AgBlock *block )
 	  // AgML extented volume information
 
 	  AgMLExtension* agmlExt = gAgMLExt[ block->GetName() ]; 
-	  if ( 0==agmlExt ) { gAgMLExt[ block->GetName() ] = agmlExt = new AgMLExtension(); }
+	  if ( 0==agmlExt ) { 
+	    // Create new agml extension
+	    gAgMLExt[ block->GetName() ] = agmlExt = new AgMLExtension(); 
+	    // Add user hits to the extension
+	    for ( auto kv : module->GetHitScoring() ) {
+	      TString key          = kv.first;
+	      AgMLScoring* scoring = kv.second;
+	      agmlExt -> AddHitScoring( scoring );
+	    }
+	  }
 	  agmlExt->SetVolumeName( nn );
 	  agmlExt->SetFamilyName( block->GetName() );
 	  agmlExt->SetModuleName( module->GetName() );

@@ -82,9 +82,9 @@ public:
  ~StarMCVertex(){ /* nada */ };
 
   double distance( double vx_, double vy_, double vz_ ){ 
-    double vx2 = vx_*vx_ - 2*vx_*mVertex[0] + mVertex[0]*mVertex[0];
-    double vy2 = vy_*vy_ - 2*vy_*mVertex[1] + mVertex[1]*mVertex[1];
-    double vz2 = vz_*vz_ - 2*vz_*mVertex[2] + mVertex[2]*mVertex[2];
+    double vx2 = (vx_-mVertex[0])*(vx_-mVertex[0]);
+    double vy2 = (vy_-mVertex[1])*(vy_-mVertex[1]);
+    double vz2 = (vz_-mVertex[2])*(vz_-mVertex[2]);
     return sqrt(vx2+vy2+vz2);
   };
 

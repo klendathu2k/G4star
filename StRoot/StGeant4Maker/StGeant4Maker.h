@@ -182,6 +182,10 @@ protected:
     sd2table( sd, table, g2t_track ); 
                                     
     AddData( table ); 
+
+    // Clear the sensitive detector
+    sd->Clear();
+
     return nhits;
   };
 

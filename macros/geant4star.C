@@ -92,8 +92,10 @@ void loadStar(const Char_t *mytag="dev2021", Bool_t agml = true  )
   // Now add makers...
   addMaker( "primary", "StarPrimaryMaker()" );
   addMaker( "geant4",  "StGeant4Maker()" );
+
   //  addMaker( "pythia8", "StarPythia8()" );
   //  gROOT->ProcessLine("_primary->AddGenerator( _pythia8 );");
+
   addMaker( "kine",        "StarKinematics()" );
   gROOT->ProcessLine("_primary->AddGenerator( _kine );");
 

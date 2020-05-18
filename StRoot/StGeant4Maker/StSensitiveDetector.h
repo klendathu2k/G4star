@@ -68,6 +68,7 @@ public:
   void Initialize();
   void ProcessHits();
   void EndOfEvent();
+  void Clear();
 
   void addVolume(TGeoVolume *v);
   int  numberOfVolumes(){ return mVolumes.size(); }

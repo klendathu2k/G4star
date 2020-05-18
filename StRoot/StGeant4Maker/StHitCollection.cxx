@@ -116,6 +116,7 @@ void StTrackerHitCollection::ProcessHits() {
 
   TGeoNavigator* navigator = gGeoManager->GetCurrentNavigator();
   TVirtualMC*    mc = TVirtualMC::GetMC();
+  TGeoVolume*    current = navigator->GetCurrentVolume();
 
   // Is this a charged particle?  If not, skip it...
   if ( 0 == mc->TrackCharge() ) return;
@@ -216,15 +217,24 @@ void StTrackerHitCollection::ProcessHits() {
   double mass = mc->TrackMass();
   double Etot = mc->Etot(); // total energy
 
+  // Grab the agml extension and evaluate user hits
+  AgMLExtension* agmlext = dynamic_cast<AgMLExtension*>( current->GetUserExtension() );
+  if ( 0==agmlext ) return;
+
+  // Score user defined hit quantities
+  for ( auto score : agmlext->GetUserHits() ) {
+    hit->user.push_back( score->hit() );
+  }
+  
 }
 //_____________________________________________________________________________________________
 void StTrackerHitCollection::EndOfEvent() {
-//  for ( auto hit : mHits ) {
-//   LOG_INFO << *hit << endm;
-//  }
-//  mHits.clear();
+  // Do nothing 
 }
 //_____________________________________________________________________________________________
+void StTrackerHitCollection::Clear() {
+  mHits.clear();
+}
 
 
 //_____________________________________________________________________________________________
@@ -236,6 +246,7 @@ void StCalorimeterHitCollection::ProcessHits() {
 
   TGeoNavigator* navigator = gGeoManager->GetCurrentNavigator();
   TVirtualMC*    mc = TVirtualMC::GetMC();
+  TGeoVolume*    current = navigator->GetCurrentVolume();
 
   // Is this a charged particle?  If not, skip it...
   if ( 0 == mc->TrackCharge() ) return;
@@ -271,7 +282,7 @@ void StCalorimeterHitCollection::ProcessHits() {
   
   // Track has entered this volume, create a new hit
   if ( isTrackEntering || isNewTrack ) {
-
+    
     // Zero out the energy sum
     mEsum = 0;
 
@@ -289,7 +300,6 @@ void StCalorimeterHitCollection::ProcessHits() {
     // Get the current volume / copy numbers to the sensitive volume.  n.b. GetBranchNumbers 
     // only writes to the current level, so if hit is not new or cleared, need to clear by hand.
     gGeoManager->GetBranchNumbers( hit->copy, hit->volu );
-
 
     // Set reduced volume path
     int inumbv = 0;
@@ -316,7 +326,7 @@ void StCalorimeterHitCollection::ProcessHits() {
     mc->TrackPosition( hit->position_in[0], hit->position_in[1],  hit->position_in[2] );
     hit->position_in[3] = mc->TrackTime();
  
-  } 
+  }
   
   if ( mHits.size() == 0 ) {
     LOG_INFO << "No available hits" << endm;
@@ -334,6 +344,16 @@ void StCalorimeterHitCollection::ProcessHits() {
   // Hit energy will be the total energy deposition corrected by Birk's law
   hit -> de =   mEsum * mBirk[0] / ( 1.0 + mBirk[1]*mEsum + mBirk[2]*mEsum*mEsum );
 
+  // Grab the agml extension and evaluate user hits
+  AgMLExtension* agmlext = dynamic_cast<AgMLExtension*>( current->GetUserExtension() );
+  if ( 0==agmlext ) return;
+
+  // Score user defined hit quantities
+  for ( auto score : agmlext->GetUserHits() ) {
+    hit->user.push_back( score->hit() );
+  }
+
+
 }
 //_____________________________________________________________________________________________
 void StCalorimeterHitCollection::EndOfEvent() {
@@ -343,3 +363,9 @@ void StCalorimeterHitCollection::EndOfEvent() {
 //  mHits.clear();
 }
 //_____________________________________________________________________________________________
+
+//_____________________________________________________________________________________________
+void StCalorimeterHitCollection::Clear() {
+  mHits.clear();
+  mEsum=0;
+}
