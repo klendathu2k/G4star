@@ -7,7 +7,7 @@
   {"g4geometry",  "","", "g4graphics,g4materials","", "$G4PATH/lib64/libG4geometry.so","Load G4 libs",false},
   {"g4particles", "","", "g4geometry",            "", "$G4PATH/lib64/libG4particles.so", "Load G4",false},
   {"g4track"    , "","", "g4particles",           "", "$G4PATH/lib64/libG4track.so",     "Load G4",false},
-  {"g4digits",    "","", "g4track",               "", "$G4PATH/lib64/libG4digits_hits.so", "Load G4",false},
+  {"g4digits",    "","", "g4track",               "", "$G4PATH/lib64/libG4zlib.so,$G4PATH/lib64/libG4digits_hits.so", "Load G4",false},
   {"g4processes", "","", "g4digits",              "", "$G4PATH/lib64/libG4processes.so", "Load G4",false},
 
   {"g4tracking" , "","", "g4processes",           "", "$G4PATH/lib64/libG4tracking.so",  "Load G4",false},
@@ -31,7 +31,7 @@
 
   // vmc
   {"g4root",      "","", "",       "", "/star/simu/simu/geant4vmc/lib64/libg4root.so", "Load g4root support", false },
-  {"geant4vmc",   "","", "geant4,g4geant3,g4root,g4ascii,g4dawn,g4heprep,g4raytracer,g4vrml,g4gmocren,g4opengl", "", 
+  {"geant4vmc",   "","", "geant4,g4root,g4ascii,g4dawn,g4heprep,g4raytracer,g4vrml,g4gmocren,g4opengl", "", 
                          "libVMC.so,/star/simu/simu/geant4vmc/lib64/libgeant4vmc.so", "Load G4 VMC libs", false},
   // agml etc...
   {"ag4ml",       "","", "g4geometry, agml"            ,"","", "AgML + g4",false},
