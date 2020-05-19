@@ -21,6 +21,13 @@ void addGenerator( const char* name, const char* maker ) {
   gROOT->ProcessLine( Form( "_primary->AddGenerator( _%s );", name ) );
 }
 
+// Hack to make sure finish is called on the chain
+struct __Fini {
+  ~__Fini() {
+    gROOT->ProcessLine("chain->Finish();");
+  }
+} __fini__;
+
 void loadStar(const Char_t *mytag="dev2021", Bool_t agml = true  )
 {
 
