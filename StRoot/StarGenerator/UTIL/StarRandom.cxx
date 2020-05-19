@@ -20,8 +20,9 @@ ROOT::Math::GSLRandomEngine *StarRandom::mEngine = 0;
 //
 class _Random : public TRandom {
 public:
-  double Rndm( Int_t i=0 ){ return StarRandom::Instance().flat(); } 
-  virtual unsigned int GetSeed(){ return StarRandom::Instance().seed(); }
+  double Rndm(int i ){ return StarRandom::Instance().flat(); } 
+  double Rndm()      { return StarRandom::Instance().flat(); } 
+  virtual unsigned int GetSeed() const { return StarRandom::Instance().seed(); }
 };
 
 _Random            *gStarRandom   = 0;
