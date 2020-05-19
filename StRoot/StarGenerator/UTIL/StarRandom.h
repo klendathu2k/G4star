@@ -55,6 +55,9 @@ class StarRandom : public TObject
   /// @param seed2 is the second RNG seed.
   static void seed( UShort_t seed1, UShort_t seed2 );
 
+  /// Returns the seed set for the RNG
+  unsigned int seed(){ return mSeed; }
+
   /// Return a random number uniformly distributed between 0 and 1
   Double_t operator()() const;
   /// Return a random number uniformly distributed between mn and mx

@@ -14,8 +14,9 @@
 #include "StarGenerator/BASE/StarPrimaryMaker.h"
 #include "StarGenerator/BASE/StarParticleStack.h"
 #include "StarGenerator/UTIL/StarParticleData.h"
-#include "TString.h"
+#include "StarGenerator/UTIL/StarRandom.h"
 
+#include "TString.h"
 #include "StMCTruthTable.h"
 #include "StSensitiveDetector.h"
 
@@ -361,7 +362,7 @@ int StGeant4Maker::Init() {
   TG4RunManager* runManager = TG4RunManager::Instance();
   if ( 0==IAttr("Random:G4") ) {
     LOG_INFO << "Map G4 random number generator to ROOT" << endm;
-    runManager->UseRootRandom(true);
+    runManager->UseRootRandom(true); 
   }
 
 
