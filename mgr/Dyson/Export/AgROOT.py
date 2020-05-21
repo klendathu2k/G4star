@@ -3628,7 +3628,8 @@ class Cut(Handler):
         value  = attr.get('value')
 
         #document.impl( '// _medium.par("%s") = %s;'%(name,val), unit=current )
-        document.impl( 'module()->AddCut(active()->GetName(),"%s",%s);'%(name.lower(),value.lower()), unit=current )
+        #document.impl( 'module()->AddCut(active()->GetName(),"%s",%s);'%(name.lower(),value.lower()), unit=current )
+        document.impl( 'active()->AddCut("%s",%s);'%(name.lower(),value.lower()), unit=current )
 
 class Hits(Handler):
 # TODO        
@@ -3697,8 +3698,11 @@ class Instrument(Handler):
         self.hit_list.append(hit)
     def startElement(self,tag,attr):
         self.block = attr.get('block', attr.get('volume', None))
+        self.user  = attr.get('user',None) # user hits
+
     def userHit(self,name):
         mylist = [ 'xx', 'yy', 'zz','pz', 'py', 'pz','cx', 'cy', 'cz','x',  'y',  'z','eta','slen', 'tof', 'step','sleng', 'lptot','birk', 'eloss', 'elos','user', 'etsp', 'ptot', 'lgam' ]
+        if self.user == None: return False # do not export user hits
         for tag in mylist:
             if tag == name.lower(): return False
         return True
