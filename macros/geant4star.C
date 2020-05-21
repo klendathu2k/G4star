@@ -31,14 +31,10 @@ struct __Fini {
 void loadStar(const Char_t *mytag="dev2021", Bool_t agml = true  )
 {
 
-//  gROOT->ProcessLine("StLoggerManager::StarLoggerInit();");
-
-//  Load("StChain.so"); 
-//  Load("StBFChain.so"); 
-
   gROOT->ProcessLine("chain = new StBFChain();");
   gROOT->ProcessLine("chain->cd();");
   gROOT->ProcessLine("chain->SetDebug(1);");  
+
   TString chainOpts = "agml geant4 geant4vmc stargen geant4mk pythia8.1.86 kinematics -emc_t -ftpcT nodefault ";
 
   // pickup command line options ala "--" and add them as a chain option
@@ -48,7 +44,7 @@ void loadStar(const Char_t *mytag="dev2021", Bool_t agml = true  )
     if ( arg.Contains("--web") || arg.Contains("notebook") ) continue;
     // Parse "--" style options for ourselves
     if ( arg.Contains("--") ) {
-      arg.ReplaceAll("--"," ");
+      arg.ReplaceAll("--"," "); // n.b. the space pads out the chain options
       // If the option matches key=value, treat this as an attribute to be
       // set on the G4 maker...
       if ( arg.Contains("=") ) {
@@ -63,26 +59,32 @@ void loadStar(const Char_t *mytag="dev2021", Bool_t agml = true  )
   // Set the chain options
   gROOT->ProcessLine(Form("chain->SetFlags(\"%s\");",chainOpts.Data()));
 
-  gROOT->ProcessLine("chain->Set_IO_Files(\"\",\"output.geant4.root\");");
+  //  gROOT->ProcessLine("chain->Set_IO_Files(\"\",\"output.geant4.root\");");
   // Find the output filename, if given, and set as the output
   TString output = "";
   for ( int i=0; i<gApplication->Argc();i++ ) {
     TString arg = gApplication->Argv(i);  
     if ( arg.Contains("--") ) {
-      arg.ReplaceAll("--"," ");
+      gMessMgr->Info() << arg.Data() << endm;
+      arg.ReplaceAll("--","");
       // If the option matches key=value, treat this as an attribute to be
       // set on the G4 maker...
       if ( arg.Contains("=") ) {
 	TString key = arg.Tokenize("=")->At(0)->GetName();
-	TString val = arg.Tokenize("=")->At(0)->GetName();
+	TString val = arg.Tokenize("=")->At(1)->GetName();
+	std::cout << " key = [" << key.Data() << "] value = " << val.Data() << std::endl;
 	if ( key=="output" ){
 	  output = val;
 	  gROOT->ProcessLine(Form("chain->Set_IO_Files(\"\",\"%s\");",output.Data()));
+	  //gMessMgr->Info() << Form("chain->Set_IO_Files(\"\",\"%s\");",output.Data()) << endm;
 	  break;
 	}
       }
     }
   }
+
+
+
   // Load shared libraries
   gROOT->ProcessLine("chain->Load();");
 
@@ -165,12 +167,6 @@ void loadStar(const Char_t *mytag="dev2021", Bool_t agml = true  )
   // ROOT6 command line processing
   //
   const char* cmds[] = { 
-
-    // // Pythia configuration
-    // "_pythia8->SetFrame(\"CMS\", 510.0);"
-    // "_pythia8->SetBlue(\"proton\");"
-    // "_pythia8->SetYell(\"proton\");"
-    // "_pythia8->Set(\"HardQCD:all= on\");"
 
     // Geometry instantiation
     "TString __geometry_tag = \"dev2021\";"
