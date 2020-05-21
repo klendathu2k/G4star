@@ -42,7 +42,6 @@ public:
   void SetBranchings( int b ) { mBranchings=b; }  
 
   void SetVolumeIdentifier( AgMLVolumeId* identifier ){ mVolumeId = identifier; }
-
   void AddHitScoring( AgMLScoring* sc ){ mHitScoring.push_back( sc ); }
 
 
@@ -57,6 +56,10 @@ public:
   int GetBranchings(){ return mBranchings; }
 
   std::vector<AgMLScoring*> GetUserHits(){ return mHitScoring; }
+
+  void AddCut( TString cut, double value ){ mGstpar[cut] = value; }
+  std::map<TString,double>& GetCuts() { return mGstpar; }
+  
  
 private:
 protected:
@@ -72,6 +75,7 @@ protected:
   AgMLVolumeId* mVolumeId; // Functor to calculate volume ID given reduced numbering scheme
 
   std::vector<AgMLScoring*> mHitScoring; // Vector of functors for hit scoring
+  std::map<TString, double> mGstpar;     // GSTPAR tracking cuts for this volume
 
   ClassDef(AgMLExtension,1);
 

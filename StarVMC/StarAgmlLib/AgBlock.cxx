@@ -66,7 +66,8 @@ AgBlock::AgBlock(const Char_t *name, const Char_t *title)
     mNicknames(),
     mGroups(),
     mMakeAssembly(0),
-    mNumberBranches(0)
+    mNumberBranches(0),
+    mGstpar()
 {
   addNickname(name); // ensure that the vector is populated
   _valid = true;
