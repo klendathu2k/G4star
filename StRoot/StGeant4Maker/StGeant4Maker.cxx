@@ -330,20 +330,17 @@ int StGeant4Maker::Init() {
   LOG_INFO << "Create GEANT4 instance" << endm;
   AddObj( gG4 = new TGeant4(SAttr("G4VmcOpt:Name"), SAttr("G4VmcOpt:Title") ,mRunConfig) , ".const", 0 );
   //gMC = gG4;
-
-  //  for ( TString cut : { "CUTGAM", "CUTELE", "CUTHAD", "CUTNEU", "CUTMUO", "BCUTE", "DCUTE", "BCUTM","DCUTM" } ) {
-  //    gG4->SetCut( cut, DAttr(cut) );
-    //  }
-    gG4->SetCut( "CUTGAM", DAttr("cutgam") );
-    gG4->SetCut( "CUTELE", DAttr("cutele") );
-    gG4->SetCut( "CUTHAD", DAttr("cuthad") );
-    gG4->SetCut( "CUTNEU", DAttr("cutneu") );
-    gG4->SetCut( "CUTMUO", DAttr("cutmuo") );
-    gG4->SetCut( "BCUTE" , DAttr("bcute") );
-    gG4->SetCut( "DCUTE" , DAttr("dcute") );
-    gG4->SetCut( "BCUTM" , DAttr("bcutm") );
-    gG4->SetCut( "DCUTM" , DAttr("dcutm") );
-
+  
+  // Set default track propation cuts
+  gG4->SetCut( "CUTGAM", DAttr("cutgam") );
+  gG4->SetCut( "CUTELE", DAttr("cutele") );
+  gG4->SetCut( "CUTHAD", DAttr("cuthad") );
+  gG4->SetCut( "CUTNEU", DAttr("cutneu") );
+  gG4->SetCut( "CUTMUO", DAttr("cutmuo") );
+  gG4->SetCut( "BCUTE" , DAttr("bcute") );
+  gG4->SetCut( "DCUTE" , DAttr("dcute") );
+  gG4->SetCut( "BCUTM" , DAttr("bcutm") );
+  gG4->SetCut( "DCUTM" , DAttr("dcutm") );
 
   LOG_INFO << "Create StarMagFieldAdaprtor" << endm;
   mMagfield = new StarMagFieldAdaptor(/*nada*/);
@@ -395,14 +392,16 @@ int StGeant4Maker::InitRun( int /* run */ ){
   return kStOK;
 }
 //________________________________________________________________________________________________
-void StarVMCApplication::ConstructGeometry(){ _g4maker -> InitGeom(); }
+void StarVMCApplication::ConstructGeometry(){ 
+  //  assert(gGeoManager);
+}
 int  StGeant4Maker::InitGeom() {
-  if ( gGeoManager ) {
-    LOG_INFO << "Running with existing geometry manager" << endm;
-    return kStOK;
-  }
+  // if ( gGeoManager ) {
+  //   LOG_INFO << "Running with existing geometry manager" << endm;
+  // }
 
   const DbAlias_t *DbAlias = GetDbAliases();
+  if ( 0==gGeoManager ) {
   for (int i = 0; DbAlias[i].tag; i++) // iterate over DB aliases
     {
       StBFChain *bfc = dynamic_cast<StBFChain *>(GetTopChain());
@@ -435,14 +434,11 @@ int  StGeant4Maker::InitGeom() {
       // Cleanup file
       // 
       if (mac) delete [] mac;
-      goto GEOMETRY;
+
     }
+  }
 
-  LOG_WARN << "Geometry no initialzied.  This should be quick." << endm;
-  assert(0);
-  return kStWarn; // we have no geometry here
-
- GEOMETRY:
+  assert(gGeoManager);
 
   LOG_INFO << "Geometry constructed." << endm;
   TGeoVolume* top = gGeoManager->FindVolumeFast( SAttr("AgMLOpt:TopVolume") );
@@ -545,6 +541,24 @@ void StarVMCApplication::ConstructSensitiveDetectors() {
 }
 //________________________________________________________________________________________________
 int  StGeant4Maker::ConfigureGeometry() {
+
+  // Iterate overall volumes and set volume specific tracking cuts
+  std::map<int, int> media;
+  TObjArray* objArray = gGeoManager->GetListOfVolumes();
+  for ( int i=0; i<objArray->GetEntries();i++ ) {
+    TGeoVolume* volume = (TGeoVolume *)objArray->At(i);
+    if ( 0==volume ) continue;
+    TGeoMedium* medium = volume->GetMedium();
+    int id = medium->GetId();
+    if ( media[id]>0 ) continue; // skip if medium already encountered
+    AgMLExtension* agmlExt = dynamic_cast<AgMLExtension*>( volume->GetUserExtension() );
+    if ( 0==agmlExt ) continue;
+    for ( auto kv : agmlExt->GetCuts() ) {
+      gG4->Gstpar( media[id]=id, kv.first, kv.second );
+    }
+  }
+
+
   return kStOK;
 }
 //________________________________________________________________________________________________

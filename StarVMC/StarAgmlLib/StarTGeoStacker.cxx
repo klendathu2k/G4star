@@ -654,6 +654,10 @@ Bool_t StarTGeoStacker::Build( AgBlock *block )
       agmlExt->SetModuleName( module->GetName() );
       agmlExt->SetSensitive( mMedium.par("isvol") );
       agmlExt->SetTracking( module->GetTrackingFlag() );
+      // Get tracking cuts from the block
+      for ( auto kv : block->GetCuts() ) {
+	agmlExt->AddCut( kv.first, kv.second );
+      }
 
       volume->SetUserExtension( agmlExt );
 
@@ -744,6 +748,10 @@ Bool_t StarTGeoStacker::Build( AgBlock *block )
 	  agmlExt->SetModuleName( module->GetName() );
 	  agmlExt->SetSensitive( mMedium.par("isvol") );
 	  agmlExt->SetTracking( module->GetTrackingFlag() );
+	  // Get tracking cuts from the block
+	  for ( auto kv : block->GetCuts() ) {
+	    agmlExt->AddCut( kv.first, kv.second );
+	  }
 
 	  volume->SetUserExtension( agmlExt );
 

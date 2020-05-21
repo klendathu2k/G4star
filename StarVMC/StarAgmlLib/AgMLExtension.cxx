@@ -8,7 +8,8 @@ AgMLExtension::AgMLExtension() : TGeoRCExtension(),
 				 mTracking(0),
 				 mBranchings(0),
 				 mVolumeId( new AgMLVolumeId ),
-				 mHitScoring()
+				 mHitScoring(),
+				 mGstpar()
 {
   Grab();
 }
