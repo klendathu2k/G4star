@@ -11,6 +11,8 @@ my $STAR_SYS     = $env->{ENV}->{STAR_SYS};
 my $STAR_VERSION = $env->{ENV}->{STAR_VERSION};         # print "#####  $STAR_VER\n";
 my $AFS_RHIC     = $env->{ENV}->{AFS_RHIC};
 
+my $G4PATH       = $ENV{'G4PATH'};
+
 @Repo   = Repository_List unless $param::noRepository;#   print "Repositories = |@Repo|\n";
 
 
@@ -788,7 +790,9 @@ if ( $pkg !~ /^sim$/ && $pkg !~ /^gen$/ ) {
 	print "CPPPATH = $CPPPATH\n" if $param::debug;
 
         # Additional CXX flags for G4
-        if ($pkg =~ m/^StGeant4Maker$/ ) {$CXXFLAGS .= " `geant4-config --cflags` -I/star/simu/simu/geant4vmc/include/geant4vmc/"; }
+        if ($pkg =~ m/^StGeant4Maker$/ ) {
+	    $CXXFLAGS .= " `$G4PATH/bin/geant4-config --cflags` -I/star/simu/simu/geant4vmc/include/geant4vmc/"; 
+	}
 
 	#$SO_PKG = $PKG . "." . $env1->{SUFSOLIB};
 

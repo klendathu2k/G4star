@@ -160,7 +160,7 @@
     if ($STAR_HOST_SYS =~ /gcc3/) {  $G77FLAGS    = "-pipe " . $G77FLAGS;}
     $G77EXTEND     = "-ffixed-line-length-132";
 
-    $CXX           = "g++";
+    $CXX           = "g++ --sanitize=address -fdiagnostics-color=always ";
     $LDFLAGS       = "";
     $SOFLAGS       = "";
     # $XMACHOPT would switch to -m32 or -m64
@@ -172,7 +172,7 @@
 
     $CC            = "gcc";
 
-    $CFLAGS       .= " -fPIC -w";
+    $CFLAGS       .= " -fPIC -w --sanitize=address ";
     $EXTRA_CFLAGS  = "";
 
     $FCPATH        = "";
@@ -180,6 +180,7 @@
 
     $FFLAGS        = $G77FLAGS;
     $FEXTEND       = $G77EXTEND;
+    $FFLAGS       .= "--sanitize=address ";
 
     $CPPCERN       = " -DCERNLIB_TYPE -DCERNLIB_DOUBLE -DCERNLIB_NOQUAD -DCERNLIB_LINUX ";
     $FPPFLAGS      = $CPPCERN;
