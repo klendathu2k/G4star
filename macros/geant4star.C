@@ -144,6 +144,7 @@ void loadStar(const Char_t *mytag="dev2021", Bool_t agml = true  )
 	// Process RNG seed
 	if ( key=="seed" ) {
 	  __rngSeed = val.Atoi();
+	  gMessMgr->Info() << "--seed=" << __rngSeed << " detected" << endm;
 	  continue;
 	}
 
@@ -188,12 +189,12 @@ bool __initialized = false;
 void particleGun( const int ntrack=1, const char* particles="pi+,pi-", double ptmn=1.0,double ptmx=10.0, double etamn=-1, double etamx=2 ) {
 
   if ( !__initialized ) { 
-    gROOT->ProcessLine(Form("chain->SetAttr(\"Random:G4\",%i)",__rngSeed));
-    gROOT->ProcessLine("chain->Init();"); 
+    //    gROOT->ProcessLine(Form("chain->SetAttr(\"Random:G4\",%i)",__rngSeed));
     // Setup RNG seed and map all ROOT TRandom here
-    gROOT->ProcessLine(Form("StarRandom::seed( %i );",__rngSeed));
-    gMessMgr->Info() << "RNG seed set to " << __rngSeed << endm;
-    gROOT->ProcessLine("StarRandom::capture();"); 
+    // gROOT->ProcessLine(Form("StarRandom::seed( %i );",__rngSeed));
+    // gROOT->ProcessLine("StarRandom::capture();"); 
+    // gMessMgr->Info() << "RNG seed set to " << __rngSeed << endm;
+    gROOT->ProcessLine("chain->Init();"); 
     __initialized = true; 
   }
 
