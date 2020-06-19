@@ -3,3 +3,5 @@
 *.session.xml
 *.log
 *.root
+.*.swp 
+temp_gccflags.c
