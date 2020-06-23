@@ -21,6 +21,10 @@ void addGenerator( const char* name, const char* maker ) {
   gROOT->ProcessLine( Form( "_primary->AddGenerator( _%s );", name ) );
 }
 
+std::map<TString,TString> _generatorMap = {
+  { "genreader", "StarGenEventReader" }
+};
+
 // Hack to make sure finish is called on the chain
 struct __Fini {
   ~__Fini() {
@@ -97,8 +101,21 @@ void loadStar(const Char_t *mytag="dev2021", Bool_t agml = true  )
   //  addMaker( "pythia8", "StarPythia8()" );
   //  gROOT->ProcessLine("_primary->AddGenerator( _pythia8 );");
 
+  // Always add the kinematic generator
   addMaker( "kine",        "StarKinematics()" );
   gROOT->ProcessLine("_primary->AddGenerator( _kine );");
+
+
+  // Loop on the chain options and add in other generators which have been called for
+  for ( auto _s : *chainOpts.Tokenize(" ") ) {
+    auto s = ( dynamic_cast<TObjString*>( _s ) ) -> String() ; // annoying
+    if ( _generatorMap[s] != "" ) {
+      addGenerator( s, _generatorMap[s] );
+    }
+    
+  }
+  
+
 
 
   // Move outputStream after the geant maker
