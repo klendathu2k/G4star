@@ -59,7 +59,6 @@ void loadStar(const Char_t *mytag="dev2021", Bool_t agml = true  )
   // Set the chain options
   gROOT->ProcessLine(Form("chain->SetFlags(\"%s\");",chainOpts.Data()));
 
-  //  gROOT->ProcessLine("chain->Set_IO_Files(\"\",\"output.geant4.root\");");
   // Find the output filename, if given, and set as the output
   TString output = "";
   for ( int i=0; i<gApplication->Argc();i++ ) {
@@ -76,13 +75,11 @@ void loadStar(const Char_t *mytag="dev2021", Bool_t agml = true  )
 	if ( key=="output" ){
 	  output = val;
 	  gROOT->ProcessLine(Form("chain->Set_IO_Files(\"\",\"%s\");",output.Data()));
-	  //gMessMgr->Info() << Form("chain->Set_IO_Files(\"\",\"%s\");",output.Data()) << endm;
 	  break;
 	}
       }
     }
   }
-
 
 
   // Load shared libraries
@@ -91,11 +88,6 @@ void loadStar(const Char_t *mytag="dev2021", Bool_t agml = true  )
   // Add in star mag field
   Load("libStarMagFieldNoDict.so");
 
-
-
-  //  gROOT->ProcessLine(Form("chain->Set_IO_Files(0,\"%s\");",output.Data()));
-	
-  //  gMessMgr->Info() << "Instantiate Makers" << endm;
   gROOT->ProcessLine( "int __result = chain->Instantiate();" );
 
   // Now add makers...
