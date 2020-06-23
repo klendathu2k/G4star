@@ -45,10 +45,11 @@
   {"geant4mk",    "","", "stargen,geant4vmc", "", "StGeant4Maker.so,StarMagField.so", "Load G4 VMC libs", false},
 
   // event generators
-  {"pythia8.1.86","","","stargen", "", "Pythia8_1_86.so", "Load Pythia 8.1.86 generator", false },
-  {"pythia8.2.35","","","stargen", "", "Pythia8_2_35.so", "Load Pythia 8.1.86 generator", false },
-  {"hijing1.383" ,"","","stargen", "", "Hijing1_383.so",  "Load Hijing  1.383 generator", false },
-  {"kinematics"  ,"","","stargen", "", "Kinematics.so",   "Load STAR Particle Gun", false },
+  {"pythia8.1.86","","","stargen", "", "Pythia8_1_86.so",       "Load Pythia 8.1.86 generator", false },
+  {"pythia8.2.35","","","stargen", "", "Pythia8_2_35.so",       "Load Pythia 8.1.86 generator", false },
+  {"hijing1.383" ,"","","stargen", "", "Hijing1_383.so",        "Load Hijing  1.383 generator", false },
+  {"kinematics"  ,"","","stargen", "", "Kinematics.so",         "Load STAR Particle Gun", false },
+  {"genreader"   ,"","","stargen", "", "StarGenEventReader.so", "Load STAR Gen Event Reader", false },
 
   // support IO
   {"Geant4Out"    ,""  ,"","Tree"                                ,"","","Write g2t tables to StTree",kFALSE},
