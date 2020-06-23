@@ -188,9 +188,11 @@ bool __initialized = false;
 void particleGun( const int ntrack=1, const char* particles="pi+,pi-", double ptmn=1.0,double ptmx=10.0, double etamn=-1, double etamx=2 ) {
 
   if ( !__initialized ) { 
+    gROOT->ProcessLine(Form("chain->SetAttr(\"Random:G4\",%i)",__rngSeed));
     gROOT->ProcessLine("chain->Init();"); 
     // Setup RNG seed and map all ROOT TRandom here
     gROOT->ProcessLine(Form("StarRandom::seed( %i );",__rngSeed));
+    gMessMgr->Info() << "RNG seed set to " << __rngSeed << endm;
     gROOT->ProcessLine("StarRandom::capture();"); 
     __initialized = true; 
   }

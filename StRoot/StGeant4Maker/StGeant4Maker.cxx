@@ -20,10 +20,10 @@
 #include "StMCTruthTable.h"
 #include "StSensitiveDetector.h"
 
+#include <CLHEP/Random/Random.h>
+
 #include "StarVMC/StarAgmlLib/AgMLExtension.h"
-
 #include "TString.h"
-
 
 //_______________________________________________________________________________________________
 #include <AgMLVolumeIdFactory.h>
@@ -286,7 +286,7 @@ StGeant4Maker::StGeant4Maker( const char* nm ) :
 
   SetAttr( "Stepping:Punchout:Stop", 1 ); // 0=no action, 1=track stopped, 2=track stopped and re-injected            
 
-  SetAttr( "Random:G4", 0); // 1=allows G4 to use its own RNG 
+  SetAttr( "Random:G4", 12345); 
 
 
   SetAttr( "field", -5.0 );
@@ -357,10 +357,7 @@ int StGeant4Maker::Init() {
 
   // Obtain the G4 run manager
   TG4RunManager* runManager = TG4RunManager::Instance();
-  if ( 0==IAttr("Random:G4") ) {
-    LOG_INFO << "Map G4 random number generator to ROOT" << endm;
-    runManager->UseRootRandom(true); 
-  }
+  CLHEP::HepRandom::setTheSeed( IAttr("Random:G4"), 3 );
 
 
 

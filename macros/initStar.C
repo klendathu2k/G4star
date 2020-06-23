@@ -19,7 +19,7 @@ void initStar() {
   gSystem->SetAclicMode(TSystem::kDebug);
 
   // ADdress sanitizer 
-//  Load("/usr/lib64/libasan.so.0"); 
+  Load("/usr/lib64/libasan.so.0"); 
   
   // Preload a few libraries
   Load("libGeom.so");
