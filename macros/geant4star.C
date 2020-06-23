@@ -21,6 +21,10 @@ void addGenerator( const char* name, const char* maker ) {
   gROOT->ProcessLine( Form( "_primary->AddGenerator( _%s );", name ) );
 }
 
+std::map<TString,TString> _generatorMap = {
+  { "genreader", "StarGenEventReader" }
+};
+
 // Hack to make sure finish is called on the chain
 struct __Fini {
   ~__Fini() {
@@ -59,7 +63,6 @@ void loadStar(const Char_t *mytag="dev2021", Bool_t agml = true  )
   // Set the chain options
   gROOT->ProcessLine(Form("chain->SetFlags(\"%s\");",chainOpts.Data()));
 
-  //  gROOT->ProcessLine("chain->Set_IO_Files(\"\",\"output.geant4.root\");");
   // Find the output filename, if given, and set as the output
   TString output = "";
   for ( int i=0; i<gApplication->Argc();i++ ) {
@@ -76,13 +79,11 @@ void loadStar(const Char_t *mytag="dev2021", Bool_t agml = true  )
 	if ( key=="output" ){
 	  output = val;
 	  gROOT->ProcessLine(Form("chain->Set_IO_Files(\"\",\"%s\");",output.Data()));
-	  //gMessMgr->Info() << Form("chain->Set_IO_Files(\"\",\"%s\");",output.Data()) << endm;
 	  break;
 	}
       }
     }
   }
-
 
 
   // Load shared libraries
@@ -91,11 +92,6 @@ void loadStar(const Char_t *mytag="dev2021", Bool_t agml = true  )
   // Add in star mag field
   Load("libStarMagFieldNoDict.so");
 
-
-
-  //  gROOT->ProcessLine(Form("chain->Set_IO_Files(0,\"%s\");",output.Data()));
-	
-  //  gMessMgr->Info() << "Instantiate Makers" << endm;
   gROOT->ProcessLine( "int __result = chain->Instantiate();" );
 
   // Now add makers...
@@ -105,8 +101,21 @@ void loadStar(const Char_t *mytag="dev2021", Bool_t agml = true  )
   //  addMaker( "pythia8", "StarPythia8()" );
   //  gROOT->ProcessLine("_primary->AddGenerator( _pythia8 );");
 
+  // Always add the kinematic generator
   addMaker( "kine",        "StarKinematics()" );
   gROOT->ProcessLine("_primary->AddGenerator( _kine );");
+
+
+  // Loop on the chain options and add in other generators which have been called for
+  for ( auto _s : *chainOpts.Tokenize(" ") ) {
+    auto s = ( dynamic_cast<TObjString*>( _s ) ) -> String() ; // annoying
+    if ( _generatorMap[s] != "" ) {
+      addGenerator( s, _generatorMap[s] );
+    }
+    
+  }
+  
+
 
 
   // Move outputStream after the geant maker
@@ -144,6 +153,7 @@ void loadStar(const Char_t *mytag="dev2021", Bool_t agml = true  )
 	// Process RNG seed
 	if ( key=="seed" ) {
 	  __rngSeed = val.Atoi();
+	  gMessMgr->Info() << "--seed=" << __rngSeed << " detected" << endm;
 	  continue;
 	}
 
@@ -188,12 +198,12 @@ bool __initialized = false;
 void particleGun( const int ntrack=1, const char* particles="pi+,pi-", double ptmn=1.0,double ptmx=10.0, double etamn=-1, double etamx=2 ) {
 
   if ( !__initialized ) { 
-    gROOT->ProcessLine(Form("chain->SetAttr(\"Random:G4\",%i)",__rngSeed));
-    gROOT->ProcessLine("chain->Init();"); 
+    //    gROOT->ProcessLine(Form("chain->SetAttr(\"Random:G4\",%i)",__rngSeed));
     // Setup RNG seed and map all ROOT TRandom here
-    gROOT->ProcessLine(Form("StarRandom::seed( %i );",__rngSeed));
-    gMessMgr->Info() << "RNG seed set to " << __rngSeed << endm;
-    gROOT->ProcessLine("StarRandom::capture();"); 
+    // gROOT->ProcessLine(Form("StarRandom::seed( %i );",__rngSeed));
+    // gROOT->ProcessLine("StarRandom::capture();"); 
+    // gMessMgr->Info() << "RNG seed set to " << __rngSeed << endm;
+    gROOT->ProcessLine("chain->Init();"); 
     __initialized = true; 
   }
 

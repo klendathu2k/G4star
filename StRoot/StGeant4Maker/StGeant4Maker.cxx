@@ -357,8 +357,7 @@ int StGeant4Maker::Init() {
 
   // Obtain the G4 run manager
   TG4RunManager* runManager = TG4RunManager::Instance();
-  CLHEP::HepRandom::setTheSeed( IAttr("Random:G4"), 3 );
-
+  runManager->UseRootRandom(false);
 
 
   LOG_INFO << "Initialize GEANT4" << endm;

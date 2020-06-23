@@ -7,7 +7,7 @@
 class StarGenEventReader : public StarGenerator
 {
 public:
-  StarGenEventReader( const Char_t *name="vmcreader" ) 
+  StarGenEventReader( const Char_t *name="genreader" ) 
     : StarGenerator(name), 
       mEntry(0)      
   { 
@@ -15,12 +15,12 @@ public:
   };
  ~StarGenEventReader(){ /* nada */ };
 
-  Int_t Init();
-  Int_t Generate();
+  int Init();
+  int Generate();
 
 private:
 protected:
-  Int_t mEntry;
+  int mEntry;
   ClassDef( StarGenEventReader, 1 );
 };
 

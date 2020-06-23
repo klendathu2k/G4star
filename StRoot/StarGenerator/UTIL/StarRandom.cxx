@@ -90,14 +90,10 @@ StarRandom &StarRandom::Instance()
 {
   if ( !sInstance )
     {
-
       gsl_rng_env_setup();
-
       sInstance = new StarRandom();
       if ( !mEngine ) mEngine = new ROOT::Math::GSLRandomEngine();
       mEngine  -> Initialize();
-      LOG_INFO << "Initialize random number generator " << mEngine->Name() << endm;
-
       if ( !gsl_rng_default_seed ) 
 	{
 	  // Setup default seed using current time (ms since epoch) randomized by process ID
@@ -108,10 +104,7 @@ StarRandom &StarRandom::Instance()
       else 
 	{
 	  seed( gsl_rng_default_seed );
-	}
-
-      LOG_INFO << "Initialize random number seed " << sInstance->mSeed << endm;
-      
+	}     
     }
   return (*sInstance);
 }
