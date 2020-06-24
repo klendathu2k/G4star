@@ -18,7 +18,6 @@ const int kDefaultArraySize = 4000;
 
 ostream&  operator<<(ostream& os,  const StarMCVertex& vert) {
   os << Form("[StMCVertex %p] (%f,%f,%f)",
-	     //	     TMCProcessName[vert.process()],
 	     (void*)&vert,
 	     vert.vx(),
 	     vert.vy(),
@@ -128,7 +127,6 @@ void StMCParticleStack::PushTrack( int toDo, int parent, int pdg,
     }  
   ntr = mArraySize; // guess this is supposed to be track number (index in array)
           
-  //LOG_INFO << "[pushed]: " << *particle << endm;
   // Increment mArraySize
   mArraySize++;
 
@@ -168,9 +166,6 @@ void StMCParticleStack::PushTrack( int toDo, int parent, int pdg,
     if ( mStackToTable[parent] ) {
       vertex->setParent( mStackToTable[parent] );
     }
-//    else {
-//      LOG_INFO << "No parent in record for " << *particle << endm;
-//    }
 
   }
 
@@ -193,14 +188,9 @@ TParticle *StMCParticleStack::PopNextTrack( int &itrack )
     }
 
   // Get the particle on the top of the stack
-  // TParticle *particle = mStack.front();    mStack.pop_front();
-  // itrack              = mStackIdx.front(); mStackIdx.pop_front();
   TParticle *particle = mStack.back();    mStack.pop_back();
   itrack              = mStackIdx.back(); mStackIdx.pop_back();
-
   mCurrent            = itrack;
-
-  //  LOG_INFO << "PopNextTrack itrack = " << itrack << endm;
   
   return particle;
 
@@ -210,9 +200,6 @@ TParticle *StMCParticleStack::PopNextTrack( int &itrack )
 //___________________________________________________________________________________________________________________
 TParticle *StMCParticleStack::PopPrimaryForTracking( int i ) 
 {
-
-  //  LOG_INFO << "PopPrimaryForTracking i = " << i << endm;
-
   assert(i<mArraySize);
   return (TParticle *)(*mArray)[i];
 }
@@ -221,7 +208,6 @@ TParticle *StMCParticleStack::PopPrimaryForTracking( int i )
 //___________________________________________________________________________________________________________________
 void StMCParticleStack::SetCurrentTrack( int tn )
 {
-  //  LOG_INFO << "SetCurrentTrack " << tn << endm;
   mCurrent = tn;
 }
 //___________________________________________________________________________________________________________________
@@ -236,7 +222,6 @@ int StMCParticleStack::GetNtrack() const
 //___________________________________________________________________________________________________________________
 TParticle *StMCParticleStack::GetCurrentTrack() const
 {
-  //  LOG_INFO << "GetCurrentTrack()" << endm;
   return GetParticle(mCurrent);
 }
 //___________________________________________________________________________________________________________________
@@ -280,7 +265,6 @@ void StMCParticleStack::Clear( const Option_t *opts )
     LOG_INFO << Form("[%04i] ",index++) << *v << endm; 
     if ( v->parent() ) {
       LOG_INFO << "      " << *(v->parent()) << " --> " << endm; 
-      //LOG_INFO << Form("    %p", v->parent()) << endm;
     }
     for ( auto d : v->daughters() ) {
         LOG_INFO << "       " << *d << endm; 
@@ -297,13 +281,6 @@ void StMCParticleStack::Clear( const Option_t *opts )
 
   mVertexTable.clear();
   mParticleTable.clear(); 
-
-  // for ( auto p : mParticleTable ) {
-  //   LOG_INFO << p << endm;
-  // }
-
-  // mParticleTable.clear();
-  // mVertexTable.clear();
 
 }
 //___________________________________________________________________________________________________________________
@@ -325,15 +302,6 @@ StarMCParticle::StarMCParticle( TParticle* part, StarMCVertex* vert ) :
   
 }
 //___________________________________________________________________________________________________________________						
-#if 0
-StarMCParticle::StarMCParticle( const StarMCParticle& other ) {
-  mStacked = other.mStacked;
-  mStartVertex = other.mStartVertex;
-  mIntermediateVertices = other.mIntermediateVertices;
-  mStopVertex = other.mStopVertex;
-}
-#endif 
-//___________________________________________________________________________________________________________________						
 StarMCVertex::StarMCVertex() : mVertex{0,0,0,0},
 			       mParent(0),
 			       mDaughters(),			   					   
@@ -351,15 +319,6 @@ StarMCVertex::StarMCVertex( double x, double y, double z, double t) : mVertex{x,
 
 
 }
-//___________________________________________________________________________________________________________________						
-#if 0
-StarMCVertex::StarMCVertex( const StarMCVertex& other ) {
-  mParent = other.mParent;
-  mDaughters = other.mDaughters;
-  mMechanism = other.mMechanism;
-  for ( int i=0;i<4;i++ )     mVertex[i] = other.mVertex[i];
-}
-#endif 
 //___________________________________________________________________________________________________________________						
 double StarMCParticle::vx() const { assert(mStartVertex); return mStartVertex->vx(); }
 double StarMCParticle::vy() const { return mStartVertex->vy(); }
