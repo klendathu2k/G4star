@@ -12,6 +12,8 @@ const std::string PASS = "\u001b[32m -passed- \u001b[0m";
 const std::string UNKN = "\u001b[33m -unknown- \u001b[0m";
 using namespace std;
 //___________________________________________________________________
+#define LOG_TEST LOG_QA << " -test- "
+//___________________________________________________________________
 TTable* hit_table    = 0;
 TTable* track_table  = 0;
 TTable* vertex_table = 0;
@@ -25,7 +27,7 @@ void throw_muon( double eta, double phid, double pT = 25.0, int q=1 ) {
   auto* particle = _kine->AddParticle( (q==1)?"mu+":"mu-" );
   particle->SetPx(momentum[0]);
   particle->SetPy(momentum[1]);
-  particle->SetPy(momentum[2]);
+  particle->SetPz(momentum[2]);
   double mass = particle->GetMass();
   double ener = sqrt( momentum.Mag2() + mass*mass );
   particle->SetEnergy(ener);
@@ -38,14 +40,15 @@ void throw_muon( double eta, double phid, double pT = 25.0, int q=1 ) {
 //___________________________________________________________________
 double _eta  = 0; 
 double _phid = 0;
-void throw_muon_in_sector( int sectorid ) {
+void throw_muon_in_sector( int sectorid, int charge = 1 ) {
   assert(sectorid>0 && sectorid <= 24);
-  const double sectors[] = { 15.0, 45.0, 75.0, 105.0, 135.0, 165.0, 195.0, 225.0, 255.0, 285.0, 315.0, 345.0 };
+  //  const double sectors[] = { 15.0, 45.0, 75.0, 105.0, 135.0, 165.0, 195.0, 225.0, 255.0, 285.0, 315.0, 345.0 };
+  const double sectors[] = { 0, 30, 60, 90, 120, 150, 180, 210, 240, 270, 300, 330, 360 };
   double eta = (sectorid<=12) ? 0.5 : -0.5;
   _eta = eta;
   double phid = sectors[sectorid-1];
   _phid = phid; 
-  throw_muon( eta, phid, 50.0 );
+  throw_muon( eta, phid, 500.0, charge ); // energetic
 }
 //___________________________________________________________________
 std::string check_track( std::string message, std::function<std::string(const g2t_track_st*)> f) {
@@ -53,7 +56,7 @@ std::string check_track( std::string message, std::function<std::string(const g2
   const g2t_track_st* track = static_cast<const g2t_track_st*>( track_table->At(0) );  
   std::string result = "[" + message + "] " + (track? f(track):FAIL );
 
-  LOG_INFO << result << endm;
+  LOG_TEST << result << endm;
 
   return result;
 
@@ -64,15 +67,17 @@ void unit_test_tpc_hits() {
   _primary->SetVertex(0.,0.,0.);
   _primary->SetSigma(0.0,0.,0.);
 
-  LOG_INFO << "=======================================================" << endm;
-  LOG_INFO << "Unit testing of TPC hits on single muons"                << endm;
-  LOG_INFO << "=======================================================" << endm;
+  LOG_TEST << "=======================================================" << endm;
+  LOG_TEST << "Unit testing of TPC hits on single muons"                << endm;
+  LOG_TEST << "=======================================================" << endm;
   
-  for ( int sector=1; sector<=1; sector++ ) {
+  for ( int sector=1; sector<=24; sector++ ) {
 
-    LOG_INFO << "Checking tracks in sector " << sector << endm;
+    std::string result;
+
+    LOG_TEST << "Checking tracks in sector " << sector << endm;
     throw_muon_in_sector( sector );
-    check_track( "Print the track table", [=]( const g2t_track_st* ){
+    result = check_track( "Print the track table", [=]( const g2t_track_st* ){
 	int nrows = track_table->GetNRows();
 	std::string result = FAIL;
 	if ( nrows > 0 ) {
@@ -81,11 +86,11 @@ void unit_test_tpc_hits() {
 	}
 	return result;
       });
-    check_track( "A muon must have been processed by geant",       [=](const g2t_track_st* t){ return PASS; } );
-    check_track( "The track should have a start vertex",           [=](const g2t_track_st* t){
+    result = check_track( "A muon must have been processed by geant",       [=](const g2t_track_st* t){ return PASS; } );
+    result = check_track( "The track should have a start vertex",           [=](const g2t_track_st* t){
       return (t->start_vertex_p>0)?PASS:FAIL;      
     });
-    check_track( "The start vertex should be in the vertex table", [=](const g2t_track_st* t){
+    result = check_track( "The start vertex should be in the vertex table", [=](const g2t_track_st* t){
       std::string result = FAIL;
       int istart = t->start_vertex_p;
       const g2t_vertex_st* vertex = (istart>0) ? static_cast<const g2t_vertex_st*>( vertex_table->At(istart-1) ) : 0;
@@ -94,7 +99,7 @@ void unit_test_tpc_hits() {
       }
       return result;
     });
-    check_track( "There should not be a stop vertex in the TPC",   [=](const g2t_track_st* t){
+    result = check_track( "There should not be a stop vertex in the TPC",   [=](const g2t_track_st* t){
       std::string result = FAIL;
       int istop = t->stop_vertex_p;
       const g2t_vertex_st* v = (istop>0) ? static_cast<const g2t_vertex_st*>( vertex_table->At(istop-1) ) : 0;
@@ -115,7 +120,7 @@ void unit_test_tpc_hits() {
       }
       return result;
     });
-    check_track( "The start vertex should be on the z-axis",       [=](const g2t_track_st* t){
+    result = check_track( "The start vertex should be on the z-axis",       [=](const g2t_track_st* t){
       std::string result = FAIL;
       int istart = t->start_vertex_p;
 
@@ -147,24 +152,24 @@ void unit_test_tpc_hits() {
        
       return result;
     });
-    check_track( "The track should be primary",                    [=](const g2t_track_st* t){
-	std::string result          = UNKN;
+    result = check_track( "The track should be primary",                    [=](const g2t_track_st* t){
+	std::string result          = PASS;
 	if ( t->eta ==-999 ) result = FAIL;
-	if ( t->eta >=   0 ) result = PASS;
 	return result;
       });
-    check_track( Form("The track should have a eta=%f",_eta),      [=](const g2t_track_st* t){
+    result = check_track( Form("The track should have an eta=%f",_eta),     [=](const g2t_track_st* t){
 	double delta = abs(t->eta-_eta);	
 	return abs(t->eta-_eta)<1E-5 ?PASS:FAIL;      
     });
-    check_track( "Expect 76 hits in the dev2021 geometry",         [=](const g2t_track_st* t){
+    result = check_track( "Expect 76 hits in the dev2021 geometry",         [=](const g2t_track_st* t){
       int n = t->n_tpc_hit;
       std::string  result = FAIL;
+      // if ( n>=70 ) result = UNKN;
       if ( n==76 ) result = PASS;
-      if ( n>=70 ) result = UNKN;
       result = Form(" n=%i ",n) + result;
       return result;
     });
+
   }
   
 
