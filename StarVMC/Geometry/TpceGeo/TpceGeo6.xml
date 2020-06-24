@@ -943,14 +943,12 @@
 				   zTOFCend,
 				   zTOFCend,
 zTIFCFlangeBegin,
-zTIFCFlangeBegin,
 				   TPCG_DzEnvelop}" 
                                rmn="{tifcOR,
 				    tifcOR,
 				    tifcOR,
 				    tifcOR,
 				    tifcOR,
-TPCG_tifcRF+TPCG_tifcDRT,
 TPCG_tifcRF+TPCG_tifcDRT,
 				    TPCG_tifcRF+TPCG_tifcDRT}" 
 			       rmx="{tofcIR,
@@ -959,8 +957,7 @@ TPCG_tifcRF+TPCG_tifcDRT,
 				    TPCG_WheelOR1,
 				    TPCG_WheelOR,
 TPCG_WheelOR,
-TPCG_WheelOR,
-				    TPCG_WheelOR}" nz="8" phi1="-15" dphi="30"  />
+				    TPCG_WheelOR}" nz="7" phi1="-15" dphi="30"  />
 
             <Create block="TSAW" /><Placement block="TSAW" konly="MANY" />
            
