@@ -944,7 +944,31 @@
 <!--        <Medium name="TSWH_STANDARD" deemax="0.248853" stmin="1.15055" /> -->
             <Medium name="STANDARD" /> 
             <Attribute for="TSWH" seen="1" colo="kViolet"  />
-            <Shape type="PCON" zi="{TPCG_MembTHK/2,zWheel1,zWheel1,zTOFCend,zTOFCend,zTIFCFlangeBegin,zTIFCFlangeBegin,TPCG_DzEnvelop}" rmn="{tifcOR,tifcOR,tifcOR,tifcOR,tifcOR,TPCG_tifcRF+TPCG_tifcDRT,TPCG_tifcRF+TPCG_tifcDRT,TPCG_tifcRF+TPCG_tifcDRT}" rmx="{tofcIR,tofcIR,TPCG_WheelOR1,TPCG_WheelOR1,TPCG_WheelOR,TPCG_WheelOR,TPCG_WheelOR,TPCG_WheelOR}" nz="8" phi1="-15" dphi="30"  />
+            <Shape type="PCON" 
+		   zi="{TPCG_MembTHK/2,
+		       zWheel1,
+		       zWheel1,
+		       zTOFCend,
+		       zTOFCend,
+zTIFCFlangeBegin,
+zTIFCFlangeBegin,
+		       TPCG_DzEnvelop}" 
+		   rmn="{tifcOR,
+			tifcOR,
+			tifcOR,
+			tifcOR,
+			tifcOR,
+TPCG_tifcRF+TPCG_tifcDRT,
+TPCG_tifcRF+TPCG_tifcDRT,
+			TPCG_tifcRF+TPCG_tifcDRT}" 
+		   rmx="{tofcIR,
+			tofcIR,
+			TPCG_WheelOR1,
+			TPCG_WheelOR1,
+			TPCG_WheelOR,
+TPCG_WheelOR,
+TPCG_WheelOR,
+			TPCG_WheelOR}" nz="8" phi1="-15" dphi="30"  />
 
             <Create block="TSAW" /><Placement block="TSAW" konly="'MANY'" />
            
