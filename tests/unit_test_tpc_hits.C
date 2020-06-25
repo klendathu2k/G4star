@@ -11,11 +11,18 @@
 #include <TTable.h>
 #include <TROOT.h>
 #include <string>
-
+#define __COLOR__
+#ifdef __COLOR__
 const std::string FAIL = "\u001b[31m -failed- \u001b[0m";
 const std::string PASS = "\u001b[32m -passed- \u001b[0m";
 const std::string UNKN = "\u001b[33m -unknown- \u001b[0m";
 const std::string TODO = "\u001b[36m -todo- \u001b[0m";
+#else
+const std::string FAIL = " -failed- ";
+const std::string PASS = " -passed- ";
+const std::string UNKN = " -unknown- ";
+const std::string TODO = " -todo- ";
+#endif
 using namespace std;
 //___________________________________________________________________
 #define LOG_TEST std::cout << "\u001b[35m -require- \u001b[0m"
