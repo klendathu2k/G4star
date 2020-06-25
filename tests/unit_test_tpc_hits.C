@@ -60,7 +60,7 @@ void throw_muon( double eta, double phid, double pT = 25.0, int q=1 ) {
 //___________________________________________________________________
 double _eta  = 0; 
 double _phid = 0;
-void throw_muon_in_sector( int sectorid, int charge = 1 ) {
+void throw_muon_in_tpc_sector( int sectorid, int charge = 1 ) {
   assert(sectorid>0 && sectorid <= 24);
   //  const double sectors[] = { 15.0, 45.0, 75.0, 105.0, 135.0, 165.0, 195.0, 225.0, 255.0, 285.0, 315.0, 345.0 };
   const double sectors[] = { 
@@ -107,7 +107,7 @@ void unit_test_tpc_hits() {
   
   for ( int sector=1; sector<=24; sector++ ) {
 
-    throw_muon_in_sector( sector );
+    throw_muon_in_tpc_sector( sector );
 
     LOG_TEST << "Checking muon track in sector " << sector << std::endl;
     // check_track( "Print the track table", [=]( const g2t_track_st* ){
