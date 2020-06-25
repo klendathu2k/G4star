@@ -33,9 +33,12 @@ void throw_muon( double eta, double phid, double pT = 25.0, int q=1 ) {
   particle->SetEnergy(ener);
   chain->Clear();
   chain->Make();
-  vertex_table = dynamic_cast<TTable*>( chain->GetDataSet("bfc/.make/geant4star/.data/g2t_vertex")  );
-  track_table  = dynamic_cast<TTable*>( chain->GetDataSet("bfc/.make/geant4star/.data/g2t_track")   );
-  hit_table    = dynamic_cast<TTable*>( chain->GetDataSet("bfc/.make/geant4star/.data/g2t_tpc_hit") );
+  // vertex_table = dynamic_cast<TTable*>( chain->GetDataSet("bfc/.make/geant4star/.data/g2t_vertex")  );
+  // track_table  = dynamic_cast<TTable*>( chain->GetDataSet("bfc/.make/geant4star/.data/g2t_track")   );
+  // hit_table    = dynamic_cast<TTable*>( chain->GetDataSet("bfc/.make/geant4star/.data/g2t_tpc_hit") );
+  assert( vertex_table = dynamic_cast<TTable*>( chain->GetDataSet("g2t_vertex")  ) );
+  assert( track_table  = dynamic_cast<TTable*>( chain->GetDataSet("g2t_track")   ) );
+  assert( hit_table    = dynamic_cast<TTable*>( chain->GetDataSet("g2t_tpc_hit") ) );
 }
 //___________________________________________________________________
 double _eta  = 0; 
