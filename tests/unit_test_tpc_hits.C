@@ -10,6 +10,7 @@
 const std::string FAIL = "\u001b[31m -failed- \u001b[0m";
 const std::string PASS = "\u001b[32m -passed- \u001b[0m";
 const std::string UNKN = "\u001b[33m -unknown- \u001b[0m";
+const std::string TODO = "\u001b[36m -todo- \u001b[0m";
 using namespace std;
 //___________________________________________________________________
 #define LOG_TEST LOG_QA << " -test- "
@@ -18,12 +19,14 @@ TTable* hit_table    = 0;
 TTable* track_table  = 0;
 TTable* vertex_table = 0;
 //___________________________________________________________________
+double _pmom = 0;
 void throw_muon( double eta, double phid, double pT = 25.0, int q=1 ) {
   // eta  = pseudorapidity
   // phid = azimuthal angle in degrees
   double phi = TMath::Pi() * phid / 180.0;
   TVector3 momentum;
   momentum.SetPtEtaPhi(pT,eta,phi);
+  _pmom = momentum.Mag();
   auto* particle = _kine->AddParticle( (q==1)?"mu+":"mu-" );
   particle->SetPx(momentum[0]);
   particle->SetPy(momentum[1]);
@@ -89,7 +92,7 @@ void unit_test_tpc_hits() {
 
     throw_muon_in_sector( sector );
 
-    LOG_TEST << "Checking track in sector " << sector << endm;
+    LOG_TEST << "Checking muon track in sector " << sector << endm;
     // check_track( "Print the track table", [=]( const g2t_track_st* ){
     // 	int nrows = track_table->GetNRows();
     // 	std::string result = FAIL;
@@ -180,12 +183,10 @@ void unit_test_tpc_hits() {
     check_track( "Expect 76 hits in the dev2021 geometry",         [=](const g2t_track_st* t){
       int n = t->n_tpc_hit;
       std::string  result = FAIL;
-      // if ( n>=70 ) result = UNKN;
       if ( n==76 ) result = PASS;
       result = Form(" n=%i ",n) + result;
       return result;
     });
-
     LOG_TEST << "Checking hits on track in sector " << sector << endm;
     for ( int i=0;i<hit_table->GetNRows();i++ ) {
       auto hit = static_cast<const g2t_tpc_hit_st*>( hit_table->At(i) );
@@ -211,40 +212,53 @@ void unit_test_tpc_hits() {
 	  if ( h->de > 0 ) result = PASS;
 	  return result;
 	});
-      // check_hit( "The hit should have a path length > 0",hit,[=](const g2t_tpc_hit_st* h) {
-      // 	  std::string result = FAIL;
-      // 	  if ( h->ds > 0 ) result = PASS;
-      // 	  return result;
-      // 	});
-      // check_hit( "The hit should have a nonzero momentum",hit,[=](const g2t_tpc_hit_st* h) {
-      // 	  std::string result = FAIL;
-      // 	  if ( h->p[0] != 0 ) result = PASS;
-      // 	  if ( h->p[1] != 0 ) result = PASS;
-      // 	  if ( h->p[2] != 0 ) result = PASS;
-      // 	  return result;
-      // 	});
-      // check_hit( "The hit should have a nonzero log10(gamma)",hit,[=](const g2t_tpc_hit_st* h) {
-      // 	  std::string result = FAIL;
-      // 	  if ( h->lgam != 0 ) result = PASS;
-      // 	  return result;
-      // 	});
+      check_hit( "The hit should have a path length > 0",hit,[=](const g2t_tpc_hit_st* h) {
+       	  std::string result = FAIL;
+       	  if ( h->ds > 0 ) result = PASS;
+       	  return result;
+       	});
+      check_hit( "The hit should have a nonzero momentum",hit,[=](const g2t_tpc_hit_st* h) {
+       	  std::string result = FAIL;
+       	  if ( h->p[0] != 0 ) result = PASS;
+       	  if ( h->p[1] != 0 ) result = PASS;
+       	  if ( h->p[2] != 0 ) result = PASS;
+       	  return result;
+       	});
+      check_hit( "The hit should have a nonzero log10(gamma)",hit,[=](const g2t_tpc_hit_st* h) {
+       	  std::string result = FAIL;
+       	  if ( h->lgam != 0 ) result = PASS;
+	  result = Form(" lgam=%f (needs to be filled) ",h->lgam ) + result;
+       	  return result;
+       	});
+      check_hit( "The hit should have a length > 0",hit,[=](const g2t_tpc_hit_st* h) {
+       	  std::string result = FAIL;
+       	  if ( h->length > 0 ) result = PASS;
+       	  return result;
+       	});
+      check_hit( "The hit should have adc, pad and timebucket set to zero",hit,[=](const g2t_tpc_hit_st* h) {
+       	  std::string result = PASS;
+	  if ( h->adc > 0 ) result = FAIL;
+	  if ( h->pad > 0 ) result = FAIL;
+	  if ( h->timebucket > 0 ) result = FAIL;
+	  return result;
+	});
+      check_hit( "Track's momentum at hit should be < initial value",hit,    [=](const g2t_tpc_hit_st* h){
+	  std::string result = FAIL;
+	  double px = h->p[0];
+	  double py = h->p[1];
+	  double pz = h->p[2];
+	  double p2 = px*px + py*py + pz*pz;
+	  if ( p2 < _pmom*_pmom ) result = PASS;
+	  return result;
+	});
 
-      // check_hit( "The hit should have a length > 0",hit,[=](const g2t_tpc_hit_st* h) {
-      // 	  std::string result = FAIL;
-      // 	  if ( h->length > 0 ) result = PASS;
-      // 	  return result;
-      // 	});
+      check_hit( "Hit position should be w/in the fiducial volume of the sector",hit,[=](const g2t_tpc_hit_st* h){
+	  // TODO
+	  return TODO;
+	});
 
-      // check_hit( "The hit should have adc, pad and timebucket set to zero",hit,[=](const g2t_tpc_hit_st* h) {
-      // 	  std::string result = PASS;
-      // 	  if ( h->adc > 0 ) result = FAIL;
-      // 	  if ( h->pad > 0 ) result = FAIL;
-      // 	  if ( h->timebucket > 0 ) result = FAIL;
-      // 	  return result;
-      // 	});
 
       //  g2t_tpc_volume_id = 100000*det + 100*sector + pad
-
       check_hit( "The padrow should be 1 <= pad <= 72",hit,[=](const g2t_tpc_hit_st* h) {
 	  std::string result = PASS;
 	  int padrow = h->volume_id % 100;
@@ -270,8 +284,6 @@ void unit_test_tpc_hits() {
 	result = Form(" sector=%i",_sector ) + result;
 	return result;
       });
-
-
     }
 
 
