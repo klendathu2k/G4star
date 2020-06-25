@@ -13,7 +13,7 @@ const std::string UNKN = "\u001b[33m -unknown- \u001b[0m";
 const std::string TODO = "\u001b[36m -todo- \u001b[0m";
 using namespace std;
 //___________________________________________________________________
-#define LOG_TEST LOG_QA << " -test- "
+#define LOG_TEST LOG_QA << " -require- "
 //___________________________________________________________________
 TTable* hit_table    = 0;
 TTable* track_table  = 0;
