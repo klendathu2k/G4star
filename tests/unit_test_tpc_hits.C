@@ -1,62 +1,5 @@
-#include <StarGenerator/EVENT/StarGenParticle.h>
-#include <StarGenerator/BASE/StarPrimaryMaker.h>
-#include <StarGenerator/Kinematics/StarKinematics.h>
-#include <StChain.h>
-#include <iostream>
-#include <TVector3.h>
-#include <TMath.h>
-#include <g2t_track.h>
-#include <g2t_vertex.h>
-#include <g2t_tpc_hit.h>
-#include <TTable.h>
-#include <TROOT.h>
-#include <string>
-#define __COLOR__
-#ifdef __COLOR__
-const std::string FAIL = "\u001b[31m -failed- \u001b[0m";
-const std::string PASS = "\u001b[32m -passed- \u001b[0m";
-const std::string UNKN = "\u001b[33m -unknown- \u001b[0m";
-const std::string TODO = "\u001b[36m -todo- \u001b[0m";
-#else
-const std::string FAIL = " -failed- ";
-const std::string PASS = " -passed- ";
-const std::string UNKN = " -unknown- ";
-const std::string TODO = " -todo- ";
-#endif
-using namespace std;
-//___________________________________________________________________
-#define LOG_TEST std::cout << "\u001b[35m -require- \u001b[0m"
-//___________________________________________________________________
-TTable* hit_table    = 0;
-TTable* track_table  = 0;
-TTable* vertex_table = 0;
-//___________________________________________________________________
-double _pmom = 0;
-void throw_muon( double eta, double phid, double pT = 25.0, int q=1 ) {
-  // eta  = pseudorapidity
-  // phid = azimuthal angle in degrees
-  double phi = TMath::Pi() * phid / 180.0;
-  TVector3 momentum;
-  momentum.SetPtEtaPhi(pT,eta,phi);
-  _pmom = momentum.Mag();
-  auto* chain = StMaker::GetChain();
-  auto* _kine = dynamic_cast<StarKinematics*>( chain->GetMaker("StarKine") );
-  auto* particle = _kine->AddParticle( (q==1)?"mu+":"mu-" );
-  particle->SetPx(momentum[0]);
-  particle->SetPy(momentum[1]);
-  particle->SetPz(momentum[2]);
-  double mass = particle->GetMass();
-  double ener = sqrt( momentum.Mag2() + mass*mass );
-  particle->SetEnergy(ener);
-  chain->Clear();
-  chain->Make();
-  // vertex_table = dynamic_cast<TTable*>( chain->GetDataSet("bfc/.make/geant4star/.data/g2t_vertex")  );
-  // track_table  = dynamic_cast<TTable*>( chain->GetDataSet("bfc/.make/geant4star/.data/g2t_track")   );
-  // hit_table    = dynamic_cast<TTable*>( chain->GetDataSet("bfc/.make/geant4star/.data/g2t_tpc_hit") );
-  assert( vertex_table = dynamic_cast<TTable*>( chain->GetDataSet("g2t_vertex")  ) );
-  assert( track_table  = dynamic_cast<TTable*>( chain->GetDataSet("g2t_track")   ) );
-  assert( hit_table    = dynamic_cast<TTable*>( chain->GetDataSet("g2t_tpc_hit") ) );
-}
+#include "tests/unit_tests.h"
+
 //___________________________________________________________________
 double _eta  = 0; 
 double _phid = 0;
@@ -72,27 +15,14 @@ void throw_muon_in_tpc_sector( int sectorid, int charge = 1 ) {
   double phid = sectors[sectorid-1];
   _phid = phid; 
   throw_muon( eta, phid, 500.0, charge ); // energetic
+  assert( vertex_table = dynamic_cast<TTable*>( chain->GetDataSet("g2t_vertex")  ) );
+  assert( track_table  = dynamic_cast<TTable*>( chain->GetDataSet("g2t_track")   ) );
+  assert( hit_table    = dynamic_cast<TTable*>( chain->GetDataSet("g2t_tpc_hit") ) );
+
 }
-//___________________________________________________________________
-std::string check_track( std::string message, std::function<std::string(const g2t_track_st*)> f) {
-
-  const g2t_track_st* track = static_cast<const g2t_track_st*>( track_table->At(0) );  
-  std::string result = "[" + message + "] " + (track? f(track):FAIL );
-
-  LOG_TEST << result << std::endl;
-
-  return result;
-
-};
-//___________________________________________________________________
-std::string check_hit( std::string message, const g2t_tpc_hit_st* hit, std::function<std::string(const g2t_tpc_hit_st*)> f) {
-  std::string result = "[" + message + "] " + (hit? f(hit):FAIL);
-  LOG_TEST << result << std::endl;
-  return result;
-};
-
 
 //___________________________________________________________________
+
 void unit_test_tpc_hits() {
 
   gROOT->ProcessLine("initChain();");
@@ -209,7 +139,7 @@ void unit_test_tpc_hits() {
       auto hit = static_cast<const g2t_tpc_hit_st*>( hit_table->At(i) );
       if ( 0==hit ) continue;     // skip null entries
       if ( 1!=hit->track_p ) continue; // not interested in secondaries
-      check_hit( "Print the hit...", hit, [=](const g2t_tpc_hit_st* h) {
+      check_tpc_hit( "Print the hit...", hit, [=](const g2t_tpc_hit_st* h) {
 	  LOG_TEST << "id=" << h->id 
 		   << " track_p=" << h->track_p 
 		   << " volume_id=" << h->volume_id 
@@ -219,47 +149,47 @@ void unit_test_tpc_hits() {
 		   << std::endl;
 	  return PASS;
 	});
-      check_hit( "The hit should have a nonzero volume_id",hit,[=](const g2t_tpc_hit_st* h) {
+      check_tpc_hit( "The hit should have a nonzero volume_id",hit,[=](const g2t_tpc_hit_st* h) {
 	  std::string result = FAIL;
 	  if ( h->volume_id > 0 ) result = PASS;
 	  return result;
 	});
-      check_hit( "The hit should have an energy deposit > 0",hit,[=](const g2t_tpc_hit_st* h) {
+      check_tpc_hit( "The hit should have an energy deposit > 0",hit,[=](const g2t_tpc_hit_st* h) {
 	  std::string result = FAIL;
 	  if ( h->de > 0 ) result = PASS;
 	  return result;
 	});
-      check_hit( "The hit should have a path length > 0",hit,[=](const g2t_tpc_hit_st* h) {
+      check_tpc_hit( "The hit should have a path length > 0",hit,[=](const g2t_tpc_hit_st* h) {
        	  std::string result = FAIL;
        	  if ( h->ds > 0 ) result = PASS;
        	  return result;
        	});
-      check_hit( "The hit should have a nonzero momentum",hit,[=](const g2t_tpc_hit_st* h) {
+      check_tpc_hit( "The hit should have a nonzero momentum",hit,[=](const g2t_tpc_hit_st* h) {
        	  std::string result = FAIL;
        	  if ( h->p[0] != 0 ) result = PASS;
        	  if ( h->p[1] != 0 ) result = PASS;
        	  if ( h->p[2] != 0 ) result = PASS;
        	  return result;
        	});
-      check_hit( "The hit should have a nonzero log10(gamma)",hit,[=](const g2t_tpc_hit_st* h) {
+      check_tpc_hit( "The hit should have a nonzero log10(gamma)",hit,[=](const g2t_tpc_hit_st* h) {
        	  std::string result = FAIL;
        	  if ( h->lgam != 0 ) result = PASS;
 	  result = Form(" lgam=%f (needs to be filled) ",h->lgam ) + result;
        	  return result;
        	});
-      check_hit( "The hit should have a length > 0",hit,[=](const g2t_tpc_hit_st* h) {
+      check_tpc_hit( "The hit should have a length > 0",hit,[=](const g2t_tpc_hit_st* h) {
        	  std::string result = FAIL;
        	  if ( h->length > 0 ) result = PASS;
        	  return result;
        	});
-      check_hit( "The hit should have adc, pad and timebucket set to zero",hit,[=](const g2t_tpc_hit_st* h) {
+      check_tpc_hit( "The hit should have adc, pad and timebucket set to zero",hit,[=](const g2t_tpc_hit_st* h) {
        	  std::string result = PASS;
 	  if ( h->adc > 0 ) result = FAIL;
 	  if ( h->pad > 0 ) result = FAIL;
 	  if ( h->timebucket > 0 ) result = FAIL;
 	  return result;
 	});
-      check_hit( "Track's momentum at hit should be < initial value",hit,    [=](const g2t_tpc_hit_st* h){
+      check_tpc_hit( "Track's momentum at hit should be < initial value",hit,    [=](const g2t_tpc_hit_st* h){
 	  std::string result = FAIL;
 	  double px = h->p[0];
 	  double py = h->p[1];
@@ -269,32 +199,32 @@ void unit_test_tpc_hits() {
 	  return result;
 	});
 
-      check_hit( "Hit position should be w/in the fiducial volume of the sector",hit,[=](const g2t_tpc_hit_st* h){
+      check_tpc_hit( "Hit position should be w/in the fiducial volume of the sector",hit,[=](const g2t_tpc_hit_st* h){
 	  // TODO
 	  return TODO;
 	});
 
 
       //  g2t_tpc_volume_id = 100000*det + 100*sector + pad
-      check_hit( "The padrow should be 1 <= pad <= 72",hit,[=](const g2t_tpc_hit_st* h) {
+      check_tpc_hit( "The padrow should be 1 <= pad <= 72",hit,[=](const g2t_tpc_hit_st* h) {
 	  std::string result = PASS;
 	  int padrow = h->volume_id % 100;
 	  if ( padrow<1 || padrow > 72 ) result=FAIL;
 	  return result;
 	});
-      check_hit( "The sector should be 1 <= sector <= 24",hit,[=](const g2t_tpc_hit_st* h) {
+      check_tpc_hit( "The sector should be 1 <= sector <= 24",hit,[=](const g2t_tpc_hit_st* h) {
 	  std::string result = PASS;
 	  int sector = ( h->volume_id / 100 ) % 1000;
 	  if ( sector<1 || sector>24 ) result=FAIL;
 	  return result;
 	});
-      check_hit( "The detector state is in (0,1,2)",hit,[=](const g2t_tpc_hit_st* h) {
+      check_tpc_hit( "The detector state is in (0,1,2)",hit,[=](const g2t_tpc_hit_st* h) {
 	  std::string result = PASS;
 	  int det = h->volume_id/100000;
 	  if ( det<0||det>2 ) result = FAIL;
 	  return result;
 	});
-      check_hit( Form("The decoded sector number should be %i",sector),hit,[=](const g2t_tpc_hit_st* h) {
+      check_tpc_hit( Form("The decoded sector number should be %i",sector),hit,[=](const g2t_tpc_hit_st* h) {
 	std::string result = FAIL;
 	int _sector = ( h->volume_id / 100 ) % 1000;
 	if ( sector == _sector ) result = PASS;
