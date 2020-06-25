@@ -1,19 +1,24 @@
 #include <StarGenerator/EVENT/StarGenParticle.h>
+#include <StarGenerator/BASE/StarPrimaryMaker.h>
 #include <StarGenerator/Kinematics/StarKinematics.h>
+#include <StChain.h>
+#include <iostream>
 #include <TVector3.h>
 #include <TMath.h>
 #include <g2t_track.h>
 #include <g2t_vertex.h>
 #include <g2t_tpc_hit.h>
+#include <TTable.h>
+#include <TROOT.h>
 #include <string>
-#include <StMessMgr.h>
+
 const std::string FAIL = "\u001b[31m -failed- \u001b[0m";
 const std::string PASS = "\u001b[32m -passed- \u001b[0m";
 const std::string UNKN = "\u001b[33m -unknown- \u001b[0m";
 const std::string TODO = "\u001b[36m -todo- \u001b[0m";
 using namespace std;
 //___________________________________________________________________
-#define LOG_TEST LOG_QA << " -require- "
+#define LOG_TEST std::cout << "\u001b[35m -require- \u001b[0m"
 //___________________________________________________________________
 TTable* hit_table    = 0;
 TTable* track_table  = 0;
@@ -27,6 +32,8 @@ void throw_muon( double eta, double phid, double pT = 25.0, int q=1 ) {
   TVector3 momentum;
   momentum.SetPtEtaPhi(pT,eta,phi);
   _pmom = momentum.Mag();
+  auto* chain = StMaker::GetChain();
+  auto* _kine = dynamic_cast<StarKinematics*>( chain->GetMaker("StarKine") );
   auto* particle = _kine->AddParticle( (q==1)?"mu+":"mu-" );
   particle->SetPx(momentum[0]);
   particle->SetPy(momentum[1]);
@@ -51,7 +58,7 @@ void throw_muon_in_sector( int sectorid, int charge = 1 ) {
   //  const double sectors[] = { 15.0, 45.0, 75.0, 105.0, 135.0, 165.0, 195.0, 225.0, 255.0, 285.0, 315.0, 345.0 };
   const double sectors[] = { 
     60.0, 30.0, 0.0, 330.0, 300.0, 270., 240.0, 210.0, 180.0, 150.0, 120.0, 90.0,
-    60.0, 30.0, 0.0, 330.0, 300.0, 270., 240.0, 210.0, 180.0, 150.0, 120.0, 90.0,
+    120.0, 150.0, 180.0, 210.0, 240.0, 270.0, 300.0, 330.0, 0.0, 30.0, 60.0, 90.0
   };
   double eta = (sectorid<=12) ? 0.5 : -0.5;
   _eta = eta;
@@ -65,7 +72,7 @@ std::string check_track( std::string message, std::function<std::string(const g2
   const g2t_track_st* track = static_cast<const g2t_track_st*>( track_table->At(0) );  
   std::string result = "[" + message + "] " + (track? f(track):FAIL );
 
-  LOG_TEST << result << endm;
+  LOG_TEST << result << std::endl;
 
   return result;
 
@@ -73,26 +80,29 @@ std::string check_track( std::string message, std::function<std::string(const g2
 //___________________________________________________________________
 std::string check_hit( std::string message, const g2t_tpc_hit_st* hit, std::function<std::string(const g2t_tpc_hit_st*)> f) {
   std::string result = "[" + message + "] " + (hit? f(hit):FAIL);
-  LOG_TEST << result << endm;
+  LOG_TEST << result << std::endl;
   return result;
 };
 
 
 //___________________________________________________________________
 void unit_test_tpc_hits() {
-  initChain(); 
-  _primary->SetVertex(0.,0.,0.);
-  _primary->SetSigma(0.0,0.,0.);
 
-  LOG_TEST << "=======================================================" << endm;
-  LOG_TEST << "Unit testing of tracks and TPC hits on single muons"     << endm;
-  LOG_TEST << "=======================================================" << endm;
+  gROOT->ProcessLine("initChain();");
+
+  auto* pm = dynamic_cast<StarPrimaryMaker*>( StMaker::GetChain()->GetMaker("PrimaryMaker") );
+  pm->SetVertex(0.,0.,0.);
+  pm->SetSigma(0.0,0.,0.);
+
+  LOG_TEST << "=======================================================" << std::endl;
+  LOG_TEST << "Unit testing of tracks and TPC hits on single muons"     << std::endl;
+  LOG_TEST << "=======================================================" << std::endl;
   
-  for ( int sector=1; sector<=1; sector++ ) {
+  for ( int sector=1; sector<=24; sector++ ) {
 
     throw_muon_in_sector( sector );
 
-    LOG_TEST << "Checking muon track in sector " << sector << endm;
+    LOG_TEST << "Checking muon track in sector " << sector << std::endl;
     // check_track( "Print the track table", [=]( const g2t_track_st* ){
     // 	int nrows = track_table->GetNRows();
     // 	std::string result = FAIL;
@@ -187,7 +197,7 @@ void unit_test_tpc_hits() {
       result = Form(" n=%i ",n) + result;
       return result;
     });
-    LOG_TEST << "Checking hits on track in sector " << sector << endm;
+    LOG_TEST << "Checking hits on track in sector " << sector << std::endl;
     for ( int i=0;i<hit_table->GetNRows();i++ ) {
       auto hit = static_cast<const g2t_tpc_hit_st*>( hit_table->At(i) );
       if ( 0==hit ) continue;     // skip null entries
@@ -199,7 +209,7 @@ void unit_test_tpc_hits() {
 		   << " x="  << h->x[0] 
 		   << " y="  << h->x[1] 
 		   << " z="  << h->x[2] 	    
-		   << endm;
+		   << std::endl;
 	  return PASS;
 	});
       check_hit( "The hit should have a nonzero volume_id",hit,[=](const g2t_tpc_hit_st* h) {
