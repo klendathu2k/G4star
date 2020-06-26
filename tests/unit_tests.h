@@ -11,6 +11,7 @@
 #include <g2t_vertex.h>
 #include <g2t_tpc_hit.h>
 #include <g2t_fts_hit.h>
+#include <g2t_emc_hit.h>
 #include <TTable.h>
 #include <TROOT.h>
 #include <string>
@@ -69,6 +70,12 @@ std::string check_tpc_hit( std::string message, const g2t_tpc_hit_st* hit, std::
 };
 //___________________________________________________________________
 std::string check_stg_hit( std::string message, const g2t_fts_hit_st* hit, std::function<std::string(const g2t_fts_hit_st*)> f) {
+  std::string result = "[" + message + "] " + (hit? f(hit):FAIL);
+  LOG_TEST << result << std::endl;
+  return result;
+};
+//___________________________________________________________________
+std::string check_emc_hit( std::string message, const g2t_emc_hit_st* hit, std::function<std::string(const g2t_emc_hit_st*)> f) {
   std::string result = "[" + message + "] " + (hit? f(hit):FAIL);
   LOG_TEST << result << std::endl;
   return result;
