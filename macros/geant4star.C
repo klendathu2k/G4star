@@ -195,8 +195,7 @@ void loadStar(const Char_t *mytag="dev2021", Bool_t agml = true  )
 
 bool __initialized = false;
 
-void particleGun( const int ntrack=1, const char* particles="pi+,pi-", double ptmn=1.0,double ptmx=10.0, double etamn=-1, double etamx=2 ) {
-
+bool initChain() {
   if ( !__initialized ) { 
     //    gROOT->ProcessLine(Form("chain->SetAttr(\"Random:G4\",%i)",__rngSeed));
     // Setup RNG seed and map all ROOT TRandom here
@@ -206,6 +205,12 @@ void particleGun( const int ntrack=1, const char* particles="pi+,pi-", double pt
     gROOT->ProcessLine("chain->Init();"); 
     __initialized = true; 
   }
+  return true;
+}
+
+void particleGun( const int ntrack=1, const char* particles="pi+,pi-", double ptmn=1.0,double ptmx=10.0, double etamn=-1, double etamx=2 ) {
+
+  initChain();
 
   const char* _cmds[] = {
 
@@ -220,6 +225,40 @@ void particleGun( const int ntrack=1, const char* particles="pi+,pi-", double pt
   }
 
 };
+
+
+void particleGun( const char* particle="mu+", double px=1.0/sqrt(2), double py=1.0/sqrt(2), double pz=0.0, double vx=0., double vy=0., double vz=0. ) {
+
+  initChain();
+
+  const char* _cmds[] = {
+    "chain->Clear();",
+    "{",
+    Form("double _px=%f",px),
+    Form("double _py=%f",py),
+    Form("double _pz=%f",pz),
+    Form("auto   _part=_kine->AddParticle(\"%s\");",particle),
+    "double _mass = _part->GetMass();",
+    "double _energy = sqrt( _px*_px+_py*_py+_pz*_pz+_mass*_mass );",
+    "_part->SetPx(_px);",
+    "_part->SetPy(_py);",
+    "_part->SetPz(_pz);",
+    "_part->SetEnergy(_energy);",
+    "_part->SetVx(_vx);",
+    "_part->SetVy(_vy);",
+    "_part->SetVz(_vz);",
+    "_part->SetTof(0);",
+    "chain->Make();",    
+    "}"
+  };
+
+  for ( auto cmd : _cmds ) {
+    gROOT->ProcessLine( cmd );
+  }
+
+};
+
+
 
 
 void geant4star(){ 

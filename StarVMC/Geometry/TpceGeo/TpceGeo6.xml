@@ -787,11 +787,11 @@
 
             <Create block="TPGV"  />
 
-            <Placement block="TPGV" z="+tpgvz" konly="'MANY'"   >
+            <Placement block="TPGV" z="+tpgvz" konly="MANY"   >
                 <Rotation thetaz="0" thetax="90" thetay="90" phiz="0" phiy="-15" phix="75"  />
             </Placement>
             
-            <Placement block="TPGV" z="-tpgvz" konly="'MANY'"   >
+            <Placement block="TPGV" z="-tpgvz" konly="MANY"   >
                 <Rotation thetaz="180" thetax="90" thetay="90" phiz="0" phiy="195" phix="105"  />
             </Placement>
                      
@@ -807,12 +807,12 @@
             <Do var="iSecAng" from="0" to="360-30" step="30"  >
 
                 <Create    block="TSWH"  />
-                <Placement block="TSWH"  konly="'MANY'" >
+                <Placement block="TSWH"  konly="MANY" >
                     <Rotation alphaz="iSecAng"  />
                 </Placement>
                 
                 <Create block="TSWH"  />
-                <Placement block="TSWH"  konly="'MANY'" >
+                <Placement block="TSWH"  konly="MANY" >
                     <Rotation ort="XY-Z"  />
                     <Rotation alphaz="iSecAng"  />
                 </Placement>
@@ -936,9 +936,30 @@
 <!--        <Medium name="TSWH_STANDARD" deemax="0.248853" stmin="1.15055" /> -->
             <Medium name="STANDARD" /> 
             <Attribute for="TSWH" seen="1" colo="kViolet"  />
-            <Shape type="PCON" zi="{TPCG_MembTHK/2,zWheel1,zWheel1,zTOFCend,zTOFCend,zTIFCFlangeBegin,zTIFCFlangeBegin,TPCG_DzEnvelop}" rmn="{tifcOR,tifcOR,tifcOR,tifcOR,tifcOR,TPCG_tifcRF+TPCG_tifcDRT,TPCG_tifcRF+TPCG_tifcDRT,TPCG_tifcRF+TPCG_tifcDRT}" rmx="{tofcIR,tofcIR,TPCG_WheelOR1,TPCG_WheelOR1,TPCG_WheelOR,TPCG_WheelOR,TPCG_WheelOR,TPCG_WheelOR}" nz="8" phi1="-15" dphi="30"  />
 
-            <Create block="TSAW" /><Placement block="TSAW" konly="'MANY'" />
+            <Shape type="PCON" zi="{TPCG_MembTHK/2,
+				   zWheel1,
+				   zWheel1,
+				   zTOFCend,
+				   zTOFCend,
+zTIFCFlangeBegin,
+				   TPCG_DzEnvelop}" 
+                               rmn="{tifcOR,
+				    tifcOR,
+				    tifcOR,
+				    tifcOR,
+				    tifcOR,
+TPCG_tifcRF+TPCG_tifcDRT,
+				    TPCG_tifcRF+TPCG_tifcDRT}" 
+			       rmx="{tofcIR,
+				    tofcIR,
+				    TPCG_WheelOR1,
+				    TPCG_WheelOR1,
+				    TPCG_WheelOR,
+TPCG_WheelOR,
+				    TPCG_WheelOR}" nz="7" phi1="-15" dphi="30"  />
+
+            <Create block="TSAW" /><Placement block="TSAW" konly="MANY" />
            
         </Block>
         
@@ -1004,10 +1025,10 @@ mycount = 0;
                 
 
                 <Create    block="TSAS"  />
-                <Placement block="TSAS" konly="'MANY'" z="tsas_zoffset" />
+                <Placement block="TSAS" konly="MANY" z="tsas_zoffset" />
 
                 <Create    block="TWAS"  />
-                <Placement block="TWAS"  konly="'MANY'" />
+                <Placement block="TWAS"  konly="MANY" />
 
 <If expr="inOut==0">                          <!-- Placed only once by AgSTAR rules -->
                 <Create    block="TBRW"  />
@@ -1074,7 +1095,7 @@ mycount = 0;
                     x = r 
                     y = r *tand(alpha)
 <!--
-                    <Placement y="y" x="x" z="zWheel1+TPCG_WheelTHK/2" konly="'MANY'" block="TBRW"  >
+                    <Placement y="y" x="x" z="zWheel1+TPCG_WheelTHK/2" konly="MANY" block="TBRW"  >
 
                      AgSTAR does not place the first version of this at the same position -->
 
@@ -1096,7 +1117,7 @@ mycount = 0;
             <Placement block="TWBT" />
             
             <Create    block="TWRI"  />
-	    <Placement block="TWRI" konly="'MANY'"  /> <!-- MANY volume because it is an assembly -->
+	    <Placement block="TWRI" konly="MANY"  /> <!-- MANY volume because it is an assembly -->
             
             <Create    block="TWTR"  />
             <Placement block="TWTR"  />
@@ -1105,7 +1126,7 @@ mycount = 0;
             <Placement block="TWMR"  />
             
             <Create    block="TRDO"  />
-            <Placement block="TRDO" konly="'MANY'" />
+            <Placement block="TRDO" konly="MANY" />
 
             
 
@@ -1360,7 +1381,7 @@ iShape = kTrd1;
                     y = HOLZ_yholes( 9*icoo + jcoo + 1 )*INCH
 
                     <Create block="FEEA"  />
-                    <Placement y="y" x="x+TFEE_AssemblyThickness/2+dRSectorShift" z="zWheel1+2*dz+TFEE_RibDZ" konly="'MANY'" block="FEEA"  >
+                    <Placement y="y" x="x+TFEE_AssemblyThickness/2+dRSectorShift" z="zWheel1+2*dz+TFEE_RibDZ" konly="MANY" block="FEEA"  >
                     </Placement>
                     
 
@@ -1921,7 +1942,7 @@ iShape = kTrd1;
             <Do var="iSecAng" from="15" to="360-15" step="30"  >
 
                 <Create    block="TPSS"  />
-                <Placement block="TPSS"            konly="'MANY'"  >
+                <Placement block="TPSS"            konly="MANY"  >
                 <!-- 
 		     Place with copy number=1 for each instance of TPSS.
 		     What is the reason for the "MANY" flag?
