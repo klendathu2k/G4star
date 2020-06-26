@@ -134,6 +134,7 @@ void unit_test_tpc_hits() {
       result = Form(" n=%i ",n) + result;
       return result;
     });
+
     LOG_TEST << "Checking hits on track in sector " << sector << std::endl;
     for ( int i=0;i<hit_table->GetNRows();i++ ) {
       auto hit = static_cast<const g2t_tpc_hit_st*>( hit_table->At(i) );
@@ -198,13 +199,10 @@ void unit_test_tpc_hits() {
 	  if ( p2 < _pmom*_pmom ) result = PASS;
 	  return result;
 	});
-
       check_tpc_hit( "Hit position should be w/in the fiducial volume of the sector",hit,[=](const g2t_tpc_hit_st* h){
 	  // TODO
 	  return TODO;
 	});
-
-
       //  g2t_tpc_volume_id = 100000*det + 100*sector + pad
       check_tpc_hit( "The padrow should be 1 <= pad <= 72",hit,[=](const g2t_tpc_hit_st* h) {
 	  std::string result = PASS;
