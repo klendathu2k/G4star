@@ -116,7 +116,6 @@ struct SD2Table_TPC {
     // TODO: increment hit count on track 
   } 
 } sd2table_tpc; 
-
 struct SD2Table_EPD {
   void operator()( StSensitiveDetector* sd, St_g2t_epd_hit* table, St_g2t_track* track ) {
     // Retrieve the hit collection 
@@ -180,7 +179,6 @@ struct SD2Table_STGC {
     }
   } 
 } sd2table_stgc; 
-
 struct SD2Table_FST {
   void operator()( StSensitiveDetector* sd, St_g2t_fts_hit* table, St_g2t_track* track ) {
     // Retrieve the hit collection 
@@ -236,8 +234,12 @@ struct SD2Table_EMC {
 
       int idtruth = hit->idtruth;
       g2t_track_st* trk = (g2t_track_st*)track->At(idtruth-1);
-      //      trk->n_fts_hit++;
 
+      TString sdname = sd->GetName();
+      if      ( sdname == "CSCI" ) 
+	trk->n_emc_hit++;
+      else if ( sdname == "ESCI" )
+	trk->n_eem_hit++;
     }
   } 
 } sd2table_emc; 

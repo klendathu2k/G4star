@@ -11,6 +11,7 @@
 #include <g2t_vertex.h>
 #include <g2t_tpc_hit.h>
 #include <g2t_fts_hit.h>
+#include <g2t_emc_hit.h>
 #include <TTable.h>
 #include <TROOT.h>
 #include <string>
@@ -57,19 +58,25 @@ void throw_muon( double eta, double phid, double pT = 25.0, int q=1 ) {
 //___________________________________________________________________
 std::string check_track( std::string message, std::function<std::string(const g2t_track_st*)> f) {
   const g2t_track_st* track = static_cast<const g2t_track_st*>( track_table->At(0) );  
-  std::string result = "[" + message + "] " + (track? f(track):FAIL );
+  std::string result = "\u001b[37m [" + message + "] " + (track? f(track):FAIL );
   LOG_TEST << result << std::endl;
   return result;
 };
 //___________________________________________________________________
 std::string check_tpc_hit( std::string message, const g2t_tpc_hit_st* hit, std::function<std::string(const g2t_tpc_hit_st*)> f) {
-  std::string result = "[" + message + "] " + (hit? f(hit):FAIL);
+  std::string result = "\u001b[37m [" + message + "] " + (hit? f(hit):FAIL);
   LOG_TEST << result << std::endl;
   return result;
 };
 //___________________________________________________________________
 std::string check_stg_hit( std::string message, const g2t_fts_hit_st* hit, std::function<std::string(const g2t_fts_hit_st*)> f) {
-  std::string result = "[" + message + "] " + (hit? f(hit):FAIL);
+  std::string result = "\u001b[37m [" + message + "] " + (hit? f(hit):FAIL);
+  LOG_TEST << result << std::endl;
+  return result;
+};
+//___________________________________________________________________
+std::string check_emc_hit( std::string message, const g2t_emc_hit_st* hit, std::function<std::string(const g2t_emc_hit_st*)> f) {
+  std::string result = "\u001b[37m [" + message + "] " + (hit? f(hit):FAIL);
   LOG_TEST << result << std::endl;
   return result;
 };
