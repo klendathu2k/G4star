@@ -259,5 +259,107 @@ void unit_test_muons() {
       return result;      
     },MeV);
 
+
+  check_hit_distribution( fstm, fstm.energy_deposit, [=](const Accumulator_t& acc){
+      std::string result = "FSTM energy deposition " + PASS; result += "\n";
+      double _mean          = boost::accumulators::mean(acc);
+      double _median        = boost::accumulators::median(acc);
+      double _min           = boost::accumulators::min( acc );
+      double _max           = boost::accumulators::max( acc );
+      double _error_of_mean = boost::accumulators::error_of<tag::mean>(acc);
+
+      result+= Form( "energy deposition: mean          = %f\n", _mean );
+      result+= Form( "energy deposition: median        = %f\n", _median );
+      result+= Form( "energy deposition: min           = %f\n", _min  );
+      result+= Form( "energy deposition: max           = %f\n", _max  );
+      result+= Form( "energy deposition: error of mean = %f\n", _error_of_mean );
+
+      return result;      
+    },keV);
+  check_hit_distribution( fstm, fstm.path_length   , [=](const Accumulator_t& acc){
+      std::string result = "FSTM path length " + PASS; result += "\n";
+      double _mean          = boost::accumulators::mean(acc);
+      double _median        = boost::accumulators::mean(acc);
+      double _min           = boost::accumulators::min( acc );
+      double _max           = boost::accumulators::max( acc );
+      double _error_of_mean = boost::accumulators::error_of<tag::mean>(acc);
+
+      result+= Form( "path length:       mean          = %f\n", _mean );
+      result+= Form( "path length:       median        = %f\n", _median );
+      result+= Form( "path length:       min           = %f\n", _min  );
+      result+= Form( "path length:       max           = %f\n", _max  );
+      result+= Form( "path length:       error of mean = %f\n", _error_of_mean );
+
+      return result;      
+    }    );
+  check_hit_distribution( fstm, fstm.de_ds, [=](const Accumulator_t& acc){
+      std::string result = "FSTM dE/ds " + PASS; result += "\n";
+      double _mean          = boost::accumulators::mean(acc);
+      double _median        = boost::accumulators::mean(acc);
+      double _min           = boost::accumulators::min( acc );
+      double _max           = boost::accumulators::max( acc );
+      double _error_of_mean = boost::accumulators::error_of<tag::mean>(acc);
+
+      result+= Form( "de/ds:             mean          = %f\n", _mean );
+      result+= Form( "de/ds:             median        = %f\n", _median );
+      result+= Form( "de/ds:             min           = %f\n", _min  );
+      result+= Form( "de/ds:             max           = %f\n", _max  );
+      result+= Form( "de/ds:             error of mean = %f\n", _error_of_mean );
+
+      return result;      
+    }, keV, [](const g2t_fts_hit_st* h){ return h->ds>0; });
+
+  check_hit_distribution( stgc, stgc.energy_deposit, [=](const Accumulator_t& acc){
+      std::string result = "STGC energy deposition " + PASS; result += "\n";
+      double _mean          = boost::accumulators::mean(acc);
+      double _median        = boost::accumulators::median(acc);
+      double _min           = boost::accumulators::min( acc );
+      double _max           = boost::accumulators::max( acc );
+      double _error_of_mean = boost::accumulators::error_of<tag::mean>(acc);
+
+      result+= Form( "energy deposition: mean          = %f\n", _mean );
+      result+= Form( "energy deposition: median        = %f\n", _median );
+      result+= Form( "energy deposition: min           = %f\n", _min  );
+      result+= Form( "energy deposition: max           = %f\n", _max  );
+      result+= Form( "energy deposition: error of mean = %f\n", _error_of_mean );
+
+      return result;      
+    },keV);
+  check_hit_distribution( stgc, stgc.path_length   , [=](const Accumulator_t& acc){
+      std::string result = "STGC path length " + PASS; result += "\n";
+      double _mean          = boost::accumulators::mean(acc);
+      double _median        = boost::accumulators::mean(acc);
+      double _min           = boost::accumulators::min( acc );
+      double _max           = boost::accumulators::max( acc );
+      double _error_of_mean = boost::accumulators::error_of<tag::mean>(acc);
+
+      result+= Form( "path length:       mean          = %f\n", _mean );
+      result+= Form( "path length:       median        = %f\n", _median );
+      result+= Form( "path length:       min           = %f\n", _min  );
+      result+= Form( "path length:       max           = %f\n", _max  );
+      result+= Form( "path length:       error of mean = %f\n", _error_of_mean );
+
+      return result;      
+    }    );
+  check_hit_distribution( stgc, stgc.de_ds, [=](const Accumulator_t& acc){
+      std::string result = "STGC dE/ds " + PASS; result += "\n";
+      double _mean          = boost::accumulators::mean(acc);
+      double _median        = boost::accumulators::mean(acc);
+      double _min           = boost::accumulators::min( acc );
+      double _max           = boost::accumulators::max( acc );
+      double _error_of_mean = boost::accumulators::error_of<tag::mean>(acc);
+
+      result+= Form( "de/ds:             mean          = %f\n", _mean );
+      result+= Form( "de/ds:             median        = %f\n", _median );
+      result+= Form( "de/ds:             min           = %f\n", _min  );
+      result+= Form( "de/ds:             max           = %f\n", _max  );
+      result+= Form( "de/ds:             error of mean = %f\n", _error_of_mean );
+
+      return result;      
+    }, keV, [](const g2t_fts_hit_st* h){ return h->ds>0; });
+
+
+
+
 }
 //___________________________________________________________________
