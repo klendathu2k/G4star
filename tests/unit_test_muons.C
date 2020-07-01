@@ -36,15 +36,15 @@ const std::map<double,std::string> scale2string = {
   {eV,"eV"}
 };
 
-template<typename T> double energy_deposit(const T* h) { return h->de; } 
-template<typename T> double path_length   (const T* h) { return h->ds; } 
-template<typename T> double deds          (const T* h) { 
-  double de = h->de;
-  double ds = h->ds;
-  double deds = -999;
-  if ( ds > 0 ) deds = de / ds;
-  return deds;
-} 
+// template<typename T> double energy_deposit(const T* h) { return h->de; } 
+// template<typename T> double path_length   (const T* h) { return h->ds; } 
+// template<typename T> double deds          (const T* h) { 
+//   double de = h->de;
+//   double ds = h->ds;
+//   double deds = -999;
+//   if ( ds > 0 ) deds = de / ds;
+//   return deds;
+// } 
 
 //___________________________________________________________________
 double _eta  = 0; 
@@ -64,7 +64,6 @@ struct tpcTag  {
     return deds;
   }
 } tpc; // TPC hits
-
 struct fstmTag {
   static double energy_deposit(const g2t_fts_hit_st* h){ return h->de; }
   static double path_length(const g2t_fts_hit_st* h){ return h->ds; }
@@ -104,23 +103,23 @@ struct esmdTag {
 template<typename T> struct HitTraits {
   /* empty, this will not go well */
 };
-template<> struct HitTraits<tpcTag>  {
+template<> struct HitTraits<tpcTag>   {
   const std::string tableName = "g2t_tpc_hit";
   typedef g2t_tpc_hit_st hit_type;
 };
-template<> struct HitTraits<bemcTag> {
+template<> struct HitTraits<bemcTag>  {
   const std::string tableName = "g2t_emc_hit";
   typedef g2t_emc_hit_st hit_type;
 };
-template<> struct HitTraits<bsmdTag> {
+template<> struct HitTraits<bsmdTag>  {
   const std::string tableName = "g2t_smd_hit";
   typedef g2t_emc_hit_st hit_type;
 };
-template<> struct HitTraits<eemcTag> {
+template<> struct HitTraits<eemcTag>  {
   const std::string tableName = "g2t_eem_hit";
   typedef g2t_emc_hit_st hit_type;
 };
-template<> struct HitTraits<esmdTag> {
+template<> struct HitTraits<esmdTag>  {
   const std::string tableName = "g2t_esm_hit";
   typedef g2t_emc_hit_st hit_type;
 };
