@@ -5,7 +5,6 @@ double _eta  = 0;
 double _phid = 0;
 void throw_muon_in_tpc_sector( int sectorid, int charge = 1 ) {
   assert(sectorid>0 && sectorid <= 24);
-  //  const double sectors[] = { 15.0, 45.0, 75.0, 105.0, 135.0, 165.0, 195.0, 225.0, 255.0, 285.0, 315.0, 345.0 };
   const double sectors[] = { 
     60.0, 30.0, 0.0, 330.0, 300.0, 270., 240.0, 210.0, 180.0, 150.0, 120.0, 90.0,
     120.0, 150.0, 180.0, 210.0, 240.0, 270.0, 300.0, 330.0, 0.0, 30.0, 60.0, 90.0
@@ -20,7 +19,6 @@ void throw_muon_in_tpc_sector( int sectorid, int charge = 1 ) {
   assert( hit_table    = dynamic_cast<TTable*>( chain->GetDataSet("g2t_tpc_hit") ) );
 
 }
-
 //___________________________________________________________________
 
 void unit_test_tpc_hits() {
@@ -40,15 +38,6 @@ void unit_test_tpc_hits() {
     throw_muon_in_tpc_sector( sector );
 
     LOG_TEST << "Checking muon track in sector " << sector << std::endl;
-    // check_track( "Print the track table", [=]( const g2t_track_st* ){
-    // 	int nrows = track_table->GetNRows();
-    // 	std::string result = FAIL;
-    // 	if ( nrows > 0 ) {
-    // 	  track_table->Print(0,5);
-    // 	  result = PASS;
-    // 	}
-    // 	return result;
-    //   });
     check_track( "A muon must have been processed by geant",       [=](const g2t_track_st* t){
 	// Failure is tested by check_track when it tests for a valid track pointer
 	return PASS; 
@@ -203,7 +192,6 @@ void unit_test_tpc_hits() {
 	  // TODO
 	  return TODO;
 	});
-      //  g2t_tpc_volume_id = 100000*det + 100*sector + pad
       check_tpc_hit( "The padrow should be 1 <= pad <= 72",hit,[=](const g2t_tpc_hit_st* h) {
 	  std::string result = PASS;
 	  int padrow = h->volume_id % 100;
