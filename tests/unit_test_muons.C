@@ -66,6 +66,30 @@ struct tpcTag  {
     return deds;
   }
 } tpc; // TPC hits
+
+struct fstmTag {
+  static double energy_deposit(const g2t_fts_hit_st* h){ return h->de; }
+  static double path_length(const g2t_fts_hit_st* h){ return h->ds; }
+  static double de_ds(const g2t_fts_hit_st* h ) {
+    double de = h->de;
+    double ds = h->ds;
+    double deds = -999;
+    if ( ds > 0 ) deds = de / ds;
+    return deds;
+  }
+} fstm;
+struct stgcTag {
+  static double energy_deposit(const g2t_fts_hit_st* h){ return h->de; }
+  static double path_length(const g2t_fts_hit_st* h){ return h->ds; }
+  static double de_ds(const g2t_fts_hit_st* h ) {
+    double de = h->de;
+    double ds = h->ds;
+    double deds = -999;
+    if ( ds > 0 ) deds = de / ds;
+    return deds;
+  }
+} stgc;
+
 struct bemcTag { 
   static double energy_deposit(const g2t_emc_hit_st* h){ return h->de; }
 } bemc; // BEMC hits
@@ -101,6 +125,14 @@ template<> struct HitTraits<eemcTag> {
 template<> struct HitTraits<esmdTag> {
   const std::string tableName = "g2t_esm_hit";
   typedef g2t_emc_hit_st hit_type;
+};
+template<> struct HitTraits<fstmTag>  {
+  const std::string tableName = "g2t_fsi_hit";
+  typedef g2t_fts_hit_st hit_type;
+};
+template<> struct HitTraits<stgcTag>  {
+  const std::string tableName = "g2t_stg_hit";
+  typedef g2t_fts_hit_st hit_type;
 };
 
 template<typename Tag> 
@@ -247,7 +279,6 @@ void unit_test_muons() {
 
       return result;      
     },MeV);
-
   check_hit_distribution( eemc, eemc.energy_deposit, [=](const Accumulator_t& acc){
       std::string result = "EEMC energy deposition " + PASS; result += "\n";
       double _mean          = boost::accumulators::mean(acc);
