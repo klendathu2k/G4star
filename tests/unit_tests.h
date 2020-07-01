@@ -1,5 +1,6 @@
 #ifndef __unit_tests__
 #define __unit_tests__
+#include <StGeant4Maker/StGeant4Maker.h>
 #include <StarGenerator/EVENT/StarGenParticle.h>
 #include <StarGenerator/BASE/StarPrimaryMaker.h>
 #include <StarGenerator/Kinematics/StarKinematics.h>
