@@ -3,7 +3,12 @@
 #include <boost/accumulators/accumulators.hpp>
 #include <boost/accumulators/statistics/stats.hpp>
 #include <boost/accumulators/statistics/mean.hpp>
+#include <boost/accumulators/statistics/median.hpp>
+#include <boost/accumulators/statistics/min.hpp>
+#include <boost/accumulators/statistics/max.hpp>
 #include <boost/accumulators/statistics/moment.hpp>
+#include <boost/accumulators/statistics/error_of.hpp>
+#include <boost/accumulators/statistics/error_of_mean.hpp>
 using namespace boost::accumulators;
 
 #include <TTable.h>
@@ -12,7 +17,14 @@ StGeant4Maker* _g4mk = 0;
 
 //accumulator_set<double, stats<tag::mean, tag::moment<2> > > acc
 
-using Accumulator_t = accumulator_set<double, stats<tag::mean, tag::moment<2> > >;
+using Accumulator_t = accumulator_set<double, 
+stats< tag::sum,
+       tag::mean, 
+       tag::median(with_p_square_quantile),
+       tag::max, 
+       tag::min, 
+       tag::error_of<tag::mean>
+>>;
 
 
 const double GeV = 1;
@@ -28,17 +40,31 @@ const std::map<double,std::string> scale2string = {
 
 template<typename T> double energy_deposit(const T* h) { return h->de; } 
 template<typename T> double path_length   (const T* h) { return h->ds; } 
+template<typename T> double deds          (const T* h) { 
+  double de = h->de;
+  double ds = h->ds;
+  double deds = -999;
+  if ( ds > 0 ) deds = de / ds;
+  return deds;
+} 
 
 //___________________________________________________________________
 double _eta  = 0; 
 double _phid = 0;
 //___________________________________________________________________
-const int ntracks=70;
+const int ntracks = 7000;
 //___________________________________________________________________
 
 struct tpcTag  { 
   static double energy_deposit(const g2t_tpc_hit_st* h){ return h->de; }
   static double path_length(const g2t_tpc_hit_st* h){ return h->ds; }
+  static double de_ds(const g2t_tpc_hit_st* h ) {
+    double de = h->de;
+    double ds = h->ds;
+    double deds = -999;
+    if ( ds > 0 ) deds = de / ds;
+    return deds;
+  }
 } tpc; // TPC hits
 struct bemcTag { 
   static double energy_deposit(const g2t_emc_hit_st* h){ return h->de; }
@@ -81,15 +107,20 @@ template<typename Tag>
 void check_hit_distribution( Tag, 
 			     std::function<double(const typename HitTraits<Tag>::hit_type *)> stat, 
 			     std::function<std::string(const Accumulator_t& acc)>             eval,
-			     double scale=1.0) {
+			     double scale=1.0,
+			     std::function<bool(const typename HitTraits<Tag>::hit_type *)> filt = [](const typename HitTraits<Tag>::hit_type *){ return true; }
+			     ) {
   Accumulator_t acc;
   HitTraits<Tag> traits;
   TTable* table = static_cast<TTable*>( _g4mk->GetDataSet(traits.tableName.c_str()) );
   for ( int irow=0; irow<table->GetNRows();irow++ ) {
     auto* hit = static_cast<const typename HitTraits<Tag>::hit_type *>( table->At(irow) );
-    acc( stat(hit)*scale ); 
+    if ( filt(hit) ) {
+      acc( stat(hit)*scale ); 
+    }
   }
   LOG_TEST <<  eval(acc) << std::endl;
+
 }
 
 
@@ -152,19 +183,96 @@ void unit_test_muons() {
   chain->Make();
 
   check_hit_distribution( tpc, tpc.energy_deposit, [=](const Accumulator_t& acc){
-      std::string result = PASS;
-      double _mean = mean(acc);
-      double _2mom = moment<2>(acc);
-      result = Form("energy deposition: mean=%f 2nd-moment=%f ",_mean,_2mom) + result;
+      std::string result = "TPC energy deposition " + PASS; result += "\n";
+      double _mean          = boost::accumulators::mean(acc);
+      double _median        = boost::accumulators::median(acc);
+      double _min           = boost::accumulators::min( acc );
+      double _max           = boost::accumulators::max( acc );
+      double _error_of_mean = boost::accumulators::error_of<tag::mean>(acc);
+
+      result+= Form( "energy deposition: mean          = %f\n", _mean );
+      result+= Form( "energy deposition: median        = %f\n", _median );
+      result+= Form( "energy deposition: min           = %f\n", _min  );
+      result+= Form( "energy deposition: max           = %f\n", _max  );
+      result+= Form( "energy deposition: error of mean = %f\n", _error_of_mean );
+
       return result;      
-    }, keV);
-  check_hit_distribution( tpc, tpc.path_length,    [=](const Accumulator_t& acc){
-      std::string result = PASS;
-      double _mean = mean(acc);
-      double _2mom = moment<2>(acc);
-      result = Form("path length: mean=%f 2nd-moment=%f ",_mean,_2mom) + result;
+    },keV);
+  check_hit_distribution( tpc, tpc.path_length   , [=](const Accumulator_t& acc){
+      std::string result = "TPC path length " + PASS; result += "\n";
+      double _mean          = boost::accumulators::mean(acc);
+      double _median        = boost::accumulators::mean(acc);
+      double _min           = boost::accumulators::min( acc );
+      double _max           = boost::accumulators::max( acc );
+      double _error_of_mean = boost::accumulators::error_of<tag::mean>(acc);
+
+      result+= Form( "path length:       mean          = %f\n", _mean );
+      result+= Form( "path length:       median        = %f\n", _median );
+      result+= Form( "path length:       min           = %f\n", _min  );
+      result+= Form( "path length:       max           = %f\n", _max  );
+      result+= Form( "path length:       error of mean = %f\n", _error_of_mean );
+
       return result;      
-    });
+    }    );
+  check_hit_distribution( tpc, tpc.de_ds, [=](const Accumulator_t& acc){
+      std::string result = "TPC dE/ds " + PASS; result += "\n";
+      double _mean          = boost::accumulators::mean(acc);
+      double _median        = boost::accumulators::mean(acc);
+      double _min           = boost::accumulators::min( acc );
+      double _max           = boost::accumulators::max( acc );
+      double _error_of_mean = boost::accumulators::error_of<tag::mean>(acc);
+
+      result+= Form( "de/ds:             mean          = %f\n", _mean );
+      result+= Form( "de/ds:             median        = %f\n", _median );
+      result+= Form( "de/ds:             min           = %f\n", _min  );
+      result+= Form( "de/ds:             max           = %f\n", _max  );
+      result+= Form( "de/ds:             error of mean = %f\n", _error_of_mean );
+
+      return result;      
+    }, keV, [](const g2t_tpc_hit_st* h){ return h->ds>0; });
+
+  check_hit_distribution( bemc, bemc.energy_deposit, [=](const Accumulator_t& acc){
+      std::string result = "BEMC energy deposition " + PASS; result += "\n";
+      double _mean          = boost::accumulators::mean(acc);
+      double _median        = boost::accumulators::median(acc);
+      double _min           = boost::accumulators::min( acc );
+      double _max           = boost::accumulators::max( acc );
+      double _error_of_mean = boost::accumulators::error_of<tag::mean>(acc);
+
+      result+= Form( "energy deposition: mean          = %f\n", _mean );
+      result+= Form( "energy deposition: median        = %f\n", _median );
+      result+= Form( "energy deposition: min           = %f\n", _min  );
+      result+= Form( "energy deposition: max           = %f\n", _max  );
+      result+= Form( "energy deposition: error of mean = %f\n", _error_of_mean );
+
+      return result;      
+    },MeV);
+
+  check_hit_distribution( eemc, eemc.energy_deposit, [=](const Accumulator_t& acc){
+      std::string result = "EEMC energy deposition " + PASS; result += "\n";
+      double _mean          = boost::accumulators::mean(acc);
+      double _median        = boost::accumulators::median(acc);
+      double _min           = boost::accumulators::min( acc );
+      double _max           = boost::accumulators::max( acc );
+      double _error_of_mean = boost::accumulators::error_of<tag::mean>(acc);
+
+      result+= Form( "energy deposition: mean          = %f\n", _mean );
+      result+= Form( "energy deposition: median        = %f\n", _median );
+      result+= Form( "energy deposition: min           = %f\n", _min  );
+      result+= Form( "energy deposition: max           = %f\n", _max  );
+      result+= Form( "energy deposition: error of mean = %f\n", _error_of_mean );
+
+      return result;      
+    },MeV);
+
+
+  // check_hit_distribution( tpc, tpc.path_length,    [=](const Accumulator_t& acc){
+  //     std::string result = PASS;
+  //     double _mean = mean(acc);
+  //     double _2mom = moment<2>(acc);
+  //     result = Form("path length: mean=%f 2nd-moment=%f ",_mean,_2mom) + result;
+  //     return result;      
+  //   });
 
 
   // check_hit_distribution( tpc, [=](const g2t_tpc_hit_st* h){ return h->ds; }, [=](const Accumulator_t& acc){
