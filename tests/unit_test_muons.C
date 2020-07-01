@@ -15,8 +15,6 @@ using namespace boost::accumulators;
 
 StGeant4Maker* _g4mk = 0;
 
-//accumulator_set<double, stats<tag::mean, tag::moment<2> > > acc
-
 using Accumulator_t = accumulator_set<double, 
 stats< tag::sum,
        tag::mean, 
@@ -155,41 +153,6 @@ void check_hit_distribution( Tag,
 
 }
 
-
-
-// void check_tpc_de( std::string tableName, 
-// 		   std::string message, 
-// 		   std::function<double(const HitType&)> s,		   
-// 		   std::function<std::string(Accumulator_t& acc)> f 
-// 		   ) {
-//   TTable* table = static_cast<TTable*>( _g4mk->GetDataSet(tableName.c_str()) );
-//   int     nrows = table->GetNRows();
-//   Accumulator_t A;
-//   for ( int irow=0;irow<nrows;irow++ ) {
-//     //    const g2t_tpc_hit_st* hit = static_cast<const g2t_tpc_hit_st*>( table->At(irow) );
-//     const HitType& hit = *static_cast<const HitType*>( table->At(irow) );
-//     if ( 0==hit ) continue;
-//     A( s(hit) * keV );
-//   };
-//   LOG_TEST << "-require- [" << tableName << "][" << message << "] " << f(A) << std::endl;
-// };
-
-// void check_tpc_de( std::string tableName, 
-// 		   std::string message, 
-// 		   std::function<std::string(Accumulator_t& acc)> f 
-// 		   ) {
-//   TTable* table = static_cast<TTable*>( _g4mk->GetDataSet(tableName.c_str()) );
-//   int     nrows = table->GetNRows();
-//   Accumulator_t A;
-//   for ( int irow=0;irow<nrows;irow++ ) {
-//     const g2t_tpc_hit_st* hit = static_cast<const g2t_tpc_hit_st*>( table->At(irow) );
-//     if ( 0==hit ) continue;
-//     A( energy_deposit(hit) * keV );
-//   };
-//   LOG_TEST << "-require- [" << tableName << "][" << message << "] " << f(A) << std::endl;
-// };
-
-
 void unit_test_muons() {
 
   gROOT->ProcessLine("initChain();");
@@ -295,57 +258,6 @@ void unit_test_muons() {
 
       return result;      
     },MeV);
-
-
-  // check_hit_distribution( tpc, tpc.path_length,    [=](const Accumulator_t& acc){
-  //     std::string result = PASS;
-  //     double _mean = mean(acc);
-  //     double _2mom = moment<2>(acc);
-  //     result = Form("path length: mean=%f 2nd-moment=%f ",_mean,_2mom) + result;
-  //     return result;      
-  //   });
-
-
-  // check_hit_distribution( tpc, [=](const g2t_tpc_hit_st* h){ return h->ds; }, [=](const Accumulator_t& acc){
-  //     std::string result = PASS;
-  //     double _mean = mean(acc);
-  //     double _2mom = moment<2>(acc);
-  //     result = Form("path length: mean=%f 2nd-moment=%f ",_mean,_2mom) + result;
-  //     return result;      
-  //   });
-
-  // check_hit_distribution( tpc, [=](const g2t_tpc_hit_st* h){ return h->de; }, [=](const Accumulator_t& acc){
-  //     std::string result = PASS;
-  //     double _mean = mean(acc);
-  //     double _2mom = moment<2>(acc);
-  //     result = Form("energy deposition: mean=%f 2nd-moment=%f ",_mean,_2mom) + result;
-  //     return result;      
-  //   }, keV);
-  // check_hit_distribution( tpc, [=](const g2t_tpc_hit_st* h){ return h->ds; }, [=](const Accumulator_t& acc){
-  //     std::string result = PASS;
-  //     double _mean = mean(acc);
-  //     double _2mom = moment<2>(acc);
-  //     result = Form("path length: mean=%f 2nd-moment=%f ",_mean,_2mom) + result;
-  //     return result;      
-  //   });
-
-
-
-
-  // check_tpc_de( "g2t_tpc_hit", "Check TPC energy loss and variance", 
-  // 		energy_deposit<g2t_tpc_hit_st>, 
-  // 		[=](Accumulator_t& acc){
-  //     double _mean = mean(acc);
-  //     double _mom2 = moment<2>(acc);
-  //     std::string result = Form(" mean=%f 2ndmoment=%f ",_mean,_mom2) + PASS;
-  //     return result;
-  //   });
-
-
-
-
-    
-
 
 }
 //___________________________________________________________________
