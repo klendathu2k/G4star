@@ -133,7 +133,7 @@ template<> struct HitTraits<stgcTag>  {
 };
 
 template<typename Tag> 
-void check_hit_distribution( Tag, 
+void check_hit_distribution( std::string message, Tag, 
 			     std::function<double(const typename HitTraits<Tag>::hit_type *)> stat, 
 			     std::function<std::string(const Accumulator_t& acc)>             eval,
 			     double scale=1.0,
@@ -148,7 +148,7 @@ void check_hit_distribution( Tag,
       acc( stat(hit)*scale ); 
     }
   }
-  LOG_TEST <<  eval(acc) << std::endl;
+  LOG_TEST << message << " " << eval(acc) << std::endl;
 
 }
 
@@ -171,12 +171,13 @@ void unit_test_muons() {
   double minPt =  0.100;
   double maxPt = 10.000;
   int    nbinPt = 100;
+
   _kine->Kine(ntracks,"mu+,mu-",0.100,10.00,-2.0,5.0);
 
   chain->Clear();
   chain->Make();
 
-  check_hit_distribution( tpc, tpc.energy_deposit, [=](const Accumulator_t& acc){
+  check_hit_distribution( "TPC energy deposit [keV] (muons)", tpc, tpc.energy_deposit, [=](const Accumulator_t& acc){
       std::string result = "TPC energy deposition " + PASS; result += "\n";
       double _mean          = boost::accumulators::mean(acc);
       double _median        = boost::accumulators::median(acc);
@@ -192,7 +193,7 @@ void unit_test_muons() {
 
       return result;      
     },keV);
-  check_hit_distribution( tpc, tpc.path_length   , [=](const Accumulator_t& acc){
+  check_hit_distribution( "TPC path length (muons)", tpc, tpc.path_length   , [=](const Accumulator_t& acc){
       std::string result = "TPC path length " + PASS; result += "\n";
       double _mean          = boost::accumulators::mean(acc);
       double _median        = boost::accumulators::mean(acc);
@@ -208,7 +209,7 @@ void unit_test_muons() {
 
       return result;      
     }    );
-  check_hit_distribution( tpc, tpc.de_ds, [=](const Accumulator_t& acc){
+  check_hit_distribution( "TPC dE/ds [keV/cm] (muons)", tpc, tpc.de_ds, [=](const Accumulator_t& acc){
       std::string result = "TPC dE/ds " + PASS; result += "\n";
       double _mean          = boost::accumulators::mean(acc);
       double _median        = boost::accumulators::mean(acc);
@@ -225,7 +226,7 @@ void unit_test_muons() {
       return result;      
     }, keV, [](const g2t_tpc_hit_st* h){ return h->ds>0; });
 
-  check_hit_distribution( bemc, bemc.energy_deposit, [=](const Accumulator_t& acc){
+  check_hit_distribution( "BEMC energy deposit [MeV] (muons)", bemc, bemc.energy_deposit, [=](const Accumulator_t& acc){
       std::string result = "BEMC energy deposition " + PASS; result += "\n";
       double _mean          = boost::accumulators::mean(acc);
       double _median        = boost::accumulators::median(acc);
@@ -241,7 +242,7 @@ void unit_test_muons() {
 
       return result;      
     },MeV);
-  check_hit_distribution( eemc, eemc.energy_deposit, [=](const Accumulator_t& acc){
+  check_hit_distribution( "EEMC energy deposit [MeV] (muons)", eemc, eemc.energy_deposit, [=](const Accumulator_t& acc){
       std::string result = "EEMC energy deposition " + PASS; result += "\n";
       double _mean          = boost::accumulators::mean(acc);
       double _median        = boost::accumulators::median(acc);
@@ -259,7 +260,7 @@ void unit_test_muons() {
     },MeV);
 
 
-  check_hit_distribution( fstm, fstm.energy_deposit, [=](const Accumulator_t& acc){
+  check_hit_distribution( "FSTM energy deposit [keV] (muons)", fstm, fstm.energy_deposit, [=](const Accumulator_t& acc){
       std::string result = "FSTM energy deposition " + PASS; result += "\n";
       double _mean          = boost::accumulators::mean(acc);
       double _median        = boost::accumulators::median(acc);
@@ -275,7 +276,7 @@ void unit_test_muons() {
 
       return result;      
     },keV);
-  check_hit_distribution( fstm, fstm.path_length   , [=](const Accumulator_t& acc){
+  check_hit_distribution( "FSTM path length (muons)", fstm, fstm.path_length   , [=](const Accumulator_t& acc){
       std::string result = "FSTM path length " + PASS; result += "\n";
       double _mean          = boost::accumulators::mean(acc);
       double _median        = boost::accumulators::mean(acc);
@@ -291,7 +292,7 @@ void unit_test_muons() {
 
       return result;      
     }    );
-  check_hit_distribution( fstm, fstm.de_ds, [=](const Accumulator_t& acc){
+  check_hit_distribution( "FSTM dE/ds [keV/cm] (muons)", fstm, fstm.de_ds, [=](const Accumulator_t& acc){
       std::string result = "FSTM dE/ds " + PASS; result += "\n";
       double _mean          = boost::accumulators::mean(acc);
       double _median        = boost::accumulators::mean(acc);
@@ -308,7 +309,7 @@ void unit_test_muons() {
       return result;      
     }, keV, [](const g2t_fts_hit_st* h){ return h->ds>0; });
 
-  check_hit_distribution( stgc, stgc.energy_deposit, [=](const Accumulator_t& acc){
+  check_hit_distribution( "STGC energy deposit [keV] (muons)", stgc, stgc.energy_deposit, [=](const Accumulator_t& acc){
       std::string result = "STGC energy deposition " + PASS; result += "\n";
       double _mean          = boost::accumulators::mean(acc);
       double _median        = boost::accumulators::median(acc);
@@ -324,7 +325,7 @@ void unit_test_muons() {
 
       return result;      
     },keV);
-  check_hit_distribution( stgc, stgc.path_length   , [=](const Accumulator_t& acc){
+  check_hit_distribution( "STGC path length (muons)", stgc, stgc.path_length   , [=](const Accumulator_t& acc){
       std::string result = "STGC path length " + PASS; result += "\n";
       double _mean          = boost::accumulators::mean(acc);
       double _median        = boost::accumulators::mean(acc);
@@ -340,7 +341,7 @@ void unit_test_muons() {
 
       return result;      
     }    );
-  check_hit_distribution( stgc, stgc.de_ds, [=](const Accumulator_t& acc){
+  check_hit_distribution( "STGC dE/ds [keV/cm] (muons)", stgc, stgc.de_ds, [=](const Accumulator_t& acc){
       std::string result = "STGC dE/ds " + PASS; result += "\n";
       double _mean          = boost::accumulators::mean(acc);
       double _median        = boost::accumulators::mean(acc);
