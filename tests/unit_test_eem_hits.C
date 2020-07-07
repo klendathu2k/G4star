@@ -157,12 +157,7 @@ void unit_test_eem_hits() {
 	if ( h->de > 0 ) result = PASS;
 	return result;
       });
-    // check_emc_hit( "The volume ID should be in 1..48",hit,[=](const g2t_emc_hit_st* h) {
-    // 	std::string result=PASS;
-    // 	if ( h->volume_id<1||h->volume_id>48 ) result=FAIL;
-    // 	result = Form(" volume_id = %i ",h->volume_id) + result;
-    // 	return result;
-    //   });       
+      
   }
 
     }
