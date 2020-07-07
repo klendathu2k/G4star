@@ -9,10 +9,8 @@ void throw_muon_in_fts_wedge( int wedgeid, int inout, int charge = 1 ) {
   double eta  = 2.8;  _eta=eta;
   double phid = 15.0; _phid=phid;
 
-  throw_muon( eta, phid, 500.0, charge ); // energetic
-
-  //  StMaker::GetChain()->ls(10);
-
+  throw_muon( eta, phid, 500.0, charge );
+	
   assert( vertex_table = dynamic_cast<TTable*>( chain->GetDataSet("g2t_vertex")  ) );
   assert( track_table  = dynamic_cast<TTable*>( chain->GetDataSet("g2t_track")   ) );
   assert( hit_table    = dynamic_cast<TTable*>( chain->GetDataSet("g2t_fsi_hit") ) );
