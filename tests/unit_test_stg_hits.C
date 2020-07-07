@@ -11,8 +11,6 @@ void throw_muon_in_stg_wedge( int wedgeid, int inout, int charge = 1 ) {
 
   throw_muon( eta, phid, 500.0, charge ); // energetic
 
-  StMaker::GetChain()->ls(10);
-
   assert( vertex_table = dynamic_cast<TTable*>( chain->GetDataSet("g2t_vertex")  ) );
   assert( track_table  = dynamic_cast<TTable*>( chain->GetDataSet("g2t_track")   ) );
   assert( hit_table    = dynamic_cast<TTable*>( chain->GetDataSet("g2t_stg_hit") ) );
