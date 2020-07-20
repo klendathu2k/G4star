@@ -95,6 +95,7 @@ struct SD2Table_TPC {
       }
       g2t_hit.tof       = 0.5 * ( hit->position_in[3] + hit->position_out[3] ); 
       g2t_hit.length    = hit->length;
+      g2t_hit.lgam      = hit->lgam;
       /*
       g2t_hit.lgam = ...;
 
@@ -666,6 +667,8 @@ void StGeant4Maker::FinishEvent(){
   AddHits<St_g2t_emc_hit>( "PREH", {"PSCI"}, "g2t_pre_hit", sd2table_emc  );
   AddHits<St_g2t_emc_hit>( "WCAH", {"WSCI"}, "g2t_wca_hit", sd2table_emc  );
   AddHits<St_g2t_emc_hit>( "HCAH", {"HSCI"}, "g2t_hca_hit", sd2table_emc  ); 
+
+  //  g2t_track->Print(0,10);
 
 }
 //________________________________________________________________________________________________
