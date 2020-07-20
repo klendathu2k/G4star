@@ -37,13 +37,6 @@ const double phibins2[] = {
   , 82.5801 , 85.4199 , 88.5801 , 91.4199 , 94.5801 , 97.4199 , 100.58 , 103.42
 };
 
-
-//root4star [5] bemc->PhiOffset()[0]
-//(const Float_t)1.25663709640502930e+00
-//root4star [6] bemc->PhiOffset()[1]
-//(const Float_t)1.88495564460754395e+00
-
-
 // nominal boundaries... first and last eta bins are actually narrower
 const std::vector<double> etabounds = {
   -1.00,-0.95, -0.90, -0.85, -0.80, -0.75, -0.70, -0.65, -0.60, -0.55, -0.50, -0.45, -0.40, -0.35, -0.30, -0.25, -0.20, -0.15, -0.10, -0.05, 0.00, 
@@ -95,15 +88,6 @@ void unit_test_emc_hits() {
 		      
       throw_muon_in_bemc_tower( eta, phid );
   
-    //   check_track( "Print the track table", [=]( const g2t_track_st* ){
-    //   int nrows = track_table->GetNRows();
-    //   std::string result = FAIL;
-    //   if ( nrows > 0 ) {
-    // 	track_table->Print(0,5);
-    // 	result = PASS;
-    //   }
-    //   return result;
-    // });
       check_track( "A muon must have been processed by geant",       [=](const g2t_track_st* t){
 	  // Failure is tested by check_track when it tests for a valid track pointer
 	  return PASS; 
@@ -172,36 +156,6 @@ void unit_test_emc_hits() {
 	  result = Form(" n=%i ",n) + result;
 	  return result;
 	}); 
-  //  LOG_TEST << "Checking hits on track in sector " << sector << std::endl;
-  //     for ( int i=0;i<hit_table->GetNRows();i++ ) {
-  //   auto hit = static_cast<const g2t_emc_hit_st*>( hit_table->At(i) );
-  //   if ( 0==hit ) continue;     // skip null entries
-  //   if ( 1!=hit->track_p ) continue; // not interested in secondaries
-  //   check_emc_hit( "Print the hit...", hit, [=](const g2t_emc_hit_st* h) {
-  // 	LOG_TEST << "id=" << h->id 
-  // 		 << " track_p=" << h->track_p 
-  // 		 << " volume_id=" << h->volume_id 
-  // 		 << " de="  << h->de 
-  // 		 << std::endl;
-  // 	return PASS;
-  //     });
-  //   check_emc_hit( "The hit should have a nonzero volume_id",hit,[=](const g2t_emc_hit_st* h) {
-  // 	std::string result = FAIL;
-  // 	if ( h->volume_id > 0 ) result = PASS;
-  // 	return result;
-  //     });
-  //   check_emc_hit( "The hit should have an energy deposit > 0",hit,[=](const g2t_emc_hit_st* h) {
-  // 	std::string result = FAIL;
-  // 	if ( h->de > 0 ) result = PASS;
-  // 	return result;
-  //     });
-  //   // check_emc_hit( "The volume ID should be in 1..48",hit,[=](const g2t_emc_hit_st* h) {
-  //   // 	std::string result=PASS;
-  //   // 	if ( h->volume_id<1||h->volume_id>48 ) result=FAIL;
-  //   // 	result = Form(" volume_id = %i ",h->volume_id) + result;
-  //   // 	return result;
-  //   //   });       
-  // }
 
     }
   }
