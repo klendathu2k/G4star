@@ -11,9 +11,9 @@ void throw_muon_in_fts_wedge( int wedgeid, int inout, int charge = 1 ) {
 
   throw_muon( eta, phid, 500.0, charge );
 	
-  assert( vertex_table = dynamic_cast<TTable*>( chain->GetDataSet("g2t_vertex")  ) );
-  assert( track_table  = dynamic_cast<TTable*>( chain->GetDataSet("g2t_track")   ) );
-  assert( hit_table    = dynamic_cast<TTable*>( chain->GetDataSet("g2t_fsi_hit") ) );
+  vertex_table = dynamic_cast<TTable*>( chain->GetDataSet("g2t_vertex")  );
+  track_table  = dynamic_cast<TTable*>( chain->GetDataSet("g2t_track")   );
+  hit_table    = dynamic_cast<TTable*>( chain->GetDataSet("g2t_fsi_hit") );
 
 }
 //___________________________________________________________________

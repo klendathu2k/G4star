@@ -16,7 +16,8 @@ using namespace boost::accumulators;
 StGeant4Maker* _g4mk = 0;
 
 using Accumulator_t = accumulator_set<double, 
-stats< tag::sum,
+stats< tag::count, 
+       tag::sum,
        tag::mean, 
        tag::median(with_p_square_quantile),
        tag::max, 
@@ -172,6 +173,32 @@ void unit_test_muons() {
   double maxPt = 10.000;
   int    nbinPt = 100;
 
+  // Throw 1k gammas at BEMC, EEMC
+  _kine->Kine(3000,"e+,e-",4.9999,5.0001,-0.95,+2.00);
+
+  chain->Clear();
+  chain->Make();
+
+  check_hit_distribution( "BEMC sampling fraction (e+,e-)", bemc, bemc.energy_deposit, [=](const Accumulator_t& acc){
+      std::string result = PASS; result += "\n";
+      double _count         = boost::accumulators::count(acc);
+      double _sum           = boost::accumulators::sum(acc);      
+      double _sf = _sum / 1000.0 / 5.0;
+      result += Form("Sampling fraction @ 5 GeV = %f\n",_sf);
+      return result;      
+    });
+
+  check_hit_distribution( "EEMC sampling fraction (e+,e-)", eemc, eemc.energy_deposit, [=](const Accumulator_t& acc){
+      std::string result = PASS; result += "\n";
+      double _count         = boost::accumulators::count(acc);
+      double _sum           = boost::accumulators::sum(acc);      
+      double _sf = _sum / 1000.0 / 5.0;
+      result += Form("Sampling fraction @ 5 GeV = %f\n",_sf);
+      return result;      
+    });
+
+  return;
+  
   _kine->Kine(ntracks,"mu+,mu-",0.100,10.00,-2.0,5.0);
 
   chain->Clear();

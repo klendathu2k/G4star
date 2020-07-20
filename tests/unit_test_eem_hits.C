@@ -24,9 +24,9 @@ void throw_muon_in_eemc_tower( double eta, double phid, int charge = 1 ) {
 
   StMaker::GetChain()->ls(10);
 
-  assert( vertex_table = dynamic_cast<TTable*>( chain->GetDataSet("g2t_vertex")  ) );
-  assert( track_table  = dynamic_cast<TTable*>( chain->GetDataSet("g2t_track")   ) );
-  assert( hit_table    = dynamic_cast<TTable*>( chain->GetDataSet("g2t_eem_hit") ) );
+  vertex_table = dynamic_cast<TTable*>( chain->GetDataSet("g2t_vertex")  );
+  track_table  = dynamic_cast<TTable*>( chain->GetDataSet("g2t_track")   );
+  hit_table    = dynamic_cast<TTable*>( chain->GetDataSet("g2t_eem_hit") );
 
 }
 //___________________________________________________________________

@@ -52,10 +52,10 @@ void throw_muon_in_bemc_tower( double eta, double phid, int charge = 1 ) {
   throw_muon( eta, phid, 500.0, charge ); // energetic
   _eta = eta;
   _phid = phid;
-  //  StMaker::GetChain()->ls(10);
-  assert( vertex_table = dynamic_cast<TTable*>( chain->GetDataSet("g2t_vertex")  ) );
-  assert( track_table  = dynamic_cast<TTable*>( chain->GetDataSet("g2t_track")   ) );
-  assert( hit_table    = dynamic_cast<TTable*>( chain->GetDataSet("g2t_emc_hit") ) );
+
+  vertex_table = dynamic_cast<TTable*>( chain->GetDataSet("g2t_vertex")  );
+  track_table  = dynamic_cast<TTable*>( chain->GetDataSet("g2t_track")   );
+  hit_table    = dynamic_cast<TTable*>( chain->GetDataSet("g2t_emc_hit") );
 
 }
 //___________________________________________________________________
