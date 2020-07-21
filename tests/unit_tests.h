@@ -35,6 +35,7 @@ using namespace std;
 TTable* hit_table    = 0;
 TTable* track_table  = 0;
 TTable* vertex_table = 0;
+static TVector3 _vector3;
 //___________________________________________________________________
 double _pmom = 0;
 void throw_muon( double eta, double phid, double pT = 25.0, int q=1 ) {
@@ -47,6 +48,25 @@ void throw_muon( double eta, double phid, double pT = 25.0, int q=1 ) {
   auto* chain = StMaker::GetChain();
   auto* _kine = dynamic_cast<StarKinematics*>( chain->GetMaker("StarKine") );
   auto* particle = _kine->AddParticle( (q==1)?"mu+":"mu-" );
+  particle->SetPx(momentum[0]);
+  particle->SetPy(momentum[1]);
+  particle->SetPz(momentum[2]);
+  double mass = particle->GetMass();
+  double ener = sqrt( momentum.Mag2() + mass*mass );
+  particle->SetEnergy(ener);
+  chain->Clear();
+  chain->Make();
+}
+void throw_particle( const char* part, double eta, double phid, double pT = 25.0, int q=1 ) {
+  // eta  = pseudorapidity
+  // phid = azimuthal angle in degrees
+  double phi = TMath::Pi() * phid / 180.0;
+  TVector3 momentum;
+  momentum.SetPtEtaPhi(pT,eta,phi);
+  _pmom = momentum.Mag();
+  auto* chain = StMaker::GetChain();
+  auto* _kine = dynamic_cast<StarKinematics*>( chain->GetMaker("StarKine") );
+  auto* particle = _kine->AddParticle( part );
   particle->SetPx(momentum[0]);
   particle->SetPy(momentum[1]);
   particle->SetPz(momentum[2]);
