@@ -712,8 +712,8 @@ void StGeant4Maker::UpdateHistory() {
 
   // Obtain the agml extensions, giving priority to anything attached to
   // a node.
-  /*AgMLExtension*/ aprev = (mPreviousNode ) ? dynamic_cast<AgMLExtension*>( mPreviousNode->GetUserExtension() ) : 0;
-  /*AgMLExtension*/ acurr = (mCurrentNode  ) ? dynamic_cast<AgMLExtension*>( mCurrentNode->GetUserExtension() )  : 0;
+  aprev = (mPreviousNode ) ? dynamic_cast<AgMLExtension*>( mPreviousNode->GetUserExtension() ) : 0;
+  acurr = (mCurrentNode  ) ? dynamic_cast<AgMLExtension*>( mCurrentNode->GetUserExtension() )  : 0;
   if ( 0==aprev ) {
     aprev = (mPreviousVolume) ? dynamic_cast<AgMLExtension*>( mPreviousVolume->GetUserExtension() ) : 0;
   }
@@ -764,6 +764,10 @@ void StGeant4Maker::Stepping(){
   // Check for region transitions
   int transit = regionTransition( mCurrentTrackingRegion, mPreviousTrackingRegion );
 
+  double vx, vy, vz, tof;
+  mc->TrackPosition( vx,vy,vz );
+  tof = mc->TrackTime(); // because consistent interface ala TrackMomentum is hard...
+
   // Check if option to stop punchout tracks is enabled
   if ( IAttr("Stepping:Punchout:Stop") && 1==transit) {
     
@@ -783,9 +787,7 @@ void StGeant4Maker::Stepping(){
         mc->TrackMomentum( px, py, pz, e );
         // ... and its current vertex and TOF from the point where it
         // emerges from the calorimeter
-        double vx, vy, vz, tof;
-        mc->TrackPosition( vx,vy,vz );
-        tof = mc->TrackTime(); // because consistent interface ala TrackMomentum is hard...
+
         // this is a user process (and I would dearly love to be able to extend the definitions here...)
         TMCProcess mech = kPUserDefined;
         int ntr;
@@ -795,6 +797,17 @@ void StGeant4Maker::Stepping(){
     } 
 
     mc->StopTrack();
+    
+  }
+
+
+  // Track has decayed or otherwise been stopped
+  if ( mc->IsTrackDisappeared() || 
+       mc->IsTrackStop() ||
+       mc->IsTrackOut() ) {
+
+    StarMCVertex* vertex = mMCStack->GetVertex( vx, vy, vz, tof );
+    vertex->setParent( truth );
     
   }
 
