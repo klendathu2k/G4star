@@ -53,6 +53,10 @@ public:
   const StarMCVertex* start() const { return mStartVertex; }
   const StarMCVertex* stop()  const { return mStopVertex; }
 
+  void  setStartVertex( StarMCVertex* v ){ mStartVertex = v; }
+  void  addIntermediateVertex( StarMCVertex* v ){ mIntermediateVertices.push_back(v); }
+  void  setStopVertex( StarMCVertex* v ){ mStopVertex = v; }
+
   void setIdStack( int id ) { mIdStack = id; } 
   int     idStack() const { return mIdStack; } 
 
