@@ -808,6 +808,7 @@ void StGeant4Maker::Stepping(){
 
     StarMCVertex* vertex = mMCStack->GetVertex( vx, vy, vz, tof );
     vertex->setParent( truth );
+    truth->setStopVertex( vertex );
     
   }
 

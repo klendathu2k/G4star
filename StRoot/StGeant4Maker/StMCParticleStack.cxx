@@ -147,9 +147,9 @@ void StMCParticleStack::PushTrack( int toDo, int parent, int pdg,
     vertex->addDaughter( mParticleTable.back() );  
 
     std::cout << "New vertex added with parentID = " << parent << " parent @ " << mStackToTable[parent] << std::endl;
-    if ( mStackToTable[parent] ) {
-      vertex->setParent( mStackToTable[parent] );
-    }
+    // if ( mStackToTable[parent] ) {
+    //   vertex->setParent( mStackToTable[parent] );
+    // }
 
   }
 
@@ -247,6 +247,7 @@ TParticle *StMCParticleStack::GetParticle( int idx ) const
 //___________________________________________________________________________________________________________________
 void StMCParticleStack::Clear( const Option_t *opts )
 {
+
 #if 0
   LOG_INFO << "TParticle table" << endm;
   int index = 0;
