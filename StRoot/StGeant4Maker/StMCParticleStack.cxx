@@ -135,20 +135,7 @@ void StMCParticleStack::PushTrack( int toDo, int parent, int pdg,
   //
   if ( agmlreg == 2 ) {
 
-    // Obtain a vertex within epsilon of current vertex
-    const double eps=0.0000005;
-    StarMCVertex* vertex = 0;
-    for ( auto vtx : mVertexTable ) {
-      double dist = vtx->distance(vx,vy,vz);
-      if ( dist < eps ) {
-	vertex=vtx;
-	break;
-      }
-    }
-
-    if ( 0==vertex ) {
-      mVertexTable.push_back( vertex = new StarMCVertex(vx,vy,vz,vt) ); 
-    }
+    StarMCVertex* vertex = GetVertex( vx, vy, vz, vt );
 
     mParticleTable.push_back(new StarMCParticle(particle,vertex));
 
@@ -159,10 +146,7 @@ void StMCParticleStack::PushTrack( int toDo, int parent, int pdg,
     // add this particle as a daughter of the vertex
     vertex->addDaughter( mParticleTable.back() );  
 
-    // If it's not primary, add parent to the vertex as well
-    // ... no.  the "parent" refers to a track in the mStack or maybe mArray, not
-    // the particle table.  We would need to lookup the ID correspondance...
-
+    std::cout << "New vertex added with parentID = " << parent << " parent @ " << mStackToTable[parent] << std::endl;
     if ( mStackToTable[parent] ) {
       vertex->setParent( mStackToTable[parent] );
     }
@@ -172,7 +156,27 @@ void StMCParticleStack::PushTrack( int toDo, int parent, int pdg,
 
 }
 //___________________________________________________________________________________________________________________
-//
+StarMCVertex* StMCParticleStack::GetVertex( double vx, double vy, double vz, double vt ) {
+
+  StarMCVertex* vertex = 0;
+
+  // TODO: Make eps a class parameter
+  const double eps=0.0000005;
+  for ( auto vtx : mVertexTable ) {
+    double dist = vtx->distance(vx,vy,vz);
+    if ( dist < eps ) {
+      vertex=vtx;
+      break;
+    }
+  }
+
+  if ( 0==vertex ) {
+    mVertexTable.push_back( vertex = new StarMCVertex(vx,vy,vz,vt) ); 
+  }
+
+  return vertex;
+
+}
 //___________________________________________________________________________________________________________________
 TParticle *StMCParticleStack::PopNextTrack( int &itrack )
 {
@@ -305,14 +309,14 @@ StarMCParticle::StarMCParticle( TParticle* part, StarMCVertex* vert ) :
 StarMCVertex::StarMCVertex() : mVertex{0,0,0,0},
 			       mParent(0),
 			       mDaughters(),			   					   
-			       mMechanism(kPNoProcess)
+		               mMechanism(kPNoProcess)
 {
 
 
 }
 //___________________________________________________________________________________________________________________						
-StarMCVertex::StarMCVertex( double x, double y, double z, double t) : mVertex{x,y,z,t},
-			       mParent(0),
+StarMCVertex::StarMCVertex( double x, double y, double z, double t, StarMCParticle* parent) : mVertex{x,y,z,t},
+			       mParent(parent),
 			       mDaughters(),			   					   
 			       mMechanism(kPNoProcess)
 {

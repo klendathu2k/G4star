@@ -76,7 +76,7 @@ protected:
 class StarMCVertex {
 public:
   StarMCVertex();
-  StarMCVertex( double vx, double vy, double vz, double vt );
+  StarMCVertex( double vx, double vy, double vz, double vt, StarMCParticle* parent=0 );
 //  StarMCVertex( const StarMCVertex& );
 //  StarMCVertex( const StarMCVertex&& ) = default;
  ~StarMCVertex(){ /* nada */ };
@@ -192,6 +192,8 @@ class StMCParticleStack : public TVirtualMCStack
 
   std::vector<StarMCParticle*>& GetParticleTable(){ return mParticleTable; }
   std::vector<StarMCVertex*>&   GetVertexTable()  { return mVertexTable; }
+
+  StarMCVertex* GetVertex( double vx, double vy, double vz, double vt );
 
  private:
  protected:
