@@ -10,6 +10,8 @@ using namespace std;
 
 #include <TGeoManager.h>
 #include <TGeoNavigator.h>
+#include <TGeoVolume.h>
+#include <TGeoMedium.h>
 
 #include <StarVMC/StarAgmlLib/AgMLExtension.h>
 
@@ -145,6 +147,13 @@ void StMCParticleStack::PushTrack( int toDo, int parent, int pdg,
 
     // add this particle as a daughter of the vertex
     vertex->addDaughter( mParticleTable.back() );  
+
+    auto* navigator = gGeoManager->GetCurrentNavigator();
+    auto* volume    = navigator->GetCurrentVolume();
+    auto* medium    = volume->GetMedium();
+    int   imed      = medium->GetId();
+
+    vertex->setMedium(imed);
 
     std::cout << "New vertex added with parentID = " << parent << " parent @ " << mStackToTable[parent] << std::endl;
     // if ( mStackToTable[parent] ) {
@@ -310,7 +319,8 @@ StarMCParticle::StarMCParticle( TParticle* part, StarMCVertex* vert ) :
 StarMCVertex::StarMCVertex() : mVertex{0,0,0,0},
 			       mParent(0),
 			       mDaughters(),			   					   
-		               mMechanism(kPNoProcess)
+		    mMechanism(kPNoProcess),
+		    mMedium(0)
 {
 
 
@@ -319,7 +329,8 @@ StarMCVertex::StarMCVertex() : mVertex{0,0,0,0},
 StarMCVertex::StarMCVertex( double x, double y, double z, double t, StarMCParticle* parent) : mVertex{x,y,z,t},
 			       mParent(parent),
 			       mDaughters(),			   					   
-			       mMechanism(kPNoProcess)
+		    mMechanism(kPNoProcess),
+		    mMedium(0)
 {
 
 

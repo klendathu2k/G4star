@@ -624,6 +624,8 @@ void StGeant4Maker::FinishEvent(){
       myvertex.n_parent = 1; // almost by definition
       myvertex.parent_p = truthTrack[ v->parent() ];
     }
+    myvertex.ge_medium = v->medium();
+    myvertex.ge_proc   = v->process();
 
     // TODO: map ROOT mechanism to G3 names
     
