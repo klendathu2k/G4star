@@ -6,6 +6,8 @@ double _eta  = 0;
 double _phid = 0;
 //___________________________________________________________________
 
+
+
 void unit_test_tracks() {
 
   gROOT->ProcessLine("initChain();");
@@ -24,21 +26,25 @@ void unit_test_tracks() {
   track_table  = dynamic_cast<TTable*>( chain->GetDataSet("bfc/.make/geant4star/.data/g2t_track")   );
   hit_table    = dynamic_cast<TTable*>( chain->GetDataSet("bfc/.make/geant4star/.data/g2t_tpc_hit") ) ;
 
-  check_track( "Print the track table",                              [=](const g2t_track_st* t){
+  check_track( "Print the track table",                                            [=](const g2t_track_st* t){
       track_table->Print(0,10);
       return PASS; 
     });
-
-  check_track( "A particle must have been processed by geant",       [=](const g2t_track_st* t){
+  check_track( "Print the vertex table",                                           [=](const g2t_track_st* t){
+      vertex_table->Print(0,100);
       return PASS; 
     });
-  check_track( "The track should have a start vertex",               [=](const g2t_track_st* t){
+
+  check_track( "A particle must have been processed by geant",                     [=](const g2t_track_st* t){
+      return PASS; 
+    });
+  check_track( "The track should have a start vertex",                             [=](const g2t_track_st* t){
       return (t->start_vertex_p>0)?PASS:FAIL;      
     });
-  check_track( "The track should have a stop vertex",               [=](const g2t_track_st* t){
+  check_track( "The track should have a stop vertex",                              [=](const g2t_track_st* t){
       return (t->stop_vertex_p>0)?PASS:FAIL;      
     });
-  check_track( "The start vertex should be in the vertex table",     [=](const g2t_track_st* t){
+  check_track( "The start vertex should be in the vertex table",                   [=](const g2t_track_st* t){
       std::string result = FAIL;
       int istart = t->start_vertex_p;
       const g2t_vertex_st* vertex = (istart>0) ? static_cast<const g2t_vertex_st*>( vertex_table->At(istart-1) ) : 0;
@@ -47,7 +53,7 @@ void unit_test_tracks() {
       }
       return result;
     });  
-  check_track( "The stop vertex should be in the vertex table",     [=](const g2t_track_st* t){
+  check_track( "The stop vertex should be in the vertex table",                    [=](const g2t_track_st* t){
       std::string result = FAIL;
       int istart = t->stop_vertex_p;
       const g2t_vertex_st* vertex = (istart>0) ? static_cast<const g2t_vertex_st*>( vertex_table->At(istart-1) ) : 0;
@@ -56,6 +62,86 @@ void unit_test_tracks() {
       }
       return result;
     });  
+  check_track( "The id of the START vertex is less than the id of the STOP vetex", [=](const g2t_track_st* t){
+      std::string result = FAIL;
+      int istart = t->start_vertex_p;
+      int istop  = t->stop_vertex_p;
+      if ( istart > 0 && istop > istart ) result = PASS;      
+      return result;
+    });
+  check_track( "The STOP vertex records a valid medium",                           [=](const g2t_track_st* t){
+      auto result = FAIL;
+      int istop = t->stop_vertex_p;
+      const g2t_vertex_st* vertex = (istop>0) ? static_cast<const g2t_vertex_st*>( vertex_table->At(istop-1) ) : 0;
+      if ( vertex ) {
+	if ( vertex->ge_medium>0 ) result = PASS;
+      }
+      return result;
+
+    });
+  check_track( "The STOP vertex records a valid process",                           [=](const g2t_track_st* t){
+      auto result = FAIL;
+      int istop = t->stop_vertex_p;
+      const g2t_vertex_st* vertex = (istop>0) ? static_cast<const g2t_vertex_st*>( vertex_table->At(istop-1) ) : 0;
+      if ( vertex ) {
+	if ( vertex->ge_proc>0 ) result = PASS;
+      }
+      return result;
+
+    });
+
+  check_track( "The STOP vertex has daughter tracks",                           [=](const g2t_track_st* t){
+      auto result = FAIL;
+      int istop = t->stop_vertex_p;
+      const g2t_vertex_st* vertex = (istop>0) ? static_cast<const g2t_vertex_st*>( vertex_table->At(istop-1) ) : 0;
+      if ( vertex ) {
+	if ( vertex->n_daughter>0 ) result = PASS;
+      }
+      return result;
+
+    });
+
+  check_track( "The STOP vertex has pointer to first daughter",                    [=](const g2t_track_st* t){
+      auto result = FAIL;
+      int istop = t->stop_vertex_p;
+      const g2t_vertex_st* vertex = (istop>0) ? static_cast<const g2t_vertex_st*>( vertex_table->At(istop-1) ) : 0;
+      if ( vertex ) {
+	if ( vertex->daughter_p>0 ) result = PASS;
+      }
+      return result;
+
+    });
+
+
+
+  // check_track( "All tracks have a start vertex",                      [=](const g2t_track_st* t){
+  //     std::string result = FAIL;
+
+  //     std::map<int, std::vector<int> > vertex2daughters; // v2d[ivertex]=vector of daughters
+  //     int ntracks = track_table->GetNRows();
+  //     for ( int itrack=0;itrack<ntracks;itrack++ ) {
+  // 	const g2t_track_st* track = static_cast<const g2t_track_st*>(track_table->At(itrack));
+  // 	if ( 0==track ) continue;
+  // 	int idtruth = track->id;
+  // 	int idstart = track->start_vertex_p;
+  // 	vertex2daughters[idstart].push_back( idtruth );
+  //     }
+
+  //     for (auto const& vd : vertex2daughters ) {
+  // 	std::cout << "vertex id=" << vd.first << " daughters=";
+  // 	for ( auto const& d : vd.second ) {
+  // 	  std::cout << d << " ";
+  // 	}
+  // 	std::cout << std::endl;
+  //     }
+     
+  //     return result;
+
+  //   });
+
+
+
+
   
   // for ( int sector=1; sector<=24; sector++ ) {
 
