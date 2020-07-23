@@ -84,8 +84,9 @@ void unit_test_tracks() {
       int istop = t->stop_vertex_p;
       const g2t_vertex_st* vertex = (istop>0) ? static_cast<const g2t_vertex_st*>( vertex_table->At(istop-1) ) : 0;
       if ( vertex ) {
-	if ( vertex->ge_proc>0 ) result = PASS;
+	if ( vertex->ge_proc>0 && vertex->ge_proc < 44 ) result = PASS;	
       }
+      result = Form(" (ge_proc=%i)", vertex->ge_proc ) + result;
       return result;
 
     });
