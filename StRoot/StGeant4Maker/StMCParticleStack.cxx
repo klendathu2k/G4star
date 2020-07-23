@@ -154,8 +154,9 @@ void StMCParticleStack::PushTrack( int toDo, int parent, int pdg,
     int   imed      = medium->GetId();
 
     vertex->setMedium(imed);
+    vertex->setProcess( mech );
 
-    std::cout << "New vertex added with parentID = " << parent << " parent @ " << mStackToTable[parent] << std::endl;
+    //    std::cout << "New vertex added with parentID = " << parent << " parent @ " << mStackToTable[parent] << std::endl;
     // if ( mStackToTable[parent] ) {
     //   vertex->setParent( mStackToTable[parent] );
     // }
