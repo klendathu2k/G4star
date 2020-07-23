@@ -8,6 +8,8 @@ double _phid = 0;
 
 
 
+
+
 void unit_test_tracks() {
 
   gROOT->ProcessLine("initChain();");
@@ -20,7 +22,7 @@ void unit_test_tracks() {
   LOG_TEST << "Unit testing of tracks "     << std::endl;
   LOG_TEST << "=======================================================" << std::endl;
 
-  throw_particle( "e-", 0.425, 3.1415/4, 10.0 );
+  throw_particle( "e+", 0.425, 3.1415/4, 10.0 );
 
   vertex_table = dynamic_cast<TTable*>( chain->GetDataSet("bfc/.make/geant4star/.data/g2t_vertex")  );
   track_table  = dynamic_cast<TTable*>( chain->GetDataSet("bfc/.make/geant4star/.data/g2t_track")   );
@@ -31,7 +33,7 @@ void unit_test_tracks() {
       return PASS; 
     });
   check_track( "Print the vertex table",                                           [=](const g2t_track_st* t){
-      vertex_table->Print(0,100);
+      vertex_table->Print(0,10);
       return PASS; 
     });
 
@@ -84,11 +86,11 @@ void unit_test_tracks() {
       int istop = t->stop_vertex_p;
       const g2t_vertex_st* vertex = (istop>0) ? static_cast<const g2t_vertex_st*>( vertex_table->At(istop-1) ) : 0;
       if ( vertex ) {
-	if ( vertex->ge_proc>0 && vertex->ge_proc < 44 ) result = PASS;	
+	vertex_table->Print(istop-1,1);
+	//if ( vertex->ge_proc>0 && vertex->ge_proc < 44 ) result = PASS;	
       }
-      result = Form(" (ge_proc=%i)", vertex->ge_proc ) + result;
+      result = Form(" (ge_proc=%i %s)", vertex->ge_proc, TMCProcessName[vertex->ge_proc] ) + result;
       return result;
-
     });
 
   check_track( "The STOP vertex has daughter tracks",                           [=](const g2t_track_st* t){
@@ -114,6 +116,24 @@ void unit_test_tracks() {
     });
 
 
+  // check_track( "Print daughters associated with the STOP vertex",                   [=](const g2t_track_st* t){
+  //     auto result = PASS;
+  //     int istop = t->stop_vertex_p;
+  //     const g2t_vertex_st* vertex = (istop>0) ? static_cast<const g2t_vertex_st*>( vertex_table->At(istop-1) ) : 0;
+  //     if ( vertex ) {
+  // 	vertex_table->Print(istop-1,1);
+  // 	int ntrack = track_table->GetNRows();
+  // 	for ( int itrack=0;itrack<ntrack;itrack++ ) {
+  // 	  const g2t_track_st* track = static_cast<const g2t_track_st*>( track_table->At(itrack) );
+  // 	  if ( track->start_vertex_p == istop ) {
+  // 	    track_table->Print(itrack,1);
+  // 	  }
+  // 	}
+	
+  //     }
+
+  //     return result;
+  //   });
 
   // check_track( "All tracks have a start vertex",                      [=](const g2t_track_st* t){
   //     std::string result = FAIL;
