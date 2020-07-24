@@ -177,6 +177,9 @@ StarMCVertex* StMCParticleStack::GetVertex( double vx, double vy, double vz, dou
 
   if ( 0==vertex ) {
     mVertexTable.push_back( vertex = new StarMCVertex(vx,vy,vz,vt) ); 
+    auto* navigator = gGeoManager->GetCurrentNavigator();
+    auto* volume    = navigator->GetCurrentVolume();
+    mVertexTable.back()->setVolume( volume->GetName() );
   }
 
   return vertex;
@@ -316,7 +319,9 @@ StarMCVertex::StarMCVertex() : mVertex{0,0,0,0},
 			       mParent(0),
 			       mDaughters(),			   					   
 		    mMechanism(kPNoProcess),
-		    mMedium(0)
+		    mMedium(0),
+		    mVolume("unkn")
+		    
 {
 
 
@@ -326,7 +331,8 @@ StarMCVertex::StarMCVertex( double x, double y, double z, double t, StarMCPartic
 			       mParent(parent),
 			       mDaughters(),			   					   
 		    mMechanism(kPNoProcess),
-		    mMedium(0)
+		    mMedium(0),
+		    mVolume("unkn")
 {
 
 

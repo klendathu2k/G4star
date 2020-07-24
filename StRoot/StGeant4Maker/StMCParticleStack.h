@@ -109,6 +109,9 @@ public:
   void setProcess( const TMCProcess p ) { mMechanism=p; }
   TMCProcess process() const { return mMechanism; }
 
+  void setVolume( const char* name ){ mVolume = name; }
+  std::string volume(){ return mVolume; }
+
 private:
 protected:
 
@@ -117,6 +120,7 @@ protected:
   std::vector<StarMCParticle*> mDaughters;  /// Decay daughters / interaction products
   TMCProcess                   mMechanism;  /// Creation mechanism
   int                          mMedium;     /// Medium ID
+  std::string                  mVolume;     /// Name of the volume
 
 };
 

@@ -97,13 +97,12 @@ struct SD2Table_TPC {
       g2t_hit.length    = hit->length;
       g2t_hit.lgam      = hit->lgam;
       /*
-      g2t_hit.lgam = ...;
+	these are used downstream by the slow simulator (and should not be filled here)
 
-      // these are used downstream by the slow simulator
-      g2t_hit.adc = ...;
-      g2t_hit.pad = ...;
-      g2t_hit.timebucket = ...;
-      g2t_hit.np = ...; // number of primary electrons
+	g2t_hit.adc = ...;
+	g2t_hit.pad = ...;
+	g2t_hit.timebucket = ...;
+	g2t_hit.np = ...; // number of primary electrons
 
       */
       
@@ -612,6 +611,8 @@ void StGeant4Maker::FinishEvent(){
     // partial fill of vertex table ________________________
     g2t_vertex_st myvertex;   memset(&myvertex, 0, sizeof(g2t_vertex_st));    
     myvertex.id = ivertex;
+    std::string vname = v->volume();
+    std::copy(vname.begin(), vname.end(), myvertex.ge_volume);
     myvertex.eg_x[0] = myvertex.ge_x[0] = v->vx();
     myvertex.eg_x[1] = myvertex.ge_x[1] = v->vy();
     myvertex.eg_x[2] = myvertex.ge_x[2] = v->vz();
@@ -802,6 +803,7 @@ void StGeant4Maker::Stepping(){
     
   }
 
+  int nsec  = mc->NSecondaries();
 
   // Track has decayed or otherwise been stopped 
   if ( mc->IsTrackDisappeared() || 
@@ -815,12 +817,10 @@ void StGeant4Maker::Stepping(){
       vertex->setParent( truth );
       vertex->setMedium( mc->CurrentMedium() );
 
-      int nsec  = mc->NSecondaries();
       int pdgid = 0;
       if ( mc->IsTrackDisappeared() ) {
 
 	if ( nsec ) vertex->setProcess( mc->ProdProcess(0) );
-	// else remains null
 	
       }
       else if ( mc->IsTrackStop() )   vertex->setProcess( kPStop );
@@ -829,6 +829,25 @@ void StGeant4Maker::Stepping(){
       truth->setStopVertex( vertex );         
     }
 
+  }
+  else if ( nsec > 0 ) {
+
+
+    TMCProcess proc = mc->ProdProcess(0);
+    {
+
+      // interaction which throws off secondaries and track contiues...
+      auto* vertex = mMCStack->GetVertex(vx,vy,vz,tof);
+
+      vertex->setParent( truth );
+      vertex->setMedium( mc->CurrentMedium() );
+      vertex->setProcess( mc->ProdProcess(0) );
+      
+      // this is an intermediate vertex on the truth track
+      truth->addIntermediateVertex( vertex );
+
+    }
+      
   }
 
 
