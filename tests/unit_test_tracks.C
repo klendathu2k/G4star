@@ -100,12 +100,13 @@ void unit_test_tracks() {
 
       return result;
     }, idx);
-  check_track( "The id of the START vertex is less than the id of the STOP vetex", [=](const g2t_track_st* t){
+  check_track( "The id of the START vertex is less than the id of the STOP vertex", [=](const g2t_track_st* t){
       std::string result = FAIL;
       int istart = t->start_vertex_p;
       int istop  = t->stop_vertex_p;
       if ( istart > 0 && istop > istart ) result = PASS;      
-      return result;
+      if ( istart == istop ) result = TODO;
+      return Form("(start=%i stop=%i)",istart,istop) + result;
     }, idx);
 
   check_track( "The STOP vertex records a valid medium",                           [=](const g2t_track_st* t){
@@ -123,7 +124,6 @@ void unit_test_tracks() {
       int istop = t->stop_vertex_p;
       const g2t_vertex_st* vertex = (istop>0) ? static_cast<const g2t_vertex_st*>( vertex_table->At(istop-1) ) : 0;
       if ( vertex ) {
-	//	vertex_table->Print(istop-1,1);
 	result = Form(" (ge_proc=%i %s)", vertex->ge_proc, TMCProcessName[vertex->ge_proc] );
 	if ( vertex->ge_proc > 0 && vertex->ge_proc < 44 ) result += PASS;
 	else                                               result += FAIL;
