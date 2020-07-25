@@ -77,8 +77,8 @@ void throw_particle( const char* part, double eta, double phid, double pT = 25.0
   chain->Make();
 }
 //___________________________________________________________________
-std::string check_track( std::string message, std::function<std::string(const g2t_track_st*)> f) {
-  const g2t_track_st* track = static_cast<const g2t_track_st*>( track_table->At(0) );  
+std::string check_track( std::string message, std::function<std::string(const g2t_track_st*)> f, int idx=0) {
+  const g2t_track_st* track = static_cast<const g2t_track_st*>( track_table->At(idx) );  
   std::string result = "\u001b[37m [" + message + "] " + (track? f(track):FAIL );
   LOG_TEST << result << std::endl;
   return result;
