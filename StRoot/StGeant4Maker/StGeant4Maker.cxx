@@ -807,8 +807,8 @@ void StGeant4Maker::Stepping(){
 
   // Track has decayed or otherwise been stopped 
   if ( mc->IsTrackDisappeared() || 
-       mc->IsTrackStop() ||
-       mc->IsTrackOut() ) {
+       mc->IsTrackStop()        ||
+       mc->IsTrackOut()         ) {
       
     const StarMCVertex* vertex_ = truth->stop();
     if ( 0==vertex_ ) {
@@ -820,7 +820,9 @@ void StGeant4Maker::Stepping(){
       int pdgid = 0;
       if ( mc->IsTrackDisappeared() ) {
 
-	if ( nsec ) vertex->setProcess( mc->ProdProcess(0) );
+	if ( nsec )                         vertex->setProcess( mc->ProdProcess(0) );
+	else if ( mc->IsTrackStop() )       vertex->setProcess( kPStop );
+	else if ( mc->IsTrackOut()  )       vertex->setProcess( kPNull );
 	
       }
       else if ( mc->IsTrackStop() )   vertex->setProcess( kPStop );
