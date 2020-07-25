@@ -10,7 +10,7 @@ double _phid = 0;
 
 
 
-void unit_test_tracks() {
+void unit_test_track_data_model() {
 
   gROOT->ProcessLine("initChain();");
 
