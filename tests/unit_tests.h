@@ -84,6 +84,13 @@ std::string check_track( std::string message, std::function<std::string(const g2
   return result;
 };
 //___________________________________________________________________
+std::string check_vertex( std::string message, std::function<std::string(const g2t_vertex_st*)> f, int idx=0) {
+  const g2t_vertex_st* vertex = static_cast<const g2t_vertex_st*>( vertex_table->At(idx) );
+  std::string result = "\u001b[37m [" + message + "] " + (vertex? f(vertex):FAIL );
+  LOG_TEST << result << std::endl;
+  return result;
+};
+//___________________________________________________________________
 std::string check_tpc_hit( std::string message, const g2t_tpc_hit_st* hit, std::function<std::string(const g2t_tpc_hit_st*)> f) {
   std::string result = "\u001b[37m [" + message + "] " + (hit? f(hit):FAIL);
   LOG_TEST << result << std::endl;
