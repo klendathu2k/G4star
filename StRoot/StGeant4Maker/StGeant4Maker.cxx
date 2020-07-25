@@ -95,14 +95,14 @@ struct SD2Table_TPC {
       }
       g2t_hit.tof       = 0.5 * ( hit->position_in[3] + hit->position_out[3] ); 
       g2t_hit.length    = hit->length;
+      g2t_hit.lgam      = hit->lgam;
       /*
-      g2t_hit.lgam = ...;
+	these are used downstream by the slow simulator (and should not be filled here)
 
-      // these are used downstream by the slow simulator
-      g2t_hit.adc = ...;
-      g2t_hit.pad = ...;
-      g2t_hit.timebucket = ...;
-      g2t_hit.np = ...; // number of primary electrons
+	g2t_hit.adc = ...;
+	g2t_hit.pad = ...;
+	g2t_hit.timebucket = ...;
+	g2t_hit.np = ...; // number of primary electrons
 
       */
       
@@ -611,6 +611,8 @@ void StGeant4Maker::FinishEvent(){
     // partial fill of vertex table ________________________
     g2t_vertex_st myvertex;   memset(&myvertex, 0, sizeof(g2t_vertex_st));    
     myvertex.id = ivertex;
+    std::string vname = v->volume();
+    std::copy(vname.begin(), vname.end(), myvertex.ge_volume);
     myvertex.eg_x[0] = myvertex.ge_x[0] = v->vx();
     myvertex.eg_x[1] = myvertex.ge_x[1] = v->vy();
     myvertex.eg_x[2] = myvertex.ge_x[2] = v->vz();
@@ -623,6 +625,8 @@ void StGeant4Maker::FinishEvent(){
       myvertex.n_parent = 1; // almost by definition
       myvertex.parent_p = truthTrack[ v->parent() ];
     }
+    myvertex.ge_medium = v->medium();
+    myvertex.ge_proc   = v->process();
 
     // TODO: map ROOT mechanism to G3 names
     
@@ -667,6 +671,8 @@ void StGeant4Maker::FinishEvent(){
   AddHits<St_g2t_emc_hit>( "WCAH", {"WSCI"}, "g2t_wca_hit", sd2table_emc  );
   AddHits<St_g2t_emc_hit>( "HCAH", {"HSCI"}, "g2t_hca_hit", sd2table_emc  ); 
 
+  //  g2t_track->Print(0,10);
+
 }
 //________________________________________________________________________________________________
 void StarVMCApplication::BeginPrimary(){ _g4maker -> BeginPrimary(); }
@@ -709,8 +715,8 @@ void StGeant4Maker::UpdateHistory() {
 
   // Obtain the agml extensions, giving priority to anything attached to
   // a node.
-  /*AgMLExtension*/ aprev = (mPreviousNode ) ? dynamic_cast<AgMLExtension*>( mPreviousNode->GetUserExtension() ) : 0;
-  /*AgMLExtension*/ acurr = (mCurrentNode  ) ? dynamic_cast<AgMLExtension*>( mCurrentNode->GetUserExtension() )  : 0;
+  aprev = (mPreviousNode ) ? dynamic_cast<AgMLExtension*>( mPreviousNode->GetUserExtension() ) : 0;
+  acurr = (mCurrentNode  ) ? dynamic_cast<AgMLExtension*>( mCurrentNode->GetUserExtension() )  : 0;
   if ( 0==aprev ) {
     aprev = (mPreviousVolume) ? dynamic_cast<AgMLExtension*>( mPreviousVolume->GetUserExtension() ) : 0;
   }
@@ -761,6 +767,10 @@ void StGeant4Maker::Stepping(){
   // Check for region transitions
   int transit = regionTransition( mCurrentTrackingRegion, mPreviousTrackingRegion );
 
+  double vx, vy, vz, tof;
+  mc->TrackPosition( vx,vy,vz );
+  tof = mc->TrackTime(); // because consistent interface ala TrackMomentum is hard...
+
   // Check if option to stop punchout tracks is enabled
   if ( IAttr("Stepping:Punchout:Stop") && 1==transit) {
     
@@ -780,9 +790,7 @@ void StGeant4Maker::Stepping(){
         mc->TrackMomentum( px, py, pz, e );
         // ... and its current vertex and TOF from the point where it
         // emerges from the calorimeter
-        double vx, vy, vz, tof;
-        mc->TrackPosition( vx,vy,vz );
-        tof = mc->TrackTime(); // because consistent interface ala TrackMomentum is hard...
+
         // this is a user process (and I would dearly love to be able to extend the definitions here...)
         TMCProcess mech = kPUserDefined;
         int ntr;
@@ -793,6 +801,55 @@ void StGeant4Maker::Stepping(){
 
     mc->StopTrack();
     
+  }
+
+  int nsec  = mc->NSecondaries();
+
+  // Track has decayed or otherwise been stopped 
+  if ( mc->IsTrackDisappeared() || 
+       mc->IsTrackStop()        ||
+       mc->IsTrackOut()         ) {
+      
+    const StarMCVertex* vertex_ = truth->stop();
+    if ( 0==vertex_ ) {
+      
+      auto* vertex = mMCStack->GetVertex( vx, vy, vz, tof );
+      vertex->setParent( truth );
+      vertex->setMedium( mc->CurrentMedium() );
+
+      int pdgid = 0;
+      if ( mc->IsTrackDisappeared() ) {
+
+	if ( nsec )                         vertex->setProcess( mc->ProdProcess(0) );
+	else if ( mc->IsTrackStop() )       vertex->setProcess( kPStop );
+	else if ( mc->IsTrackOut()  )       vertex->setProcess( kPNull );
+	
+      }
+      else if ( mc->IsTrackStop() )   vertex->setProcess( kPStop );
+      else if ( mc->IsTrackOut()  )   vertex->setProcess( kPNull );
+      
+      truth->setStopVertex( vertex );         
+    }
+
+  }
+  else if ( nsec > 0 ) {
+
+
+    TMCProcess proc = mc->ProdProcess(0);
+    {
+
+      // interaction which throws off secondaries and track contiues...
+      auto* vertex = mMCStack->GetVertex(vx,vy,vz,tof);
+
+      vertex->setParent( truth );
+      vertex->setMedium( mc->CurrentMedium() );
+      vertex->setProcess( mc->ProdProcess(0) );
+      
+      // this is an intermediate vertex on the truth track
+      truth->addIntermediateVertex( vertex );
+
+    }
+      
   }
 
 

@@ -217,6 +217,12 @@ void StTrackerHitCollection::ProcessHits() {
   double mass = mc->TrackMass();
   double Etot = mc->Etot(); // total energy
 
+  double Ekin = Etot - mass;
+  if      ( mass <= 0 ) hit->lgam = -999;
+  else if ( Ekin <= 0 ) hit->lgam = -998;
+  else                  hit->lgam = TMath::Log10( Ekin/mass );
+  
+
   // Grab the agml extension and evaluate user hits
   AgMLExtension* agmlext = dynamic_cast<AgMLExtension*>( current->GetUserExtension() );
   if ( 0==agmlext ) return;

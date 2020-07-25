@@ -24,9 +24,9 @@ void throw_muon_in_eemc_tower( double eta, double phid, int charge = 1 ) {
 
   StMaker::GetChain()->ls(10);
 
-  assert( vertex_table = dynamic_cast<TTable*>( chain->GetDataSet("g2t_vertex")  ) );
-  assert( track_table  = dynamic_cast<TTable*>( chain->GetDataSet("g2t_track")   ) );
-  assert( hit_table    = dynamic_cast<TTable*>( chain->GetDataSet("g2t_eem_hit") ) );
+  vertex_table = dynamic_cast<TTable*>( chain->GetDataSet("g2t_vertex")  );
+  track_table  = dynamic_cast<TTable*>( chain->GetDataSet("g2t_track")   );
+  hit_table    = dynamic_cast<TTable*>( chain->GetDataSet("g2t_eem_hit") );
 
 }
 //___________________________________________________________________
@@ -157,12 +157,7 @@ void unit_test_eem_hits() {
 	if ( h->de > 0 ) result = PASS;
 	return result;
       });
-    // check_emc_hit( "The volume ID should be in 1..48",hit,[=](const g2t_emc_hit_st* h) {
-    // 	std::string result=PASS;
-    // 	if ( h->volume_id<1||h->volume_id>48 ) result=FAIL;
-    // 	result = Form(" volume_id = %i ",h->volume_id) + result;
-    // 	return result;
-    //   });       
+      
   }
 
     }

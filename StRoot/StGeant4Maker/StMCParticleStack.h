@@ -53,6 +53,10 @@ public:
   const StarMCVertex* start() const { return mStartVertex; }
   const StarMCVertex* stop()  const { return mStopVertex; }
 
+  void  setStartVertex( StarMCVertex* v ){ mStartVertex = v; }
+  void  addIntermediateVertex( StarMCVertex* v ){ mIntermediateVertices.push_back(v); }
+  void  setStopVertex( StarMCVertex* v ){ mStopVertex = v; }
+
   void setIdStack( int id ) { mIdStack = id; } 
   int     idStack() const { return mIdStack; } 
 
@@ -76,7 +80,7 @@ protected:
 class StarMCVertex {
 public:
   StarMCVertex();
-  StarMCVertex( double vx, double vy, double vz, double vt );
+  StarMCVertex( double vx, double vy, double vz, double vt, StarMCParticle* parent=0 );
 //  StarMCVertex( const StarMCVertex& );
 //  StarMCVertex( const StarMCVertex&& ) = default;
  ~StarMCVertex(){ /* nada */ };
@@ -93,13 +97,20 @@ public:
   double vz() const { return mVertex[2]; }
   double tof() const { return mVertex[3]; }
 
-  TMCProcess process() const { return mMechanism; }
-
   void setParent  ( StarMCParticle* _parent   ){ mParent = _parent; } 
   void addDaughter( StarMCParticle* daughter ){ mDaughters.push_back( daughter ); } 
 
   const             StarMCParticle*   parent()   { return mParent; } 
   const std::vector<StarMCParticle*>& daughters(){ return mDaughters; } 
+
+  void setMedium( const int medium ) { mMedium = medium; }
+  int  medium() const { return mMedium; }
+
+  void setProcess( const TMCProcess p ) { mMechanism=p; }
+  TMCProcess process() const { return mMechanism; }
+
+  void setVolume( const char* name ){ mVolume = name; }
+  std::string volume(){ return mVolume; }
 
 private:
 protected:
@@ -108,6 +119,8 @@ protected:
   StarMCParticle*              mParent;     /// Parent particle 
   std::vector<StarMCParticle*> mDaughters;  /// Decay daughters / interaction products
   TMCProcess                   mMechanism;  /// Creation mechanism
+  int                          mMedium;     /// Medium ID
+  std::string                  mVolume;     /// Name of the volume
 
 };
 
@@ -192,6 +205,8 @@ class StMCParticleStack : public TVirtualMCStack
 
   std::vector<StarMCParticle*>& GetParticleTable(){ return mParticleTable; }
   std::vector<StarMCVertex*>&   GetVertexTable()  { return mVertexTable; }
+
+  StarMCVertex* GetVertex( double vx, double vy, double vz, double vt );
 
  private:
  protected:

@@ -1,4 +1,5 @@
 #include "tests/unit_tests.h"
+#include <assert.h>
 
 //___________________________________________________________________
 double _eta  = 0; 
@@ -14,9 +15,10 @@ void throw_muon_in_tpc_sector( int sectorid, int charge = 1 ) {
   double phid = sectors[sectorid-1];
   _phid = phid; 
   throw_muon( eta, phid, 500.0, charge ); // energetic
-  assert( vertex_table = dynamic_cast<TTable*>( chain->GetDataSet("g2t_vertex")  ) );
-  assert( track_table  = dynamic_cast<TTable*>( chain->GetDataSet("g2t_track")   ) );
-  assert( hit_table    = dynamic_cast<TTable*>( chain->GetDataSet("g2t_tpc_hit") ) );
+
+  vertex_table = dynamic_cast<TTable*>( chain->GetDataSet("bfc/.make/geant4star/.data/g2t_vertex")  );
+  track_table  = dynamic_cast<TTable*>( chain->GetDataSet("bfc/.make/geant4star/.data/g2t_track")   );
+  hit_table    = dynamic_cast<TTable*>( chain->GetDataSet("bfc/.make/geant4star/.data/g2t_tpc_hit") ) ;
 
 }
 //___________________________________________________________________
@@ -33,7 +35,7 @@ void unit_test_tpc_hits() {
   LOG_TEST << "Unit testing of tracks and TPC hits on single muons"     << std::endl;
   LOG_TEST << "=======================================================" << std::endl;
   
-  for ( int sector=1; sector<=24; sector++ ) {
+  for ( int sector=1; sector<=1; sector++ ) {
 
     throw_muon_in_tpc_sector( sector );
 

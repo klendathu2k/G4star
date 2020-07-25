@@ -35,6 +35,7 @@ using namespace std;
 TTable* hit_table    = 0;
 TTable* track_table  = 0;
 TTable* vertex_table = 0;
+static TVector3 _vector3;
 //___________________________________________________________________
 double _pmom = 0;
 void throw_muon( double eta, double phid, double pT = 25.0, int q=1 ) {
@@ -56,10 +57,36 @@ void throw_muon( double eta, double phid, double pT = 25.0, int q=1 ) {
   chain->Clear();
   chain->Make();
 }
+void throw_particle( const char* part, double eta, double phid, double pT = 25.0, int q=1 ) {
+  // eta  = pseudorapidity
+  // phid = azimuthal angle in degrees
+  double phi = TMath::Pi() * phid / 180.0;
+  TVector3 momentum;
+  momentum.SetPtEtaPhi(pT,eta,phi);
+  _pmom = momentum.Mag();
+  auto* chain = StMaker::GetChain();
+  auto* _kine = dynamic_cast<StarKinematics*>( chain->GetMaker("StarKine") );
+  auto* particle = _kine->AddParticle( part );
+  particle->SetPx(momentum[0]);
+  particle->SetPy(momentum[1]);
+  particle->SetPz(momentum[2]);
+  double mass = particle->GetMass();
+  double ener = sqrt( momentum.Mag2() + mass*mass );
+  particle->SetEnergy(ener);
+  chain->Clear();
+  chain->Make();
+}
 //___________________________________________________________________
-std::string check_track( std::string message, std::function<std::string(const g2t_track_st*)> f) {
-  const g2t_track_st* track = static_cast<const g2t_track_st*>( track_table->At(0) );  
+std::string check_track( std::string message, std::function<std::string(const g2t_track_st*)> f, int idx=0) {
+  const g2t_track_st* track = static_cast<const g2t_track_st*>( track_table->At(idx) );  
   std::string result = "\u001b[37m [" + message + "] " + (track? f(track):FAIL );
+  LOG_TEST << result << std::endl;
+  return result;
+};
+//___________________________________________________________________
+std::string check_vertex( std::string message, std::function<std::string(const g2t_vertex_st*)> f, int idx=0) {
+  const g2t_vertex_st* vertex = static_cast<const g2t_vertex_st*>( vertex_table->At(idx) );
+  std::string result = "\u001b[37m [" + message + "] " + (vertex? f(vertex):FAIL );
   LOG_TEST << result << std::endl;
   return result;
 };

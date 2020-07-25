@@ -10,6 +10,8 @@ using namespace std;
 
 #include <TGeoManager.h>
 #include <TGeoNavigator.h>
+#include <TGeoVolume.h>
+#include <TGeoMedium.h>
 
 #include <StarVMC/StarAgmlLib/AgMLExtension.h>
 
@@ -135,20 +137,7 @@ void StMCParticleStack::PushTrack( int toDo, int parent, int pdg,
   //
   if ( agmlreg == 2 ) {
 
-    // Obtain a vertex within epsilon of current vertex
-    const double eps=0.0000005;
-    StarMCVertex* vertex = 0;
-    for ( auto vtx : mVertexTable ) {
-      double dist = vtx->distance(vx,vy,vz);
-      if ( dist < eps ) {
-	vertex=vtx;
-	break;
-      }
-    }
-
-    if ( 0==vertex ) {
-      mVertexTable.push_back( vertex = new StarMCVertex(vx,vy,vz,vt) ); 
-    }
+    StarMCVertex* vertex = GetVertex( vx, vy, vz, vt );
 
     mParticleTable.push_back(new StarMCParticle(particle,vertex));
 
@@ -159,20 +148,43 @@ void StMCParticleStack::PushTrack( int toDo, int parent, int pdg,
     // add this particle as a daughter of the vertex
     vertex->addDaughter( mParticleTable.back() );  
 
-    // If it's not primary, add parent to the vertex as well
-    // ... no.  the "parent" refers to a track in the mStack or maybe mArray, not
-    // the particle table.  We would need to lookup the ID correspondance...
+    auto* navigator = gGeoManager->GetCurrentNavigator();
+    auto* volume    = navigator->GetCurrentVolume();
+    auto* medium    = volume->GetMedium();
+    int   imed      = medium->GetId();
 
-    if ( mStackToTable[parent] ) {
-      vertex->setParent( mStackToTable[parent] );
-    }
+    vertex->setMedium(imed);
+    vertex->setProcess( mech );
 
   }
 
 
 }
 //___________________________________________________________________________________________________________________
-//
+StarMCVertex* StMCParticleStack::GetVertex( double vx, double vy, double vz, double vt ) {
+
+  StarMCVertex* vertex = 0;
+
+  // TODO: Make eps a class parameter
+  const double eps=0.0000005;
+  for ( auto vtx : mVertexTable ) {
+    double dist = vtx->distance(vx,vy,vz);
+    if ( dist < eps ) {
+      vertex=vtx;
+      break;
+    }
+  }
+
+  if ( 0==vertex ) {
+    mVertexTable.push_back( vertex = new StarMCVertex(vx,vy,vz,vt) ); 
+    auto* navigator = gGeoManager->GetCurrentNavigator();
+    auto* volume    = navigator->GetCurrentVolume();
+    mVertexTable.back()->setVolume( volume->GetName() );
+  }
+
+  return vertex;
+
+}
 //___________________________________________________________________________________________________________________
 TParticle *StMCParticleStack::PopNextTrack( int &itrack )
 {
@@ -243,6 +255,7 @@ TParticle *StMCParticleStack::GetParticle( int idx ) const
 //___________________________________________________________________________________________________________________
 void StMCParticleStack::Clear( const Option_t *opts )
 {
+
 #if 0
   LOG_INFO << "TParticle table" << endm;
   int index = 0;
@@ -305,16 +318,21 @@ StarMCParticle::StarMCParticle( TParticle* part, StarMCVertex* vert ) :
 StarMCVertex::StarMCVertex() : mVertex{0,0,0,0},
 			       mParent(0),
 			       mDaughters(),			   					   
-			       mMechanism(kPNoProcess)
+		    mMechanism(kPNoProcess),
+		    mMedium(0),
+		    mVolume("unkn")
+		    
 {
 
 
 }
 //___________________________________________________________________________________________________________________						
-StarMCVertex::StarMCVertex( double x, double y, double z, double t) : mVertex{x,y,z,t},
-			       mParent(0),
+StarMCVertex::StarMCVertex( double x, double y, double z, double t, StarMCParticle* parent) : mVertex{x,y,z,t},
+			       mParent(parent),
 			       mDaughters(),			   					   
-			       mMechanism(kPNoProcess)
+		    mMechanism(kPNoProcess),
+		    mMedium(0),
+		    mVolume("unkn")
 {
 
 
