@@ -813,7 +813,7 @@ void StGeant4Maker::Stepping(){
     const StarMCVertex* vertex_ = truth->stop();
     if ( 0==vertex_ ) {
       
-      auto* vertex = mMCStack->GetVertex( vx, vy, vz, tof );
+      auto* vertex = mMCStack->GetVertex( vx, vy, vz, tof, -1 );
       vertex->setParent( truth );
       vertex->setMedium( mc->CurrentMedium() );
 
@@ -839,7 +839,7 @@ void StGeant4Maker::Stepping(){
     {
 
       // interaction which throws off secondaries and track contiues...
-      auto* vertex = mMCStack->GetVertex(vx,vy,vz,tof);
+      auto* vertex = mMCStack->GetVertex(vx,vy,vz,tof,proc);
 
       vertex->setParent( truth );
       vertex->setMedium( mc->CurrentMedium() );

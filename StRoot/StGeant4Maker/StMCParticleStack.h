@@ -206,7 +206,7 @@ class StMCParticleStack : public TVirtualMCStack
   std::vector<StarMCParticle*>& GetParticleTable(){ return mParticleTable; }
   std::vector<StarMCVertex*>&   GetVertexTable()  { return mVertexTable; }
 
-  StarMCVertex* GetVertex( double vx, double vy, double vz, double vt );
+  StarMCVertex* GetVertex( double vx, double vy, double vz, double vt, int proc=-1 );
 
  private:
  protected:
