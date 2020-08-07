@@ -7,6 +7,7 @@ double _phid = 0;
 //___________________________________________________________________
 
 std::map<int,int> idIsNotUnique;
+int               expectedId = 0;
 
 void unit_test_track_data_model() {
 
@@ -41,6 +42,15 @@ void unit_test_track_data_model() {
       idIsNotUnique[ t->id ]++;      
       return result;
     }, idx);
+  check_track( "The track IDs are in numerical order",                              [=](const g2t_track_st* t){
+      std::string result = Form("unique id = %i",t->id);
+      expectedId++;
+      if ( expectedId == t->id  ) result += PASS;
+      else                          result += FAIL;
+      return result;
+    }, idx);
+
+
   check_track( "The track should have a start vertex",                              [=](const g2t_track_st* t){
       return (t->start_vertex_p>0)?PASS:FAIL;      
     }, idx);
