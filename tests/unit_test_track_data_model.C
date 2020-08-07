@@ -6,6 +6,7 @@ double _eta  = 0;
 double _phid = 0;
 //___________________________________________________________________
 
+std::map<int,int> idIsNotUnique;
 
 void unit_test_track_data_model() {
 
@@ -24,12 +25,21 @@ void unit_test_track_data_model() {
   vertex_table = dynamic_cast<TTable*>( chain->GetDataSet("bfc/.make/geant4star/.data/g2t_vertex")  );
   track_table  = dynamic_cast<TTable*>( chain->GetDataSet("bfc/.make/geant4star/.data/g2t_track")   );
 
+
   for ( int idx=0;idx<track_table->GetNRows();idx++ ) {
 
   check_track( "A particle must have been processed by geant",                      [=](const g2t_track_st* t){
       LOG_TEST << "-----------------------------------------------------------" << std::endl;
+      assert(t);
       std::string result = Form("particle id = %i",t->eg_pid);
       return result + PASS; 
+    }, idx);
+  check_track( "The track has a unique ID",                                         [=](const g2t_track_st* t){
+      std::string result = Form("unique id = %i",t->id);
+      if ( idIsNotUnique[ t->id ] ) result += FAIL;
+      else                          result += PASS;
+      idIsNotUnique[ t->id ]++;      
+      return result;
     }, idx);
   check_track( "The track should have a start vertex",                              [=](const g2t_track_st* t){
       return (t->start_vertex_p>0)?PASS:FAIL;      
