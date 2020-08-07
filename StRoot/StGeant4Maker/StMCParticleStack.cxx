@@ -168,8 +168,8 @@ StarMCVertex* StMCParticleStack::GetVertex( double vx, double vy, double vz, dou
   // TODO: Make eps a class parameter
   const double eps=0.0000005;
   for ( auto vtx : mVertexTable ) {
-    double dist = vtx->distance(vx,vy,vz);
-    if ( dist < eps ) {
+    double dist = vtx->distance(vx,vy,vz);   
+    if ( dist < eps && vtx->process()!=kPStop ) {
       vertex=vtx;
       break;
     }
