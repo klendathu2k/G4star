@@ -627,8 +627,15 @@ void StGeant4Maker::FinishEvent(){
     }
     myvertex.ge_medium = v->medium();
     myvertex.ge_proc   = v->process();
+    myvertex.is_itrmd  = v->intermediate();
 
     // TODO: map ROOT mechanism to G3 names
+
+    // An intermediate vertex with no daughters makes no
+    // sense (daughters must have been ranged out) so
+    // skip filling
+    //    if ( myvertex.is_itrmd && 0==myvertex.n_daughter ) continue;
+
     
     //__________________________________________ next vertex
     g2t_vertex->AddAt( &myvertex );
@@ -844,6 +851,7 @@ void StGeant4Maker::Stepping(){
       vertex->setParent( truth );
       vertex->setMedium( mc->CurrentMedium() );
       vertex->setProcess( mc->ProdProcess(0) );
+      vertex->setIntermediate(true);
       
       // this is an intermediate vertex on the truth track
       truth->addIntermediateVertex( vertex );
