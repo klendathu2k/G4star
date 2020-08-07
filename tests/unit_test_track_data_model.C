@@ -98,7 +98,7 @@ void unit_test_track_data_model() {
       if ( vertex ) {
 	//	vertex_table->Print(istart-1,1);
 	result = Form(" (ge_proc=%i %s)", vertex->ge_proc, TMCProcessName[vertex->ge_proc] );
-	if ( vertex->ge_proc >= 0 && vertex->ge_proc < 44 ) result += PASS;
+	if ( vertex->ge_proc >= 0 && vertex->ge_proc < 44 && vertex->ge_proc!=kPStop ) result += PASS;
 	else                                                result += FAIL;
       }
       else 
