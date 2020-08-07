@@ -323,7 +323,8 @@ StarMCVertex::StarMCVertex() : mVertex{0,0,0,0},
 			       mDaughters(),			   					   
 		    mMechanism(kPNoProcess),
 		    mMedium(0),
-		    mVolume("unkn")
+		    mVolume("unkn"),
+		    mIntermediate(false)
 		    
 {
 
@@ -335,7 +336,8 @@ StarMCVertex::StarMCVertex( double x, double y, double z, double t, StarMCPartic
 			       mDaughters(),			   					   
 		    mMechanism(kPNoProcess),
 		    mMedium(0),
-		    mVolume("unkn")
+		    mVolume("unkn"),
+		    mIntermediate(false)
 {
 
 
