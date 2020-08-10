@@ -112,6 +112,9 @@ public:
   void setVolume( const char* name ){ mVolume = name; }
   std::string volume(){ return mVolume; }
 
+  void setIntermediate( bool stat=true ){ mIntermediate=true; }
+  bool intermediate(){ return mIntermediate; }
+
 private:
 protected:
 
@@ -121,6 +124,7 @@ protected:
   TMCProcess                   mMechanism;  /// Creation mechanism
   int                          mMedium;     /// Medium ID
   std::string                  mVolume;     /// Name of the volume
+  bool                         mIntermediate; /// Vertex is an intermediate vtx
 
 };
 
@@ -206,7 +210,7 @@ class StMCParticleStack : public TVirtualMCStack
   std::vector<StarMCParticle*>& GetParticleTable(){ return mParticleTable; }
   std::vector<StarMCVertex*>&   GetVertexTable()  { return mVertexTable; }
 
-  StarMCVertex* GetVertex( double vx, double vy, double vz, double vt );
+  StarMCVertex* GetVertex( double vx, double vy, double vz, double vt, int proc=-1 );
 
  private:
  protected:

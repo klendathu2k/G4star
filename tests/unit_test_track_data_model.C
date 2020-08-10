@@ -6,9 +6,8 @@ double _eta  = 0;
 double _phid = 0;
 //___________________________________________________________________
 
-
-
-
+std::map<int,int> idIsNotUnique;
+int               expectedId = 0;
 
 void unit_test_track_data_model() {
 
@@ -23,35 +22,42 @@ void unit_test_track_data_model() {
   LOG_TEST << "=======================================================" << std::endl;
 
   throw_particle( "e+", 0.4251, 3.1415/4, 10.0 );
-  //  throw_particle( "e+", 0.3125, 3.1415/4+0.125, 10.0 );
 
   vertex_table = dynamic_cast<TTable*>( chain->GetDataSet("bfc/.make/geant4star/.data/g2t_vertex")  );
   track_table  = dynamic_cast<TTable*>( chain->GetDataSet("bfc/.make/geant4star/.data/g2t_track")   );
-  hit_table    = dynamic_cast<TTable*>( chain->GetDataSet("bfc/.make/geant4star/.data/g2t_tpc_hit") ) ;
-
-  // check_track( "Print the track table",                                            [=](const g2t_track_st* t){
-  //     track_table->Print(0,10);
-  //     return PASS; 
-  //   });
-  // check_track( "Print the vertex table",                                           [=](const g2t_track_st* t){
-  //     vertex_table->Print(0,10);
-  //     return PASS; 
-  //   });
-
+  
+  // TRACK VALIDATION
   for ( int idx=0;idx<track_table->GetNRows();idx++ ) {
 
-  check_track( "A particle must have been processed by geant",                     [=](const g2t_track_st* t){
+  check_track( "A particle must have been processed by geant",                      [=](const g2t_track_st* t){
       LOG_TEST << "-----------------------------------------------------------" << std::endl;
+      assert(t);
       std::string result = Form("particle id = %i",t->eg_pid);
       return result + PASS; 
     }, idx);
-  check_track( "The track should have a start vertex",                             [=](const g2t_track_st* t){
+  check_track( "The track has a unique ID",                                         [=](const g2t_track_st* t){
+      std::string result = Form("unique id = %i",t->id);
+      if ( idIsNotUnique[ t->id ] ) result += FAIL;
+      else                          result += PASS;
+      idIsNotUnique[ t->id ]++;      
+      return result;
+    }, idx);
+  check_track( "The track IDs are in numerical order",                              [=](const g2t_track_st* t){
+      std::string result = Form("unique id = %i",t->id);
+      expectedId++;
+      if ( expectedId == t->id  ) result += PASS;
+      else                          result += FAIL;
+      return result;
+    }, idx);
+
+
+  check_track( "The track should have a start vertex",                              [=](const g2t_track_st* t){
       return (t->start_vertex_p>0)?PASS:FAIL;      
     }, idx);
-  check_track( "The track should have a stop vertex",                              [=](const g2t_track_st* t){
+  check_track( "The track should have a stop vertex",                               [=](const g2t_track_st* t){
       return (t->stop_vertex_p>0)?PASS:FAIL;      
     }, idx);
-  check_track( "The start vertex should be in the vertex table",                   [=](const g2t_track_st* t){
+  check_track( "The start vertex should be in the vertex table",                    [=](const g2t_track_st* t){
       std::string result = FAIL;
       int istart = t->start_vertex_p;
       const g2t_vertex_st* vertex = (istart>0) ? static_cast<const g2t_vertex_st*>( vertex_table->At(istart-1) ) : 0;
@@ -60,7 +66,7 @@ void unit_test_track_data_model() {
       }
       return result;
     }, idx);  
-  check_track( "The stop vertex should be in the vertex table",                    [=](const g2t_track_st* t){
+  check_track( "The stop vertex should be in the vertex table",                     [=](const g2t_track_st* t){
       std::string result = FAIL;
       int istart = t->stop_vertex_p;
       const g2t_vertex_st* vertex = (istart>0) ? static_cast<const g2t_vertex_st*>( vertex_table->At(istart-1) ) : 0;
@@ -69,7 +75,7 @@ void unit_test_track_data_model() {
       }
       return result;
     }, idx);
-  check_track( "The id of the START vertex is nonzero",                            [=](const g2t_track_st* t){
+  check_track( "The id of the START vertex is nonzero",                             [=](const g2t_track_st* t){
       std::string result = FAIL;
       int istart = t->start_vertex_p;
       if ( istart > 0 ) result = PASS;      
@@ -92,8 +98,8 @@ void unit_test_track_data_model() {
       if ( vertex ) {
 	//	vertex_table->Print(istart-1,1);
 	result = Form(" (ge_proc=%i %s)", vertex->ge_proc, TMCProcessName[vertex->ge_proc] );
-	if ( vertex->ge_proc > 0 && vertex->ge_proc < 44 ) result += PASS;
-	else                                               result += FAIL;
+	if ( vertex->ge_proc >= 0 && vertex->ge_proc < 44 && vertex->ge_proc!=kPStop ) result += PASS;
+	else                                                result += FAIL;
       }
       else 
 	result = Form("No start vertex on track") + result;
@@ -108,8 +114,7 @@ void unit_test_track_data_model() {
       if ( istart == istop ) result = TODO;
       return Form("(start=%i stop=%i)",istart,istop) + result;
     }, idx);
-
-  check_track( "The STOP vertex records a valid medium",                           [=](const g2t_track_st* t){
+  check_track( "The STOP vertex records a valid medium",                            [=](const g2t_track_st* t){
       auto result = FAIL;
       int istop = t->stop_vertex_p;
       const g2t_vertex_st* vertex = (istop>0) ? static_cast<const g2t_vertex_st*>( vertex_table->At(istop-1) ) : 0;
@@ -119,7 +124,7 @@ void unit_test_track_data_model() {
       return result;
 
     }, idx);
-  check_track( "The STOP vertex records a valid process",                          [=](const g2t_track_st* t){
+  check_track( "The STOP vertex records a valid process",                           [=](const g2t_track_st* t){
       auto result = FAIL;
       int istop = t->stop_vertex_p;
       const g2t_vertex_st* vertex = (istop>0) ? static_cast<const g2t_vertex_st*>( vertex_table->At(istop-1) ) : 0;
@@ -133,25 +138,108 @@ void unit_test_track_data_model() {
 
       return result;
     }, idx);
+  check_track( "The STOP vertex parent track is this track",                        [=](const g2t_track_st* t){
+      auto result = FAIL;
+      int istop = t->stop_vertex_p;
+      const g2t_vertex_st* vertex = (istop>0) ? static_cast<const g2t_vertex_st*>( vertex_table->At(istop-1) ) : 0;
+      if ( vertex ) {
+	int iparent = vertex->parent_p;
+	result = Form(" track id=%i vertex parent id=%i", t->id, vertex->parent_p );
+	if ( vertex->parent_p == t->id ) result += PASS;
+	else                             result += FAIL;
+      }
+      else 
+	result = Form("No stop vertex on track") + result;
 
-  if ( idx==0 ) continue; 
+      return result;
+    }, idx);
 
-  // check_track( "Print the STOP vertex",                                    [=](const g2t_track_st* t){
-  //     auto result = FAIL;
-  //     int istop = t->stop_vertex_p;
-  //     const g2t_vertex_st* vertex = (istop>0) ? static_cast<const g2t_vertex_st*>( vertex_table->At(istop-1) ) : 0;
-  //     if ( vertex ) {
-  // 	vertex_table->Print(istop-1,1);
-  //     }
-  //     else 
-  // 	result = Form("No stop vertex on track") + result;
-
-  //     return result;
-  //   }, idx);
-  
-  
   
   }
+
+  expectedId=0;
+  idIsNotUnique.clear();
+  // VERTEX VALIDATION
+  for ( int idx=0;idx<vertex_table->GetNRows();idx++ ) {
+  check_vertex( "A vertex must have been processed by geant",                      [=](const g2t_vertex_st* t){
+      LOG_TEST << "-----------------------------------------------------------" << std::endl;
+      assert(t);
+      std::string result = PASS;
+      return result;
+    }, idx);
+
+  check_vertex( "Is this vertex intermediate?",                                    [=](const g2t_vertex_st* v){
+      LOG_TEST << "-----------------------------------------------------------" << std::endl;
+      return (v->is_itrmd)? YES : NOPE;
+    }, idx);
+
+  check_vertex( "The vertex has a unique ID",                                      [=](const g2t_vertex_st* t){
+      std::string result = Form("unique id = %i",t->id);
+      if ( idIsNotUnique[ t->id ] ) result += FAIL;
+      else                          result += PASS;
+      idIsNotUnique[ t->id ]++;      
+      return result;
+    }, idx);
+  check_vertex( "The vertex IDs are in numerical order",                           [=](const g2t_vertex_st* t){
+      std::string result = Form("unique id = %i",t->id);
+      expectedId++;
+      if ( expectedId == t->id  ) result += PASS;
+      else                          result += FAIL;
+      return result;
+    }, idx);
+  check_vertex( "Primary vertex has no parents, all others do",                    [=](const g2t_vertex_st* v){
+      std::string result;
+      int np = v->n_parent;
+      if (v->id==1) {
+	result = Form("primary vertex: nparent=%i ",np);
+	result += (np==0) ? PASS : FAIL;
+      }
+      else {
+	result = Form("secondary vertex: nparent=%i ",np);
+	result += (np==1) ? PASS : FAIL;	
+      }      
+      return result;
+    }, idx);
+  check_vertex( "Vertex parent track stops on this vertex if not intermediate",    [=](const g2t_vertex_st* v){
+      std::string result;
+      int np = v->n_parent;
+      if (v->id==1) {
+	result = Form("primary vertex: nparent=%i ",np);
+	result += (np==0) ? PASS : FAIL;
+      }
+      else {
+	int itrack=v->parent_p;
+	const g2t_track_st* track = static_cast<const g2t_track_st*>(track_table->At(itrack-1));	
+	int idvert=v->id;
+	int idstop= (track)? track->stop_vertex_p : -1;
+	int isint = v->is_itrmd;
+	if ( isint==0 ) 
+	  result += ( idvert==idstop )? PASS : FAIL;
+	else
+	  result += PASS;
+      }      
+      return result;
+    }, idx);
+  check_vertex( "Intermediate vertex must have daughter tracks",                   [=](const g2t_vertex_st* v){
+      std::string result = NADA;
+      if ( v->is_itrmd ) {
+	result = Form("(n daughter=%i proc=%i %s) ", v->n_daughter, v->ge_proc, TMCProcessName[v->ge_proc] );
+	if ( v->n_daughter>0 ) result += PASS;
+	else                   { 
+	  result += FAIL;       
+	  std::cout << *v << std::endl; 
+	}
+      }
+      return result;
+    }, idx);
+
+
+  }
+
+
+  
+
+
 
 
   // check_track( "The STOP vertex has daughter tracks",                              [=](const g2t_track_st* t){
@@ -413,7 +501,5 @@ void unit_test_track_data_model() {
 
   // }
   
-
-
 }
 //___________________________________________________________________

@@ -137,7 +137,7 @@ void StMCParticleStack::PushTrack( int toDo, int parent, int pdg,
   //
   if ( agmlreg == 2 ) {
 
-    StarMCVertex* vertex = GetVertex( vx, vy, vz, vt );
+    StarMCVertex* vertex = GetVertex( vx, vy, vz, vt, mech );
 
     mParticleTable.push_back(new StarMCParticle(particle,vertex));
 
@@ -161,17 +161,20 @@ void StMCParticleStack::PushTrack( int toDo, int parent, int pdg,
 
 }
 //___________________________________________________________________________________________________________________
-StarMCVertex* StMCParticleStack::GetVertex( double vx, double vy, double vz, double vt ) {
+StarMCVertex* StMCParticleStack::GetVertex( double vx, double vy, double vz, double vt, int proc ) {
 
   StarMCVertex* vertex = 0;
 
   // TODO: Make eps a class parameter
-  const double eps=0.0000005;
+  const double eps=0.0000005;  
+  if ( proc >= 0 ) 
   for ( auto vtx : mVertexTable ) {
-    double dist = vtx->distance(vx,vy,vz);
+    double dist = vtx->distance(vx,vy,vz);   
     if ( dist < eps ) {
-      vertex=vtx;
-      break;
+      if ( vtx->process() == proc ) {
+	vertex=vtx;
+	break;
+      }
     }
   }
 
@@ -320,7 +323,8 @@ StarMCVertex::StarMCVertex() : mVertex{0,0,0,0},
 			       mDaughters(),			   					   
 		    mMechanism(kPNoProcess),
 		    mMedium(0),
-		    mVolume("unkn")
+		    mVolume("unkn"),
+		    mIntermediate(false)
 		    
 {
 
@@ -332,7 +336,8 @@ StarMCVertex::StarMCVertex( double x, double y, double z, double t, StarMCPartic
 			       mDaughters(),			   					   
 		    mMechanism(kPNoProcess),
 		    mMedium(0),
-		    mVolume("unkn")
+		    mVolume("unkn"),
+		    mIntermediate(false)
 {
 
 
