@@ -726,11 +726,20 @@ void StGeant4Maker::UpdateHistory() {
 
   aprev = (mPreviousNode ) ? dynamic_cast<AgMLExtension*>( mPreviousNode->GetUserExtension() ) : 0;
   acurr = (mCurrentNode  ) ? dynamic_cast<AgMLExtension*>( mCurrentNode->GetUserExtension() )  : 0;
+
   if ( 0==aprev ) {
     aprev = (mPreviousVolume) ? dynamic_cast<AgMLExtension*>( mPreviousVolume->GetUserExtension() ) : 0;
   }
   if ( 0==acurr ) {
     acurr = (mCurrentVolume) ? dynamic_cast<AgMLExtension*>( mCurrentVolume->GetUserExtension() ) : 0;
+  }
+
+  // Possibly inherit from parent volume
+  if ( 0==aprev && mPreviousNode ) {
+    aprev = dynamic_cast<AgMLExtension*>( mPreviousNode->GetMotherVolume()->GetUserExtension() );
+  }
+  if ( 0==acurr && mCurrentNode ) {
+    acurr = dynamic_cast<AgMLExtension*>( mCurrentNode->GetMotherVolume()->GetUserExtension() );
   }
 
 
