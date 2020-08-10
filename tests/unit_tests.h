@@ -20,13 +20,17 @@
 #ifdef __COLOR__
 const std::string FAIL = "\u001b[31m -failed- \u001b[0m";
 const std::string PASS = "\u001b[32m -passed- \u001b[0m";
+const std::string NOPE = "\u001b[33m - nope - \u001b[0m";
+const std::string YES  = "\u001b[33m - yes - \u001b[0m";
 const std::string UNKN = "\u001b[33m -unknown- \u001b[0m";
 const std::string TODO = "\u001b[36m -todo- \u001b[0m";
+const std::string NADA = "\u001b[36m - N/A - \u001b[0m";
 #else
 const std::string FAIL = " -failed- ";
 const std::string PASS = " -passed- ";
 const std::string UNKN = " -unknown- ";
 const std::string TODO = " -todo- ";
+const std::string NADA = " - n/a - ";
 #endif
 using namespace std;
 //___________________________________________________________________
@@ -109,5 +113,10 @@ std::string check_emc_hit( std::string message, const g2t_emc_hit_st* hit, std::
   return result;
 };
 //___________________________________________________________________
-
+ostream& operator<<(  ostream& os, const g2t_vertex_st& v ) {
+  os << Form("g2t_vertex id=%i ",v.id);
+  os << Form("volume=%s ",v.ge_volume);
+  os << Form("np=%i nd=%i itrmd=%i x=(%f, %f, %f)",v.n_parent,v.n_daughter,v.is_itrmd,v.ge_x[0],v.ge_x[1],v.ge_x[2]);
+  return os;
+};
 #endif
