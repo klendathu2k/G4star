@@ -16,9 +16,12 @@ void throw_muon_in_tpc_sector( int sectorid, int charge = 1 ) {
   _phid = phid; 
   throw_muon( eta, phid, 500.0, charge ); // energetic
 
-  vertex_table = dynamic_cast<TTable*>( chain->GetDataSet("bfc/.make/geant4star/.data/g2t_vertex")  );
-  track_table  = dynamic_cast<TTable*>( chain->GetDataSet("bfc/.make/geant4star/.data/g2t_track")   );
-  hit_table    = dynamic_cast<TTable*>( chain->GetDataSet("bfc/.make/geant4star/.data/g2t_tpc_hit") ) ;
+  auto* chain = StMaker::GetChain();
+  vertex_table = dynamic_cast<TTable*>( chain->GetDataSet("g2t_vertex")  );
+  track_table  = dynamic_cast<TTable*>( chain->GetDataSet("g2t_track")   );
+  hit_table    = dynamic_cast<TTable*>( chain->GetDataSet("g2t_tpc_hit") ) ;
+
+  assert(vertex_table);
 
 }
 //___________________________________________________________________
