@@ -53,6 +53,7 @@ void throw_muon_in_bemc_tower( double eta, double phid, int charge = 1 ) {
   _eta = eta;
   _phid = phid;
 
+  auto* chain = StMaker::GetChain();
   vertex_table = dynamic_cast<TTable*>( chain->GetDataSet("g2t_vertex")  );
   track_table  = dynamic_cast<TTable*>( chain->GetDataSet("g2t_track")   );
   hit_table    = dynamic_cast<TTable*>( chain->GetDataSet("g2t_emc_hit") );
