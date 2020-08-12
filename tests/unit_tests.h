@@ -6,6 +6,8 @@
 #include <StChain.h>
 #include <iostream>
 #include <TVector3.h>
+#include <TSystem.h>
+#include <TStopwatch.h>
 #include <TMath.h>
 #include <g2t_track.h>
 #include <g2t_vertex.h>
@@ -33,12 +35,14 @@ const std::string NADA = " - n/a - ";
 #endif
 using namespace std;
 //___________________________________________________________________
-#define LOG_TEST std::cout << "\u001b[35m -require- \u001b[0m"
+#define LOG_TEST std::cout << " \u001b[35m -require- \u001b[0m"
 //___________________________________________________________________
 TTable* hit_table    = 0;
 TTable* track_table  = 0;
 TTable* vertex_table = 0;
 static TVector3 _vector3;
+//___________________________________________________________________
+TStopwatch timer;
 //___________________________________________________________________
 double _pmom = 0;
 void throw_muon( double eta, double phid, double pT = 25.0, int q=1 ) {
