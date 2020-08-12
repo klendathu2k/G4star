@@ -1,6 +1,30 @@
 #include "tests/unit_tests.h"
 #include <assert.h>
 
+#ifndef __CINT__
+#include <boost/accumulators/accumulators.hpp>
+#include <boost/accumulators/statistics/stats.hpp>
+#include <boost/accumulators/statistics/mean.hpp>
+#include <boost/accumulators/statistics/median.hpp>
+#include <boost/accumulators/statistics/min.hpp>
+#include <boost/accumulators/statistics/max.hpp>
+#include <boost/accumulators/statistics/moment.hpp>
+#include <boost/accumulators/statistics/error_of.hpp>
+#include <boost/accumulators/statistics/error_of_mean.hpp>
+using namespace boost::accumulators;
+
+using Accumulator_t = accumulator_set<double, 
+stats< tag::count, 
+       tag::sum,
+       tag::mean, 
+       tag::median(with_p_square_quantile),
+       tag::max, 
+       tag::min, 
+       tag::error_of<tag::mean>
+>>;
+#endif
+
+
 //___________________________________________________________________
 double _eta  = 0; 
 double _phid = 0;
@@ -37,10 +61,17 @@ void unit_test_tpc_hits() {
   LOG_TEST << "=======================================================" << std::endl;
   LOG_TEST << "Unit testing of tracks and TPC hits on single muons"     << std::endl;
   LOG_TEST << "=======================================================" << std::endl;
-  
-  for ( int sector=1; sector<=1; sector++ ) {
 
+  Accumulator_t edep; // Energy deposition
+  Accumulator_t step; // Step size
+  Accumulator_t time; // Time per throw
+  
+  for ( int sector=1; sector<=24; sector++ ) {
+
+    timer.Start();
     throw_muon_in_tpc_sector( sector );
+    time( timer.CpuTime() );
+    timer.Reset();
 
     LOG_TEST << "Checking muon track in sector " << sector << std::endl;
     check_track( "A muon must have been processed by geant",       [=](const g2t_track_st* t){
@@ -130,10 +161,16 @@ void unit_test_tpc_hits() {
     });
 
     LOG_TEST << "Checking hits on track in sector " << sector << std::endl;
+
     for ( int i=0;i<hit_table->GetNRows();i++ ) {
+
       auto hit = static_cast<const g2t_tpc_hit_st*>( hit_table->At(i) );
       if ( 0==hit ) continue;     // skip null entries
       if ( 1!=hit->track_p ) continue; // not interested in secondaries
+
+      edep( hit->de * 1E6 ); // GeV MeV keV
+      step( hit->ds );
+
       check_tpc_hit( "Print the hit...", hit, [=](const g2t_tpc_hit_st* h) {
 	  LOG_TEST << "id=" << h->id 
 		   << " track_p=" << h->track_p 
@@ -224,9 +261,57 @@ void unit_test_tpc_hits() {
       });
     }
 
+  }
+
+  // Print out energy deposition
+  {
+  
+    double _mean          = boost::accumulators::mean(edep);
+    double _median        = boost::accumulators::median(edep);
+    double _min           = boost::accumulators::min(edep);
+    double _max           = boost::accumulators::max(edep);
+    double _error_of_mean = boost::accumulators::error_of<tag::mean>(edep);
+    
+    LOG_TEST << Form( "energy deposition: mean          = %f keV", _mean )          << std::endl;
+    LOG_TEST << Form( "energy deposition: median        = %f keV", _median )        << std::endl;
+    LOG_TEST << Form( "energy deposition: min           = %f keV", _min  )          << std::endl;
+    LOG_TEST << Form( "energy deposition: max           = %f keV", _max  )          << std::endl;
+    LOG_TEST << Form( "energy deposition: error of mean = %f keV", _error_of_mean ) << std::endl;
 
   }
+
+  // Print out step sizes
+  {
   
+    double _mean          = boost::accumulators::mean(step);
+    double _median        = boost::accumulators::median(step);
+    double _min           = boost::accumulators::min(step);
+    double _max           = boost::accumulators::max(step);
+    double _error_of_mean = boost::accumulators::error_of<tag::mean>(step); 
+    LOG_TEST << Form( "step size: mean          = %f cm", _mean )          << std::endl;
+    LOG_TEST << Form( "step size: median        = %f cm", _median )        << std::endl;
+    LOG_TEST << Form( "step size: min           = %f cm", _min  )          << std::endl;
+    LOG_TEST << Form( "step size: max           = %f cm", _max  )          << std::endl;
+    LOG_TEST << Form( "step size: error of mean = %f cm", _error_of_mean ) << std::endl;
+
+  }
+
+  // Print out time per track
+  {
+  
+    double _mean          = boost::accumulators::mean(time);
+    double _median        = boost::accumulators::median(time);
+    double _min           = boost::accumulators::min(time);
+    double _max           = boost::accumulators::max(time);
+    double _error_of_mean = boost::accumulators::error_of<tag::mean>(time); 
+    LOG_TEST << Form( "time / muon: mean          = %f s", _mean )          << std::endl;
+    LOG_TEST << Form( "time / muon: median        = %f s", _median )        << std::endl;
+    LOG_TEST << Form( "time / muon: min           = %f s", _min  )          << std::endl;
+    LOG_TEST << Form( "time / muon: max           = %f s", _max  )          << std::endl;
+    LOG_TEST << Form( "time / muon: error of mean = %f s", _error_of_mean ) << std::endl;
+
+  }
+
 
 
 }
