@@ -73,10 +73,12 @@ void unit_test_tpc_hits() {
     time( timer.CpuTime() );
     timer.Reset();
 
-    LOG_TEST << "Checking muon track in sector " << sector << std::endl;
+    LOG_TEST << "-------------------------------------------------------------------------- sector=" << sector << std::endl;
+
+
     check_track( "A muon must have been processed by geant",       [=](const g2t_track_st* t){
-	// Failure is tested by check_track when it tests for a valid track pointer
-	return PASS; 
+	std::string result = Form("sector=%i ", sector);
+	return result+PASS; 
       });
     check_track( "The track should have a start vertex",           [=](const g2t_track_st* t){
       return (t->start_vertex_p>0)?PASS:FAIL;      
@@ -171,16 +173,16 @@ void unit_test_tpc_hits() {
       edep( hit->de * 1E6 ); // GeV MeV keV
       step( hit->ds );
 
-      check_tpc_hit( "Print the hit...", hit, [=](const g2t_tpc_hit_st* h) {
-	  LOG_TEST << "id=" << h->id 
-		   << " track_p=" << h->track_p 
-		   << " volume_id=" << h->volume_id 
-		   << " x="  << h->x[0] 
-		   << " y="  << h->x[1] 
-		   << " z="  << h->x[2] 	    
-		   << std::endl;
-	  return PASS;
-	});
+      // check_tpc_hit( "Print the hit...", hit, [=](const g2t_tpc_hit_st* h) {
+      // 	  LOG_TEST << "id=" << h->id 
+      // 		   << " track_p=" << h->track_p 
+      // 		   << " volume_id=" << h->volume_id 
+      // 		   << " x="  << h->x[0] 
+      // 		   << " y="  << h->x[1] 
+      // 		   << " z="  << h->x[2] 	    
+      // 		   << std::endl;
+      // 	  return PASS;
+      // 	});
       check_tpc_hit( "The hit should have a nonzero volume_id",hit,[=](const g2t_tpc_hit_st* h) {
 	  std::string result = FAIL;
 	  if ( h->volume_id > 0 ) result = PASS;
