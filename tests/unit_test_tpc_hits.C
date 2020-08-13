@@ -23,7 +23,7 @@ stats< tag::count,
        tag::error_of<tag::mean>
 >>;
 #endif
-
+#include <TVector3.h>
 
 //___________________________________________________________________
 double _eta  = 0; 
@@ -48,8 +48,29 @@ void throw_muon_in_tpc_sector( int sectorid, int charge = 1 ) {
   assert(vertex_table);
 
 }
-//___________________________________________________________________
 
+// bool checkFiducial() {
+
+//   StThreeVectorF hitPos;
+//   Int_t i,rotator;
+
+//   hitPos = tpcHitsVec[k]->position();
+//   i = tpcHitsVec[k]->sector(); // 0-23
+//   if (i>11) {
+//     rotator = 11-i;
+//   } else {
+//     rotator = i-11;
+//   }
+//   hitPos.rotateZ(((float) rotator)*TMath::Pi()/6.0);
+
+//   bool isInSectorPhi = abs(hitPos.phi() - TMath::Pi()/2.0) < TMath::Pi()/12.0;
+//   bool isInSectorZ = abs(hitPos.z() - 110.0*(i > 11 ? -1.0 : 1.0)) < 110.0;
+//   bool isInSectorR = abs(hitPos.perp() -124.0) < 76.0;
+//   bool isInSector = isInSectorPhi && isInSectorZ  && isInSectorR;
+
+// }
+
+//______________________________________________________________________
 void unit_test_tpc_hits() {
 
   gROOT->ProcessLine("initChain();");
@@ -233,8 +254,16 @@ void unit_test_tpc_hits() {
 	  return result;
 	});
       check_tpc_hit( "Hit position should be w/in the fiducial volume of the sector",hit,[=](const g2t_tpc_hit_st* h){
-	  // TODO
-	  return TODO;
+	  TVector3 hitpos( h->x[0], h->x[1], h->x[2] );
+	  int rotator = (sector>12)? 12-sector : sector-12;
+	  double rotatord = (double) rotator;
+	  hitpos.RotateZ( rotatord * TMath::Pi() / 6.0 );
+	  bool isInSectorPhi = abs(hitpos.Phi() - TMath::Pi()/2.0) < TMath::Pi()/12.0;
+	  bool isInSectorZ   = abs(hitpos.Z() - 110.0*(i > 11 ? -1.0 : 1.0)) < 110.0;
+	  bool isInSectorR   = abs(hitpos.Perp() -124.0) < 76.0;
+	  bool isInSector    = isInSectorPhi && isInSectorZ  && isInSectorR;	  
+	  std::string result = ( isInSector ) ? PASS : FAIL;
+	  return result;
 	});
       check_tpc_hit( "The padrow should be 1 <= pad <= 72",hit,[=](const g2t_tpc_hit_st* h) {
 	  std::string result = PASS;
