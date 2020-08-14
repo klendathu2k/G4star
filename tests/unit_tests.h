@@ -83,6 +83,13 @@ void throw_particle( const char* part, double eta, double phid, double pT = 25.0
   chain->Clear();
   chain->Make();
 }
+void throw_particle( int n, const char* part, double ptmn, double ptmx, double etamn, double etamx, double phimn, double phimx ) {
+  auto* chain = StMaker::GetChain();
+  auto* _kine = dynamic_cast<StarKinematics*>( chain->GetMaker("StarKine") );
+  _kine->Kine( n, part, ptmn, ptmx, etamn, etamx, phimn, phimx );
+  chain->Clear();
+  chain->Make();
+}
 //___________________________________________________________________
 std::string check_track( std::string message, std::function<std::string(const g2t_track_st*)> f, int idx=0) {
   const g2t_track_st* track = static_cast<const g2t_track_st*>( track_table->At(idx) );  
