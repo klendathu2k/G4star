@@ -23,6 +23,7 @@ stats< tag::count,
        tag::error_of<tag::mean>
 >>;
 #endif
+
 #include <TVector3.h>
 
 //___________________________________________________________________
@@ -48,28 +49,6 @@ void throw_muon_in_tpc_sector( int sectorid, int charge = 1 ) {
   assert(vertex_table);
 
 }
-
-// bool checkFiducial() {
-
-//   StThreeVectorF hitPos;
-//   Int_t i,rotator;
-
-//   hitPos = tpcHitsVec[k]->position();
-//   i = tpcHitsVec[k]->sector(); // 0-23
-//   if (i>11) {
-//     rotator = 11-i;
-//   } else {
-//     rotator = i-11;
-//   }
-//   hitPos.rotateZ(((float) rotator)*TMath::Pi()/6.0);
-
-//   bool isInSectorPhi = abs(hitPos.phi() - TMath::Pi()/2.0) < TMath::Pi()/12.0;
-//   bool isInSectorZ = abs(hitPos.z() - 110.0*(i > 11 ? -1.0 : 1.0)) < 110.0;
-//   bool isInSectorR = abs(hitPos.perp() -124.0) < 76.0;
-//   bool isInSector = isInSectorPhi && isInSectorZ  && isInSectorR;
-
-// }
-
 //______________________________________________________________________
 void unit_test_tpc_hits() {
 
@@ -207,11 +186,14 @@ void unit_test_tpc_hits() {
       check_tpc_hit( "The hit should have a nonzero volume_id",hit,[=](const g2t_tpc_hit_st* h) {
 	  std::string result = FAIL;
 	  if ( h->volume_id > 0 ) result = PASS;
+	  result = Form("id=%i vid=%i de=%f ds=%f ",h->id,h->volume_id,h->de,h->ds) + result;
 	  return result;
 	});
       check_tpc_hit( "The hit should have an energy deposit > 0",hit,[=](const g2t_tpc_hit_st* h) {
-	  std::string result = FAIL;
-	  if ( h->de > 0 ) result = PASS;
+	  std::string result = NADA; // undetermined
+	  double ds = h->ds;
+	  if       ( ds > 1.0 && h->de > 0 ) result = PASS;
+	  else if  ( ds > 1.0 && h->de <=0 ) result = FAIL;
 	  return result;
 	});
       check_tpc_hit( "The hit should have a path length > 0",hit,[=](const g2t_tpc_hit_st* h) {
@@ -254,15 +236,18 @@ void unit_test_tpc_hits() {
 	  return result;
 	});
       check_tpc_hit( "Hit position should be w/in the fiducial volume of the sector",hit,[=](const g2t_tpc_hit_st* h){
-	  TVector3 hitpos( h->x[0], h->x[1], h->x[2] );
+	  double x = h->x[0];
+	  double y = h->x[1];
+	  double z = h->x[2];
+	  TVector3 hitpos( x, y, z );
 	  int rotator = (sector>12)? 12-sector : sector-12;
 	  double rotatord = (double) rotator;
 	  hitpos.RotateZ( rotatord * TMath::Pi() / 6.0 );
 	  bool isInSectorPhi = abs(hitpos.Phi() - TMath::Pi()/2.0) < TMath::Pi()/12.0;
-	  bool isInSectorZ   = abs(hitpos.Z() - 110.0*(i > 11 ? -1.0 : 1.0)) < 110.0;
 	  bool isInSectorR   = abs(hitpos.Perp() -124.0) < 76.0;
-	  bool isInSector    = isInSectorPhi && isInSectorZ  && isInSectorR;	  
-	  std::string result = ( isInSector ) ? PASS : FAIL;
+	  bool isInSector    = isInSectorPhi && isInSectorR;	  
+	  std::string result = Form("(%f %f %f / in phi=%i r=%i",x,y,z,isInSectorPhi,isInSectorR);
+	  result += ( isInSector ) ? PASS : FAIL;	  
 	  return result;
 	});
       check_tpc_hit( "The padrow should be 1 <= pad <= 72",hit,[=](const g2t_tpc_hit_st* h) {
@@ -293,6 +278,8 @@ void unit_test_tpc_hits() {
     }
 
   }
+
+  std::cout << std::endl << std::endl;
 
   // Print out energy deposition
   {
