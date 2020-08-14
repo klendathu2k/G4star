@@ -23,6 +23,7 @@
 #include <CLHEP/Random/Random.h>
 
 #include "StarVMC/StarAgmlLib/AgMLExtension.h"
+#include "GeometryUtils.h"
 #include "TString.h"
 
 //_______________________________________________________________________________________________
@@ -722,14 +723,26 @@ void StGeant4Maker::UpdateHistory() {
 
   // Obtain the agml extensions, giving priority to anything attached to
   // a node.
+
   aprev = (mPreviousNode ) ? dynamic_cast<AgMLExtension*>( mPreviousNode->GetUserExtension() ) : 0;
   acurr = (mCurrentNode  ) ? dynamic_cast<AgMLExtension*>( mCurrentNode->GetUserExtension() )  : 0;
+
   if ( 0==aprev ) {
     aprev = (mPreviousVolume) ? dynamic_cast<AgMLExtension*>( mPreviousVolume->GetUserExtension() ) : 0;
   }
   if ( 0==acurr ) {
     acurr = (mCurrentVolume) ? dynamic_cast<AgMLExtension*>( mCurrentVolume->GetUserExtension() ) : 0;
   }
+
+  // Possibly inherit from parent volume
+  if ( 0==aprev && mPreviousNode ) {
+    aprev = dynamic_cast<AgMLExtension*>( mPreviousNode->GetMotherVolume()->GetUserExtension() );
+  }
+  if ( 0==acurr && mCurrentNode ) {
+    acurr = dynamic_cast<AgMLExtension*>( mCurrentNode->GetMotherVolume()->GetUserExtension() );
+  }
+
+
 
   // If the previous or current extension is null, there is no change in the tracking state.
 
@@ -772,7 +785,7 @@ void StGeant4Maker::Stepping(){
   UpdateHistory();
 
   // Check for region transitions
-  int transit = regionTransition( mCurrentTrackingRegion, mPreviousTrackingRegion );
+  const int transit = regionTransition( mCurrentTrackingRegion, mPreviousTrackingRegion );
 
   double vx, vy, vz, tof;
   mc->TrackPosition( vx,vy,vz );
@@ -810,54 +823,59 @@ void StGeant4Maker::Stepping(){
     
   }
 
-  int nsec  = mc->NSecondaries();
+  // Score interaction vertices on entrance / exit of a tracking region
+  if ( 2==mCurrentTrackingRegion || 0!=transit ) {
 
-  // Track has decayed or otherwise been stopped 
-  if ( mc->IsTrackDisappeared() || 
-       mc->IsTrackStop()        ||
-       mc->IsTrackOut()         ) {
+    int nsec  = mc->NSecondaries();
+
+    // Track has decayed or otherwise been stopped 
+    if ( mc->IsTrackDisappeared() || 
+	 mc->IsTrackStop()        ||
+	 mc->IsTrackOut()         ) {
       
-    const StarMCVertex* vertex_ = truth->stop();
-    if ( 0==vertex_ ) {
+      const StarMCVertex* vertex_ = truth->stop();
+      if ( 0==vertex_ ) {
+	
+	auto* vertex = mMCStack->GetVertex( vx, vy, vz, tof, -1 );
+	vertex->setParent( truth );
+	vertex->setMedium( mc->CurrentMedium() );
+	
+	int pdgid = 0;
+	if ( mc->IsTrackDisappeared() ) {
+	  
+	  if ( nsec )                         vertex->setProcess( mc->ProdProcess(0) );
+	  else if ( mc->IsTrackStop() )       vertex->setProcess( kPStop );
+	  else if ( mc->IsTrackOut()  )       vertex->setProcess( kPNull );
+	  
+	}
+	else if ( mc->IsTrackStop() )   vertex->setProcess( kPStop );
+	else if ( mc->IsTrackOut()  )   vertex->setProcess( kPNull );
+	
+	truth->setStopVertex( vertex );         
+      }
       
-      auto* vertex = mMCStack->GetVertex( vx, vy, vz, tof, -1 );
-      vertex->setParent( truth );
-      vertex->setMedium( mc->CurrentMedium() );
-
-      int pdgid = 0;
-      if ( mc->IsTrackDisappeared() ) {
-
-	if ( nsec )                         vertex->setProcess( mc->ProdProcess(0) );
-	else if ( mc->IsTrackStop() )       vertex->setProcess( kPStop );
-	else if ( mc->IsTrackOut()  )       vertex->setProcess( kPNull );
+    }
+    else if ( nsec > 0 ) {
+      
+      
+      TMCProcess proc = mc->ProdProcess(0);
+      {
+	
+	// interaction which throws off secondaries and track contiues...
+	auto* vertex = mMCStack->GetVertex(vx,vy,vz,tof,proc);
+	
+	vertex->setParent( truth );
+	vertex->setMedium( mc->CurrentMedium() );
+	vertex->setProcess( mc->ProdProcess(0) );
+	vertex->setIntermediate(true);
+	
+	// this is an intermediate vertex on the truth track
+	truth->addIntermediateVertex( vertex );
 	
       }
-      else if ( mc->IsTrackStop() )   vertex->setProcess( kPStop );
-      else if ( mc->IsTrackOut()  )   vertex->setProcess( kPNull );
       
-      truth->setStopVertex( vertex );         
     }
 
-  }
-  else if ( nsec > 0 ) {
-
-
-    TMCProcess proc = mc->ProdProcess(0);
-    {
-
-      // interaction which throws off secondaries and track contiues...
-      auto* vertex = mMCStack->GetVertex(vx,vy,vz,tof,proc);
-
-      vertex->setParent( truth );
-      vertex->setMedium( mc->CurrentMedium() );
-      vertex->setProcess( mc->ProdProcess(0) );
-      vertex->setIntermediate(true);
-      
-      // this is an intermediate vertex on the truth track
-      truth->addIntermediateVertex( vertex );
-
-    }
-      
   }
 
 

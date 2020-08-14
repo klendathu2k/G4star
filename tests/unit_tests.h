@@ -1,12 +1,13 @@
 #ifndef __unit_tests__
 #define __unit_tests__
-#include <StGeant4Maker/StGeant4Maker.h>
 #include <StarGenerator/EVENT/StarGenParticle.h>
 #include <StarGenerator/BASE/StarPrimaryMaker.h>
 #include <StarGenerator/Kinematics/StarKinematics.h>
 #include <StChain.h>
 #include <iostream>
 #include <TVector3.h>
+#include <TSystem.h>
+#include <TStopwatch.h>
 #include <TMath.h>
 #include <g2t_track.h>
 #include <g2t_vertex.h>
@@ -20,22 +21,28 @@
 #ifdef __COLOR__
 const std::string FAIL = "\u001b[31m -failed- \u001b[0m";
 const std::string PASS = "\u001b[32m -passed- \u001b[0m";
+const std::string NOPE = "\u001b[33m - nope - \u001b[0m";
+const std::string YES  = "\u001b[33m - yes - \u001b[0m";
 const std::string UNKN = "\u001b[33m -unknown- \u001b[0m";
 const std::string TODO = "\u001b[36m -todo- \u001b[0m";
+const std::string NADA = "\u001b[36m - N/A - \u001b[0m";
 #else
 const std::string FAIL = " -failed- ";
 const std::string PASS = " -passed- ";
 const std::string UNKN = " -unknown- ";
 const std::string TODO = " -todo- ";
+const std::string NADA = " - n/a - ";
 #endif
 using namespace std;
 //___________________________________________________________________
-#define LOG_TEST std::cout << "\u001b[35m -require- \u001b[0m"
+#define LOG_TEST std::cout << " \u001b[35m -require- \u001b[0m"
 //___________________________________________________________________
 TTable* hit_table    = 0;
 TTable* track_table  = 0;
 TTable* vertex_table = 0;
 static TVector3 _vector3;
+//___________________________________________________________________
+TStopwatch timer;
 //___________________________________________________________________
 double _pmom = 0;
 void throw_muon( double eta, double phid, double pT = 25.0, int q=1 ) {
@@ -76,6 +83,13 @@ void throw_particle( const char* part, double eta, double phid, double pT = 25.0
   chain->Clear();
   chain->Make();
 }
+void throw_particle( int n, const char* part, double ptmn, double ptmx, double etamn, double etamx, double phimn, double phimx ) {
+  auto* chain = StMaker::GetChain();
+  auto* _kine = dynamic_cast<StarKinematics*>( chain->GetMaker("StarKine") );
+  _kine->Kine( n, part, ptmn, ptmx, etamn, etamx, phimn, phimx );
+  chain->Clear();
+  chain->Make();
+}
 //___________________________________________________________________
 std::string check_track( std::string message, std::function<std::string(const g2t_track_st*)> f, int idx=0) {
   const g2t_track_st* track = static_cast<const g2t_track_st*>( track_table->At(idx) );  
@@ -109,5 +123,16 @@ std::string check_emc_hit( std::string message, const g2t_emc_hit_st* hit, std::
   return result;
 };
 //___________________________________________________________________
-
+ostream& operator<<(  ostream& os, const g2t_vertex_st& v ) {
+  os << Form("g2t_vertex id=%i ",v.id);
+  os << Form("volume=%s ",v.ge_volume);
+  os << Form("np=%i nd=%i itrmd=%i x=(%f, %f, %f)",v.n_parent,v.n_daughter,v.is_itrmd,v.ge_x[0],v.ge_x[1],v.ge_x[2]);
+  return os;
+};
+//___________________________________________________________________
+template<typename Hit_t>
+ostream& operator<<(  ostream& os, const Hit_t& h ) {
+  os << Form("g2t_XXX_hit id=%i de=%f ds=%f",h.id,h.de,h.ds);
+  return os;
+};
 #endif

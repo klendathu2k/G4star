@@ -22,9 +22,10 @@ void unit_test_track_data_model() {
   LOG_TEST << "=======================================================" << std::endl;
 
   throw_particle( "e+", 0.4251, 3.1415/4, 10.0 );
-
-  vertex_table = dynamic_cast<TTable*>( chain->GetDataSet("bfc/.make/geant4star/.data/g2t_vertex")  );
-  track_table  = dynamic_cast<TTable*>( chain->GetDataSet("bfc/.make/geant4star/.data/g2t_track")   );
+  
+  auto* chain = StMaker::GetChain();
+  vertex_table = dynamic_cast<TTable*>( chain->GetDataSet("g2t_vertex")  );
+  track_table  = dynamic_cast<TTable*>( chain->GetDataSet("g2t_track")   );
   
   // TRACK VALIDATION
   for ( int idx=0;idx<track_table->GetNRows();idx++ ) {
@@ -49,8 +50,6 @@ void unit_test_track_data_model() {
       else                          result += FAIL;
       return result;
     }, idx);
-
-
   check_track( "The track should have a start vertex",                              [=](const g2t_track_st* t){
       return (t->start_vertex_p>0)?PASS:FAIL;      
     }, idx);
@@ -63,6 +62,7 @@ void unit_test_track_data_model() {
       const g2t_vertex_st* vertex = (istart>0) ? static_cast<const g2t_vertex_st*>( vertex_table->At(istart-1) ) : 0;
       if ( vertex ) {
 	result = PASS;
+	std::cout << *vertex << std::endl;
       }
       return result;
     }, idx);  
@@ -72,6 +72,7 @@ void unit_test_track_data_model() {
       const g2t_vertex_st* vertex = (istart>0) ? static_cast<const g2t_vertex_st*>( vertex_table->At(istart-1) ) : 0;
       if ( vertex ) {
 	result = PASS;
+	std::cout << *vertex << std::endl;
       }
       return result;
     }, idx);
@@ -167,12 +168,10 @@ void unit_test_track_data_model() {
       std::string result = PASS;
       return result;
     }, idx);
-
   check_vertex( "Is this vertex intermediate?",                                    [=](const g2t_vertex_st* v){
       LOG_TEST << "-----------------------------------------------------------" << std::endl;
       return (v->is_itrmd)? YES : NOPE;
     }, idx);
-
   check_vertex( "The vertex has a unique ID",                                      [=](const g2t_vertex_st* t){
       std::string result = Form("unique id = %i",t->id);
       if ( idIsNotUnique[ t->id ] ) result += FAIL;
@@ -227,7 +226,7 @@ void unit_test_track_data_model() {
 	if ( v->n_daughter>0 ) result += PASS;
 	else                   { 
 	  result += FAIL;       
-	  std::cout << *v << std::endl; 
+	  //	  std::cout << *v << std::endl; 
 	}
       }
       return result;

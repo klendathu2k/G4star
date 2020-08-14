@@ -1,6 +1,31 @@
 #include "tests/unit_tests.h"
 #include <assert.h>
 
+#ifndef __CINT__
+#include <boost/accumulators/accumulators.hpp>
+#include <boost/accumulators/statistics/stats.hpp>
+#include <boost/accumulators/statistics/mean.hpp>
+#include <boost/accumulators/statistics/median.hpp>
+#include <boost/accumulators/statistics/min.hpp>
+#include <boost/accumulators/statistics/max.hpp>
+#include <boost/accumulators/statistics/moment.hpp>
+#include <boost/accumulators/statistics/error_of.hpp>
+#include <boost/accumulators/statistics/error_of_mean.hpp>
+using namespace boost::accumulators;
+
+using Accumulator_t = accumulator_set<double, 
+stats< tag::count, 
+       tag::sum,
+       tag::mean, 
+       tag::median(with_p_square_quantile),
+       tag::max, 
+       tag::min, 
+       tag::error_of<tag::mean>
+>>;
+#endif
+
+#include <TVector3.h>
+
 //___________________________________________________________________
 double _eta  = 0; 
 double _phid = 0;
@@ -16,13 +41,15 @@ void throw_muon_in_tpc_sector( int sectorid, int charge = 1 ) {
   _phid = phid; 
   throw_muon( eta, phid, 500.0, charge ); // energetic
 
-  vertex_table = dynamic_cast<TTable*>( chain->GetDataSet("bfc/.make/geant4star/.data/g2t_vertex")  );
-  track_table  = dynamic_cast<TTable*>( chain->GetDataSet("bfc/.make/geant4star/.data/g2t_track")   );
-  hit_table    = dynamic_cast<TTable*>( chain->GetDataSet("bfc/.make/geant4star/.data/g2t_tpc_hit") ) ;
+  auto* chain = StMaker::GetChain();
+  vertex_table = dynamic_cast<TTable*>( chain->GetDataSet("g2t_vertex")  );
+  track_table  = dynamic_cast<TTable*>( chain->GetDataSet("g2t_track")   );
+  hit_table    = dynamic_cast<TTable*>( chain->GetDataSet("g2t_tpc_hit") ) ;
+
+  assert(vertex_table);
 
 }
-//___________________________________________________________________
-
+//______________________________________________________________________
 void unit_test_tpc_hits() {
 
   gROOT->ProcessLine("initChain();");
@@ -34,15 +61,24 @@ void unit_test_tpc_hits() {
   LOG_TEST << "=======================================================" << std::endl;
   LOG_TEST << "Unit testing of tracks and TPC hits on single muons"     << std::endl;
   LOG_TEST << "=======================================================" << std::endl;
+
+  Accumulator_t edep; // Energy deposition
+  Accumulator_t step; // Step size
+  Accumulator_t time; // Time per throw
   
-  for ( int sector=1; sector<=1; sector++ ) {
+  for ( int sector=1; sector<=24; sector++ ) {
 
+    timer.Start();
     throw_muon_in_tpc_sector( sector );
+    time( timer.CpuTime() );
+    timer.Reset();
 
-    LOG_TEST << "Checking muon track in sector " << sector << std::endl;
+    LOG_TEST << "-------------------------------------------------------------------------- sector=" << sector << std::endl;
+
+
     check_track( "A muon must have been processed by geant",       [=](const g2t_track_st* t){
-	// Failure is tested by check_track when it tests for a valid track pointer
-	return PASS; 
+	std::string result = Form("sector=%i ", sector);
+	return result+PASS; 
       });
     check_track( "The track should have a start vertex",           [=](const g2t_track_st* t){
       return (t->start_vertex_p>0)?PASS:FAIL;      
@@ -127,28 +163,37 @@ void unit_test_tpc_hits() {
     });
 
     LOG_TEST << "Checking hits on track in sector " << sector << std::endl;
+
     for ( int i=0;i<hit_table->GetNRows();i++ ) {
+
       auto hit = static_cast<const g2t_tpc_hit_st*>( hit_table->At(i) );
       if ( 0==hit ) continue;     // skip null entries
       if ( 1!=hit->track_p ) continue; // not interested in secondaries
-      check_tpc_hit( "Print the hit...", hit, [=](const g2t_tpc_hit_st* h) {
-	  LOG_TEST << "id=" << h->id 
-		   << " track_p=" << h->track_p 
-		   << " volume_id=" << h->volume_id 
-		   << " x="  << h->x[0] 
-		   << " y="  << h->x[1] 
-		   << " z="  << h->x[2] 	    
-		   << std::endl;
-	  return PASS;
-	});
+
+      edep( hit->de * 1E6 ); // GeV MeV keV
+      step( hit->ds );
+
+      // check_tpc_hit( "Print the hit...", hit, [=](const g2t_tpc_hit_st* h) {
+      // 	  LOG_TEST << "id=" << h->id 
+      // 		   << " track_p=" << h->track_p 
+      // 		   << " volume_id=" << h->volume_id 
+      // 		   << " x="  << h->x[0] 
+      // 		   << " y="  << h->x[1] 
+      // 		   << " z="  << h->x[2] 	    
+      // 		   << std::endl;
+      // 	  return PASS;
+      // 	});
       check_tpc_hit( "The hit should have a nonzero volume_id",hit,[=](const g2t_tpc_hit_st* h) {
 	  std::string result = FAIL;
 	  if ( h->volume_id > 0 ) result = PASS;
+	  result = Form("id=%i vid=%i de=%f ds=%f ",h->id,h->volume_id,h->de,h->ds) + result;
 	  return result;
 	});
       check_tpc_hit( "The hit should have an energy deposit > 0",hit,[=](const g2t_tpc_hit_st* h) {
-	  std::string result = FAIL;
-	  if ( h->de > 0 ) result = PASS;
+	  std::string result = NADA; // undetermined
+	  double ds = h->ds;
+	  if       ( ds > 1.0 && h->de > 0 ) result = PASS;
+	  else if  ( ds > 1.0 && h->de <=0 ) result = FAIL;
 	  return result;
 	});
       check_tpc_hit( "The hit should have a path length > 0",hit,[=](const g2t_tpc_hit_st* h) {
@@ -191,8 +236,19 @@ void unit_test_tpc_hits() {
 	  return result;
 	});
       check_tpc_hit( "Hit position should be w/in the fiducial volume of the sector",hit,[=](const g2t_tpc_hit_st* h){
-	  // TODO
-	  return TODO;
+	  double x = h->x[0];
+	  double y = h->x[1];
+	  double z = h->x[2];
+	  TVector3 hitpos( x, y, z );
+	  int rotator = (sector>12)? 12-sector : sector-12;
+	  double rotatord = (double) rotator;
+	  hitpos.RotateZ( rotatord * TMath::Pi() / 6.0 );
+	  bool isInSectorPhi = abs(hitpos.Phi() - TMath::Pi()/2.0) < TMath::Pi()/12.0;
+	  bool isInSectorR   = abs(hitpos.Perp() -124.0) < 76.0;
+	  bool isInSector    = isInSectorPhi && isInSectorR;	  
+	  std::string result = Form("(%f %f %f / in phi=%i r=%i",x,y,z,isInSectorPhi,isInSectorR);
+	  result += ( isInSector ) ? PASS : FAIL;	  
+	  return result;
 	});
       check_tpc_hit( "The padrow should be 1 <= pad <= 72",hit,[=](const g2t_tpc_hit_st* h) {
 	  std::string result = PASS;
@@ -221,9 +277,59 @@ void unit_test_tpc_hits() {
       });
     }
 
+  }
+
+  std::cout << std::endl << std::endl;
+
+  // Print out energy deposition
+  {
+  
+    double _mean          = boost::accumulators::mean(edep);
+    double _median        = boost::accumulators::median(edep);
+    double _min           = boost::accumulators::min(edep);
+    double _max           = boost::accumulators::max(edep);
+    double _error_of_mean = boost::accumulators::error_of<tag::mean>(edep);
+    
+    LOG_TEST << Form( "energy deposition: mean          = %f keV", _mean )          << std::endl;
+    LOG_TEST << Form( "energy deposition: median        = %f keV", _median )        << std::endl;
+    LOG_TEST << Form( "energy deposition: min           = %f keV", _min  )          << std::endl;
+    LOG_TEST << Form( "energy deposition: max           = %f keV", _max  )          << std::endl;
+    LOG_TEST << Form( "energy deposition: error of mean = %f keV", _error_of_mean ) << std::endl;
 
   }
+
+  // Print out step sizes
+  {
   
+    double _mean          = boost::accumulators::mean(step);
+    double _median        = boost::accumulators::median(step);
+    double _min           = boost::accumulators::min(step);
+    double _max           = boost::accumulators::max(step);
+    double _error_of_mean = boost::accumulators::error_of<tag::mean>(step); 
+    LOG_TEST << Form( "step size: mean          = %f cm", _mean )          << std::endl;
+    LOG_TEST << Form( "step size: median        = %f cm", _median )        << std::endl;
+    LOG_TEST << Form( "step size: min           = %f cm", _min  )          << std::endl;
+    LOG_TEST << Form( "step size: max           = %f cm", _max  )          << std::endl;
+    LOG_TEST << Form( "step size: error of mean = %f cm", _error_of_mean ) << std::endl;
+
+  }
+
+  // Print out time per track
+  {
+  
+    double _mean          = boost::accumulators::mean(time);
+    double _median        = boost::accumulators::median(time);
+    double _min           = boost::accumulators::min(time);
+    double _max           = boost::accumulators::max(time);
+    double _error_of_mean = boost::accumulators::error_of<tag::mean>(time); 
+    LOG_TEST << Form( "time / muon: mean          = %f s", _mean )          << std::endl;
+    LOG_TEST << Form( "time / muon: median        = %f s", _median )        << std::endl;
+    LOG_TEST << Form( "time / muon: min           = %f s", _min  )          << std::endl;
+    LOG_TEST << Form( "time / muon: max           = %f s", _max  )          << std::endl;
+    LOG_TEST << Form( "time / muon: error of mean = %f s", _error_of_mean ) << std::endl;
+
+  }
+
 
 
 }

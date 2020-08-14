@@ -14,11 +14,12 @@ using namespace std;
 #include <TGeoMedium.h>
 
 #include <StarVMC/StarAgmlLib/AgMLExtension.h>
+#include <GeometryUtils.h>
 
 const int kDefaultStackSize = 400;
 const int kDefaultArraySize = 4000;
 
-ostream&  operator<<(ostream& os,  const StarMCVertex& vert) {
+ostream&  operator<<(ostream& os,  const StarMCVertex&   vert) {
   os << Form("[StMCVertex %p] (%f,%f,%f)",
 	     (void*)&vert,
 	     vert.vx(),
@@ -92,10 +93,12 @@ void StMCParticleStack::PushTrack( int toDo, int parent, int pdg,
          auto* node         = navigator->FindNode( vx, vy, vz );   assert(node);
          auto* volume       = node->GetVolume();                   assert(volume);
 
-  AgMLExtension* agmlext = dynamic_cast<AgMLExtension*>( node->GetUserExtension() );
-  if ( 0==agmlext ) {
-    agmlext = dynamic_cast<AgMLExtension*>( volume->GetUserExtension() );
-  }
+  // AgMLExtension* agmlext = dynamic_cast<AgMLExtension*>( node->GetUserExtension() );
+  // if ( 0==agmlext ) {
+  //   agmlext = dynamic_cast<AgMLExtension*>( volume->GetUserExtension() );
+  // }
+
+  AgMLExtension* agmlext = getExtension( node );
 
   int agmlreg = (agmlext) ? agmlext->GetTracking() : 2; // 1=calorimeter 2=tracking 0=blackhole
   
