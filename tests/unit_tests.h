@@ -129,4 +129,10 @@ ostream& operator<<(  ostream& os, const g2t_vertex_st& v ) {
   os << Form("np=%i nd=%i itrmd=%i x=(%f, %f, %f)",v.n_parent,v.n_daughter,v.is_itrmd,v.ge_x[0],v.ge_x[1],v.ge_x[2]);
   return os;
 };
+//___________________________________________________________________
+template<typename Hit_t>
+ostream& operator<<(  ostream& os, const Hit_t& h ) {
+  os << Form("g2t_XXX_hit id=%i de=%f ds=%f",h.id,h.de,h.ds);
+  return os;
+};
 #endif
