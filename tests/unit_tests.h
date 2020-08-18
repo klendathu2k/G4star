@@ -130,8 +130,7 @@ ostream& operator<<(  ostream& os, const g2t_vertex_st& v ) {
   return os;
 };
 //___________________________________________________________________
-template<typename Hit_t>
-ostream& operator<<(  ostream& os, const Hit_t& h ) {
+ostream& operator<<(  ostream& os, const g2t_tpc_hit_st& h ) {
   os << Form("g2t_XXX_hit id=%i de=%f ds=%f",h.id,h.de,h.ds);
   return os;
 };
