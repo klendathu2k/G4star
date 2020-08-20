@@ -155,6 +155,7 @@ void StTrackerHitCollection::ProcessHits() {
       LOG_INFO << "Cannot score hits with depth " <<   navigator->GetLevel() << endm;
       return; 
     }
+
     mHits.push_back( hit = new TrackerHit );
 
     // Get the current path to the sensitive volume
@@ -164,7 +165,6 @@ void StTrackerHitCollection::ProcessHits() {
     // only writes to the current level, so if hit is not new or cleared, need to clear by hand.
     gGeoManager->GetBranchNumbers( hit->copy, hit->volu );
 
-    // Set reduced volume path
     int inumbv = 0;
     AgMLExtension* agmlext = 0;
     for ( int ilvl=0; ilvl<navigator->GetLevel()+1;ilvl++ ) {
