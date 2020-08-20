@@ -103,7 +103,7 @@ StHitCollection::StHitCollection( const char* name, const char* title ) : TNamed
 //_____________________________________________________________________________________________
 StTrackerHitCollection::StTrackerHitCollection( const char* name, const char* title ) : StHitCollection(name,title), mHits() { }
 //_____________________________________________________________________________________________
-StCalorimeterHitCollection::StCalorimeterHitCollection( const char* name, const char* title ) : StHitCollection(name,title), mHits(),mBirk{1.0,0.0130,9.6E-6},mEsum(0) { }
+StCalorimeterHitCollection::StCalorimeterHitCollection( const char* name, const char* title ) : StHitCollection(name,title), mHits(), mHitsByVolume(), mBirk{1.0,0.0130,9.6E-6},mEsum(0) { }
 //_____________________________________________________________________________________________
 
 
