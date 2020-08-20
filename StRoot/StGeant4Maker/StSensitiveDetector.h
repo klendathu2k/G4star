@@ -85,7 +85,7 @@ private:
 protected:
 
   std::vector<TGeoVolume*>   mVolumes;
-  std::vector<DetectorHit*>  mHits; // Deprecated... remove
+
   AgMLExtension* mAgMLInfo;
 
   StHitCollection* mCollection;
