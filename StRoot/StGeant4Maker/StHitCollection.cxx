@@ -363,10 +363,35 @@ void StCalorimeterHitCollection::ProcessHits() {
 }
 //_____________________________________________________________________________________________
 void StCalorimeterHitCollection::EndOfEvent() {
-//  for ( auto hit : mHits ) {
-//    LOG_INFO << *hit << endm;
-//  }
-//  mHits.clear();
+  LOG_INFO << "END OF EVENT" << endm;
+  // Aggregate hits in each calorimeter sensitive volume
+  int count=0;
+  for ( auto hit : mHits ) {
+    int volumeId = hit->volId;
+    auto myhit   = mHitsByVolume[volumeId];
+    if ( 0==myhit ) {
+      myhit = mHitsByVolume[volumeId] = new CalorimeterHit();
+      myhit->id = count++;
+      myhit->idtruth=hit->idtruth;
+      std::copy( hit->volu, hit->volu+DetectorHit::maxdepth, myhit->volu );
+      std::copy( hit->copy, hit->copy+DetectorHit::maxdepth, myhit->copy );
+      myhit->volId = volumeId;
+      myhit->path  = hit->path;      
+      myhit->user.resize(hit->user.size());
+      std::copy(hit->position_in,hit->position_in+4,myhit->position_in);
+    }
+    myhit->nsteps += hit->nsteps;
+    myhit->de     += hit->de;
+    for ( int i=0;i<myhit->user.size();i++ ) {
+      myhit->user[i]+=hit->user[i];
+    }    
+  }
+
+  mHits.clear();
+  for ( auto kv : mHitsByVolume ) {
+    mHits.push_back( kv.second );
+  }
+  
 }
 //_____________________________________________________________________________________________
 
