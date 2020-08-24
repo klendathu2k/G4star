@@ -366,6 +366,8 @@ void StCalorimeterHitCollection::EndOfEvent() {
   LOG_INFO << "END OF EVENT" << endm;
   // Aggregate hits in each calorimeter sensitive volume
   int count=0;
+  int idtruth=0;
+  double demax=-9E9;
   for ( auto hit : mHits ) {
     int volumeId = hit->volId;
     auto myhit   = mHitsByVolume[volumeId];
@@ -379,6 +381,9 @@ void StCalorimeterHitCollection::EndOfEvent() {
       myhit->path  = hit->path;      
       myhit->user.resize(hit->user.size());
       std::copy(hit->position_in,hit->position_in+4,myhit->position_in);
+      if ( hit->de > demax ) {
+	myhit->idtruth=hit->idtruth;
+      }
     }
     myhit->nsteps += hit->nsteps;
     myhit->de     += hit->de;
