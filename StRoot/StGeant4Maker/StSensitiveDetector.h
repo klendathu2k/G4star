@@ -4,6 +4,7 @@
 #include <TVirtualMCSensitiveDetector.h>
 #include <TGeoVolume.h>
 #include <vector>
+#include <map>
 #include <TString.h>
 
 class AgMLExtension;
