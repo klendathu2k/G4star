@@ -26,6 +26,8 @@ stats< tag::count,
 
 #include <TVector3.h>
 
+
+
 //___________________________________________________________________
 double _eta  = 0; 
 double _phid = 0;
@@ -50,7 +52,7 @@ void throw_muon_in_tpc_sector( int sectorid, int charge = 1 ) {
 
 }
 //______________________________________________________________________
-void unit_test_tpc_hits() {
+void unit_test_tpc_hits( int longtest=0 ) {
 
   gROOT->ProcessLine("initChain();");
 
@@ -74,7 +76,6 @@ void unit_test_tpc_hits() {
     timer.Reset();
 
     LOG_TEST << "-------------------------------------------------------------------------- sector=" << sector << std::endl;
-
 
     check_track( "A muon must have been processed by geant",       [=](const g2t_track_st* t){
 	std::string result = Form("sector=%i ", sector);
@@ -170,7 +171,7 @@ void unit_test_tpc_hits() {
       if ( 0==hit ) continue;     // skip null entries
       if ( 1!=hit->track_p ) continue; // not interested in secondaries
 
-      edep( hit->de * 1E6 ); // GeV MeV keV
+      edep( TMath::Abs(hit->de) * 1E6 ); // GeV MeV keV
       step( hit->ds );
 
       // check_tpc_hit( "Print the hit...", hit, [=](const g2t_tpc_hit_st* h) {
@@ -330,7 +331,63 @@ void unit_test_tpc_hits() {
 
   }
 
+  // Reset accumulators
+  edep = step = time = {};
+  
+  if ( longtest > 0 ) {
 
+    std::cout << "-/ running long test with N pi+/pi- =" << longtest << " /-" << std::endl;
+
+    throw_particle( longtest, "pi+,pi-", 0.200, 20.0, -1.0, 1.0, 0.0, TMath::TwoPi() );
+
+    auto* chain = StMaker::GetChain();
+    hit_table    = dynamic_cast<TTable*>( chain->GetDataSet("g2t_tpc_hit") ) ;
+
+    // Accumulate
+    for ( int i=0;i<hit_table->GetNRows();i++ ) {
+
+      auto hit = static_cast<const g2t_tpc_hit_st*>( hit_table->At(i) );
+      if ( 0==hit ) continue;     // skip null entries
+      //      std::cout << *hit << std::endl;
+
+      edep( TMath::Abs(hit->de) * 1E6 ); // GeV MeV keV
+      step( hit->ds );
+
+    }
+
+    // Print out energy deposition  
+    {
+      double _mean          = boost::accumulators::mean(edep);
+      double _median        = boost::accumulators::median(edep);
+      double _min           = boost::accumulators::min(edep);
+      double _max           = boost::accumulators::max(edep);
+      double _error_of_mean = boost::accumulators::error_of<tag::mean>(edep);
+    
+      LOG_TEST << Form( "energy deposition: mean          = %f keV", _mean )          << std::endl;
+      LOG_TEST << Form( "energy deposition: median        = %f keV", _median )        << std::endl;
+      LOG_TEST << Form( "energy deposition: min           = %f keV", _min  )          << std::endl;
+      LOG_TEST << Form( "energy deposition: max           = %f keV", _max  )          << std::endl;
+      LOG_TEST << Form( "energy deposition: error of mean = %f keV", _error_of_mean ) << std::endl;
+      
+    }
+
+    // Print out step sizes
+    {
+      
+      double _mean          = boost::accumulators::mean(step);
+      double _median        = boost::accumulators::median(step);
+      double _min           = boost::accumulators::min(step);
+      double _max           = boost::accumulators::max(step);
+      double _error_of_mean = boost::accumulators::error_of<tag::mean>(step); 
+      LOG_TEST << Form( "step size: mean          = %f cm", _mean )          << std::endl;
+      LOG_TEST << Form( "step size: median        = %f cm", _median )        << std::endl;
+      LOG_TEST << Form( "step size: min           = %f cm", _min  )          << std::endl;
+      LOG_TEST << Form( "step size: max           = %f cm", _max  )          << std::endl;
+      LOG_TEST << Form( "step size: error of mean = %f cm", _error_of_mean ) << std::endl;
+
+    }
+
+  }
 
 }
 //___________________________________________________________________

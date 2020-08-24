@@ -7,6 +7,8 @@ class CalorimeterHit;
 
 #include <TNamed.h>
 #include <TVector.h>
+#include <vector>
+#include <map>
 
 class StHitCollection : public TNamed {
 
@@ -73,6 +75,7 @@ private:
 protected:
 
   std::vector<CalorimeterHit*> mHits;
+  std::map<int, CalorimeterHit*> mHitsByVolume;
   double mBirk[3];
   double mEsum;
 

@@ -4,6 +4,7 @@
 #include <TVirtualMCSensitiveDetector.h>
 #include <TGeoVolume.h>
 #include <vector>
+#include <map>
 #include <TString.h>
 
 class AgMLExtension;
@@ -85,7 +86,7 @@ private:
 protected:
 
   std::vector<TGeoVolume*>   mVolumes;
-  std::vector<DetectorHit*>  mHits; // Deprecated... remove
+
   AgMLExtension* mAgMLInfo;
 
   StHitCollection* mCollection;

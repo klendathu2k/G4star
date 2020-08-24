@@ -12,6 +12,7 @@
 #include <AgMLHcaVolumeId.h>
 #include <AgMLPreVolumeId.h>
 #include <AgMLEpdVolumeId.h>
+#include <AgMLEmcVolumeId.h>
 
 class AgMLVolumeIdFactory {
 public:
@@ -29,6 +30,7 @@ public:
     if ( name == "HSCI" ) { return (id)? id : id=new AgMLHcaVolumeId; }
     if ( name == "PSCI" ) { return (id)? id : id=new AgMLPreVolumeId; }
     if ( name == "EPDT" ) { return (id)? id : id=new AgMLEpdVolumeId; }
+    if ( name == "CSCI" ) { return (id)? id : id=new AgMLEmcVolumeId; }
     
     assert(id==0);
     return 0;
