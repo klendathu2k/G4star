@@ -207,10 +207,15 @@ class StMCParticleStack : public TVirtualMCStack
   /// Obtain the current particle truth
 //  const StarMCParticle* GetCurrentTruth() const { return mParticleTable.back(); }
 
+  std::vector<StarMCParticle*>&    GetTruthTable()   { return mTruthTable; }
   std::vector<StarMCParticle*>& GetParticleTable(){ return mParticleTable; }
   std::vector<StarMCVertex*>&   GetVertexTable()  { return mVertexTable; }
 
   StarMCVertex* GetVertex( double vx, double vy, double vz, double vt, int proc=-1 );
+
+  StarMCParticle* GetPersistentTrack( int stackIndex ) {    return mStackToTable[ stackIndex ];  }
+
+  int GetIdTruth( StarMCParticle* part ){ return mIdTruthFromParticle[part]; }
 
  private:
  protected:
@@ -226,10 +231,14 @@ class StMCParticleStack : public TVirtualMCStack
   std::list  <int>         mStackIdx;
 
 
+  std::vector<StarMCParticle *> mTruthTable;
   std::vector<StarMCParticle *> mParticleTable;
   std::vector<StarMCVertex   *> mVertexTable;
 
   std::map<int, StarMCParticle*> mStackToTable;
+
+  std::map<StarMCParticle*, int> mIdTruthFromParticle;
+
 
   //  ClassDef(StMCParticleStack,0);
     

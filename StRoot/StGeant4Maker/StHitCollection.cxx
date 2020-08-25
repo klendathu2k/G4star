@@ -132,10 +132,12 @@ void StTrackerHitCollection::ProcessHits() {
   StMCParticleStack* stack = (StMCParticleStack *)mc->GetStack();
   
   // Get list of tracks from particle stack
-  std::vector<StarMCParticle*>& truthTable = stack->GetParticleTable();
+  std::vector<StarMCParticle*>& truthTable    = stack->GetTruthTable();
+  std::vector<StarMCParticle*>& particleTable = stack->GetParticleTable();
 
   // This should be the current particle truth 
   StarMCParticle* truth = truthTable.back();
+  LOG_INFO << "Score hit to truth = " << *truth << endm;
   truth->addHit(); 
 
   bool isNewTrack      = mc->IsNewTrack();
@@ -183,7 +185,11 @@ void StTrackerHitCollection::ProcessHits() {
     hit->id = mHits.size();
 
     // Assign the hit the ID truth of the current track (index + 1)
-    hit->idtruth = truthTable.size();
+    //    hit->idtruth = particleTable.size();
+    //    hit->idtruth = truthTable.size();
+    hit->idtruth = stack->GetIdTruth ( truth );
+
+
 
     // Score entrance momentum and 
     mc->TrackMomentum( hit->momentum_in[0], hit->momentum_in[1],  hit->momentum_in[2],  hit->momentum_in[3] ); 
@@ -271,7 +277,8 @@ void StCalorimeterHitCollection::ProcessHits() {
   StMCParticleStack* stack = (StMCParticleStack *)mc->GetStack();
   
   // Get list of tracks from particle stack
-  std::vector<StarMCParticle*>& truthTable = stack->GetParticleTable();
+  std::vector<StarMCParticle*>& truthTable = stack->GetTruthTable();
+  std::vector<StarMCParticle*>& particleTable = stack->GetParticleTable();
 
   // This should be the current particle truth 
   StarMCParticle* truth = truthTable.back();
@@ -326,7 +333,9 @@ void StCalorimeterHitCollection::ProcessHits() {
     hit->id = 1 + mHits.size();
 
     // Assign the hit the ID truth of the current track (index + 1)
-    hit->idtruth = truthTable.size();
+    //    hit->idtruth = particleTable.size();
+    //    hit->idtruth = truthTable.size();
+    hit->idtruth = stack->GetIdTruth ( truth );
 
     // Score entrance
     mc->TrackPosition( hit->position_in[0], hit->position_in[1],  hit->position_in[2] );

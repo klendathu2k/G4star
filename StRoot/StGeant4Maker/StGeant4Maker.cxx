@@ -683,7 +683,12 @@ void StarVMCApplication::BeginPrimary(){ _g4maker -> BeginPrimary(); }
 void StGeant4Maker::BeginPrimary()
 {
 
+  std::vector<StarMCParticle*>& truthTable    = mMCStack->GetTruthTable();
+  truthTable.clear();
 
+  int current = mMCStack->GetCurrentTrackNumber();
+  truthTable.push_back( mMCStack->GetPersistentTrack( current ) );
+ 
 }
 //________________________________________________________________________________________________
 void StarVMCApplication::FinishPrimary(){ _g4maker->FinishPrimary(); }
