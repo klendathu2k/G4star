@@ -350,8 +350,6 @@ void StCalorimeterHitCollection::ProcessHits() {
   // Hit energy will be the total energy deposition corrected by Birk's law
   hit -> de =   mEsum * mBirk[0] / ( 1.0 + mBirk[1]*mEsum + mBirk[2]*mEsum*mEsum );
 
-  LOG_INFO << *hit << endm;
-
   // Grab the agml extension and evaluate user hits
   AgMLExtension* agmlext = dynamic_cast<AgMLExtension*>( current->GetUserExtension() );
   if ( 0==agmlext ) return;
