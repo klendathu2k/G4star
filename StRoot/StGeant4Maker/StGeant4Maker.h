@@ -14,7 +14,6 @@
 
 class StGeant4Maker;
 class StMCParticleStack;
-class StMCTruthTable;
 
 class AgMLExtension;
 
@@ -144,7 +143,6 @@ protected:
   StarMagFieldAdaptor *mMagfield;
   TG4RunConfiguration* mRunConfig;
   //  StVMCStepManager* mStepping;
-  StMCTruthTable* mTruthTable;
 
   void UpdateHistory();
 

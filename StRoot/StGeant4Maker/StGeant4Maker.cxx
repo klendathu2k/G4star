@@ -17,7 +17,6 @@
 #include "StarGenerator/UTIL/StarRandom.h"
 
 #include "TString.h"
-#include "StMCTruthTable.h"
 #include "StSensitiveDetector.h"
 
 #include <CLHEP/Random/Random.h>
@@ -265,7 +264,6 @@ StGeant4Maker::StGeant4Maker( const char* nm ) :
   mMCStack        ( new StMCParticleStack( "MCstack" ) ),
   mMagfield       ( NULL ),
   mRunConfig      ( NULL ),
-  mTruthTable     ( new StMCTruthTable() ),
   mCurrentNode    (0),
   mPreviousNode   (0),
   mCurrentVolume  (0),
@@ -564,14 +562,12 @@ int  StGeant4Maker::ConfigureGeometry() {
 void StarVMCApplication::BeginEvent(){ _g4maker->BeginEvent(); }
 void StGeant4Maker::BeginEvent(){
 
-  mTruthTable->BeginEvent();
 
 }
 //________________________________________________________________________________________________
 void StarVMCApplication::FinishEvent(){ _g4maker -> FinishEvent(); }
 void StGeant4Maker::FinishEvent(){
 
-  mTruthTable->FinishEvent();
 
   LOG_INFO << "End of Event" << endm;
 
