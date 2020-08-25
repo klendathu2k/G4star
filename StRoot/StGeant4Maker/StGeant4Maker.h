@@ -187,46 +187,6 @@ protected:
     return nhits;
   };
 
-
-#if 0
-  /// Given a list of sensitive volumes within the (G3) hit container, loop over all
-  /// hits in those volumes and add them to a new g2t table.                        
-  /// @param T specifies the type of the table   
-  /// @param F specifies the functor class which retrieves the hits from geant  
-  /// @param container is the name of the geant container  
-  /// @param volumes is the list of sensitive volumes managed by the container   
-  /// @param tablename is the name of the table to be created                                                                                  
-  /// @param g2t is the functor of class F passed 
-  template<typename T, typename F>                                                                                                             
-  int AddHits( std::vector<std::string> volumes, std::string tablename, F g2t, bool verbose=false ){                    
-    int ntotal = 0, nhits = 0;                                                                                                               
-    for ( auto v : volumes ) {
-      // Obtain the sensitive detector defined on the volume name
-      StSensitiveDetector* sd = TVirtualMC::GetMC()->GetSensitiveDetector( v.c_str() );
-      // Get the number of hits
-      nhits = sd->numberOfHits();
-      std::string key = v;                                                                                                 
-      LOG_DEBUG << key << " found nhits=" << nhits << endm;                                                                                  
-      if (nhits) { 
-	mHitCounts[ key ] += nhits; 
-	mHitCounts["ALL"] += nhits; 
-      }                                                                   
-      ntotal += nhits;                                                                                                                       
-    }                                                                                                                                        
-    if ( ntotal <= 0 ) return ntotal;                                                                                                        
-
-    // T* table = new T( tablename.c_str(), ntotal );                                                                                           
-    // auto* g2t_track = (St_g2t_track*)FindByName("g2t_track");                                                                                
-
-    // g2t( sd, g2t_track, table );
-    // AddData( table );                                                                                                                        
-
-    // if ( Debug() > 1 || verbose ) table->Print(0,10);                                                                                        
-    return ntotal;                                                                                                                           
-  }                                                                                                                                            
-  std::map<std::string, int> mHitCounts;    
-#endif
-
   ClassDef(StGeant4Maker,1);
 
 };
