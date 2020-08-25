@@ -323,7 +323,7 @@ void StCalorimeterHitCollection::ProcessHits() {
     hit->volId = agmlext->GetVolumeId( hit->numbv );
 
     // Assign the hit a unqiue ID (index + 1)
-    hit->id = mHits.size();
+    hit->id = 1 + mHits.size();
 
     // Assign the hit the ID truth of the current track (index + 1)
     hit->idtruth = truthTable.size();
@@ -350,6 +350,8 @@ void StCalorimeterHitCollection::ProcessHits() {
   // Hit energy will be the total energy deposition corrected by Birk's law
   hit -> de =   mEsum * mBirk[0] / ( 1.0 + mBirk[1]*mEsum + mBirk[2]*mEsum*mEsum );
 
+  LOG_INFO << *hit << endm;
+
   // Grab the agml extension and evaluate user hits
   AgMLExtension* agmlext = dynamic_cast<AgMLExtension*>( current->GetUserExtension() );
   if ( 0==agmlext ) return;
@@ -363,7 +365,6 @@ void StCalorimeterHitCollection::ProcessHits() {
 }
 //_____________________________________________________________________________________________
 void StCalorimeterHitCollection::EndOfEvent() {
-  LOG_INFO << "END OF EVENT" << endm;
   // Aggregate hits in each calorimeter sensitive volume
   int count=0;
   int idtruth=0;
@@ -373,7 +374,7 @@ void StCalorimeterHitCollection::EndOfEvent() {
     auto myhit   = mHitsByVolume[volumeId];
     if ( 0==myhit ) {
       myhit = mHitsByVolume[volumeId] = new CalorimeterHit();
-      myhit->id = count++;
+      myhit->id = ++count;
       myhit->idtruth=hit->idtruth;
       std::copy( hit->volu, hit->volu+DetectorHit::maxdepth, myhit->volu );
       std::copy( hit->copy, hit->copy+DetectorHit::maxdepth, myhit->copy );
@@ -381,10 +382,9 @@ void StCalorimeterHitCollection::EndOfEvent() {
       myhit->path  = hit->path;      
       myhit->user.resize(hit->user.size());
       std::copy(hit->position_in,hit->position_in+4,myhit->position_in);
-      if ( hit->de > demax ) {
-	myhit->idtruth=hit->idtruth;
-      }
+      myhit->idtruth=hit->idtruth;      
     }
+    myhit->idtruth = TMath::Min( hit->idtruth, myhit->idtruth );
     myhit->nsteps += hit->nsteps;
     myhit->de     += hit->de;
     for ( int i=0;i<myhit->user.size();i++ ) {
