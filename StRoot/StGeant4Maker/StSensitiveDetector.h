@@ -14,6 +14,7 @@ class DetectorHit {
 public:
 
   DetectorHit();
+  virtual ~DetectorHit(){ /* nada */ };
 
   static const unsigned int maxdepth = 15;
 
@@ -36,6 +37,7 @@ class TrackerHit : public DetectorHit {
 public:
 
   TrackerHit();
+  virtual ~TrackerHit(){ /* nada */ }
 
   double position_in[4];        /// x,y,z,t position where track entered volume
   double position_out[4];       /// x,y,z,t position where track exited volume
@@ -55,6 +57,7 @@ class CalorimeterHit : public DetectorHit {
 public:
 
   CalorimeterHit(); 
+  virtual ~CalorimeterHit(){ /* nada */ }
 
   double position_in[4];        /// x,y,z,t position where track entered volume
   double de;
