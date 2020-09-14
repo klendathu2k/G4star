@@ -3,6 +3,7 @@
 
 #include <TVirtualMCSensitiveDetector.h>
 #include <TGeoVolume.h>
+#include <iostream>
 #include <vector>
 #include <map>
 #include <TString.h>
