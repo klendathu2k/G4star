@@ -33,7 +33,7 @@ ostream&  operator<<(ostream& os,  const TrackerHit& hit) {
   }
 
    // Printout hit information
-   os << Form( "Tracker Hit [%i %i %i]\n\t[%s]\n\t[%s]\n\tpos:(%f,%f,%f)(%f,%f,%f)\n\tmom:(%f,%f,%f),(%f,%f,%f) \n\tde=%f nstep=%i",
+   os << Form( "Tracker Hit [i=%i t=%i v=%i] \t[%s]\n\t[%s]\n\tpos:(%f,%f,%f)(%f,%f,%f)\n\tmom:(%f,%f,%f),(%f,%f,%f) \n\tde=%f nstep=%i",
                hit.id, hit.idtruth,hit.volId,
                hit.path.Data(),
 	       numbv.Data(),
@@ -137,8 +137,6 @@ void StTrackerHitCollection::ProcessHits() {
 
   // This should be the current particle truth 
   StarMCParticle* truth = truthTable.back();
-  LOG_INFO << "Score hit to truth = " << *truth << endm;
-  truth->addHit(); 
 
   bool isNewTrack      = mc->IsNewTrack();
   bool isTrackEntering = mc->IsTrackEntering();
@@ -159,6 +157,7 @@ void StTrackerHitCollection::ProcessHits() {
     }
 
     mHits.push_back( hit = new TrackerHit );
+    truth->addHit( hit );
 
     // Get the current path to the sensitive volume
     hit->path = mc->CurrentVolPath(); 
@@ -282,7 +281,7 @@ void StCalorimeterHitCollection::ProcessHits() {
 
   // This should be the current particle truth 
   StarMCParticle* truth = truthTable.back();
-  truth->addHit(); 
+
 
   bool isNewTrack      = mc->IsNewTrack();
   bool isTrackEntering = mc->IsTrackEntering();
@@ -306,6 +305,7 @@ void StCalorimeterHitCollection::ProcessHits() {
     }
 
     mHits.push_back( hit = new CalorimeterHit );
+    truth->addHit( hit );
 
     // Get the current path to the sensitive volume
     hit->path = mc->CurrentVolPath(); 
