@@ -49,11 +49,12 @@ void unit_test_track_data_model_ntrack() {
 
   timer.Start();
   
-  int    _ntrack = 10;
+  int    _ntrack = 500;
   double _pt = 10.0;
-  for ( int i=1;i<_ntrack;i++ ) 
-    add_particle( "mu+", 0.4251, 3.1415/4*(1.0+0.8*double(i)), _pt );
-  throw_particle( "mu+", 0.4251, 3.1415/4, _pt );
+  // for ( int i=1;i<_ntrack;i++ ) 
+  //   add_particle( "mu+", 0.4251, 3.1415/4*(1.0+0.8*double(i)), _pt );
+  // throw_particle( "mu+", 0.4251, 3.1415/4, _pt );
+  throw_particle( _ntrack, "mu+", 0.1, 10.0, -0.95, 0.95, 0.0, TMath::TwoPi() );
   timer.Stop();
   
   auto* chain = StMaker::GetChain();
@@ -62,34 +63,55 @@ void unit_test_track_data_model_ntrack() {
   hit_table    = dynamic_cast<TTable*>( chain->GetDataSet("g2t_emc_hit") );
 
   // Track table validation
-  check_track_table( Form("The first %i tracks should be primary muons",_ntrack), [=](g2t_track_st* begin_, g2t_track_st* end_) {
+  check_track_table( Form("The first %i tracks should be primary muons",_ntrack),   [=](g2t_track_st* begin_, g2t_track_st* end_) {
       std::string result = PASS;
       g2t_track_st* track = begin_;
       for ( int i=0;i<_ntrack;i++ ) {
 	if ( track->eg_pid != -13 ) result = FAIL;
+	track++;
       }
       return result;
     });
-
-  check_track_table( Form("The first %i tracks should have pT=%f",_ntrack,_pt), [=](g2t_track_st* begin_, g2t_track_st* end_) {
+  check_track_table( Form("The first %i tracks should have 0.1 < pT < 10.0 GeV",_ntrack),     [=](g2t_track_st* begin_, g2t_track_st* end_) {
       std::string result = PASS;
       g2t_track_st* track = begin_;
       for ( int i=0;i<_ntrack;i++ ) {
-	if ( TMath::Abs(track->pt - _pt) > 0.001*_pt ) result = FAIL;
+	//if ( TMath::Abs(track->pt - _pt) > 0.001*_pt ) result = FAIL;
+	if ( track->pt<0.1 || track->pt>10.0 ) result = FAIL;
+	track++;
       }
       return result;
     });
-
-  check_track_table( Form("The first %i tracks should have > 50 TPC hits",_ntrack), [=](g2t_track_st* begin_, g2t_track_st* end_) {
+  check_track_table( "80% of primary tracks should have >= 70 TPC hits", [=](g2t_track_st* begin_, g2t_track_st* end_) {
       std::string result = PASS;
       g2t_track_st* track = begin_;
+      std::vector<int> nh;
+      double fail=0;
       for ( int i=0;i<_ntrack;i++ ) {
-	if ( track->n_tpc_hit<50 ) result = FAIL;
+	if ( track->n_tpc_hit<70 ) fail+=1;
+	track++;
       }
+      fail /= _ntrack;
+      if ( fail > 0.80 ) result = Form("fail rate=%f%% ",fail*100.0) + FAIL;
       return result;
     });
 
-  
+  check_track_table( "Primary tracks should have < 78 hits",             [=](g2t_track_st* begin_, g2t_track_st* end_) {
+      std::string result = PASS;
+      g2t_track_st* track = begin_;
+      std::vector<int> nh;
+      double fail=0;
+      std::string nf = "";
+      for ( int i=0;i<_ntrack;i++ ) {
+	if ( track->n_tpc_hit>=78 ) { fail+=1; nf += Form("%i ",track->n_tpc_hit); }
+	track++;
+      }
+      fail /= _ntrack;
+      if ( fail > 0.00 ) result = Form("fail rate=%f%% %s",fail*100.0,nf.c_str()) + FAIL;
+      return result;
+    });
+
+ 
   // TRACK VALIDATION
   if (0)  for ( int idx=0;idx<track_table->GetNRows();idx++ ) {
 
@@ -329,7 +351,10 @@ void unit_test_track_data_model_ntrack() {
   }
 
   // Print the track list
-  track_table->Print(0, _ntrack);
+  if (0) 
+    track_table->Print(0, _ntrack);
+  else if (0) 
+    track_table->Print(0, track_table->GetNRows() );
   
 
 }
