@@ -13,6 +13,8 @@
 #include <map>
 #include <iostream>
 
+class DetectorHit;
+
 
 /**
    \class StMCParticleStack
@@ -57,11 +59,18 @@ public:
   void  addIntermediateVertex( StarMCVertex* v ){ mIntermediateVertices.push_back(v); }
   void  setStopVertex( StarMCVertex* v ){ mStopVertex = v; }
 
+  std::vector<StarMCVertex*> intermediate() const { return mIntermediateVertices; }
+
   void setIdStack( int id ) { mIdStack = id; } 
   int     idStack() const { return mIdStack; } 
 
-  const long long numberOfHits(){ return mNumHits; } 
-  void  addHit(){ mNumHits++; } 
+  //const long long numberOfHits(){ return mNumHits; } 
+  //void  addHit(){ mNumHits++; } 
+
+  const long long numberOfHits(){ return mHits.size(); } 
+  void  addHit( DetectorHit* hit ){ mHits.push_back(hit); } 
+
+  std::vector<DetectorHit*>& hits(){ return mHits; }
   
 
 private:
@@ -74,6 +83,8 @@ protected:
 
   int                        mIdStack;              /// Track identity on stack 
   long long                  mNumHits;              /// Number of hits registered on the track 
+
+  std::vector<DetectorHit*>  mHits;                 /// List of hits on track
 
 };
 
