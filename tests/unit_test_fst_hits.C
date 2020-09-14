@@ -10,7 +10,8 @@ void throw_muon_in_fts_wedge( int wedgeid, int inout, int charge = 1 ) {
   double phid = 15.0; _phid=phid;
 
   throw_muon( eta, phid, 500.0, charge );
-	
+
+  auto* chain = StMaker::GetChain();	
   vertex_table = dynamic_cast<TTable*>( chain->GetDataSet("g2t_vertex")  );
   track_table  = dynamic_cast<TTable*>( chain->GetDataSet("g2t_track")   );
   hit_table    = dynamic_cast<TTable*>( chain->GetDataSet("g2t_fsi_hit") );
