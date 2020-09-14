@@ -110,8 +110,8 @@ struct SD2Table_TPC {
 
       int idtruth = hit->idtruth;
       g2t_track_st* trk = (g2t_track_st*)track->At(idtruth-1);
-      trk->n_tpc_hit++;
-      
+      trk->n_tpc_hit++;     
+
     }
     // TODO: increment hit count on track 
   } 
@@ -280,8 +280,8 @@ StGeant4Maker::StGeant4Maker( const char* nm ) :
   SetAttr( "G4VmcOpt:Name",  "Geant4"  );
   SetAttr( "G4VmcOpt:Title", "The Geant4 Monte Carlo" );
   SetAttr( "G4VmcOpt:Phys",  "FTFP_BERT" ); // default physics list
-  //  SetAttr( "G4VmcOpt:Process", "stepLimit+specialCuts" ); // special process
-  SetAttr( "G4VmcOpt:Process", "stepLimit+specialCuts+stackPopper" ); // special process
+  //  SetAttr( "G4VmcOpt:Process", "stepLimiter+specialCuts" ); // special process
+  SetAttr( "G4VmcOpt:Process", "stepLimiter+specialCuts+stackPopper" ); // special process
 
   SetAttr( "AgMLOpt:TopVolume", "HALL" );
 
@@ -351,6 +351,7 @@ int StGeant4Maker::Init() {
     gG4->SetStack( mMCStack );  
     gG4->SetMagField( mMagfield );
     gG4 -> SetRootGeometry();
+    gG4->ProcessGeantCommand( "/mcControl/g3Defaults" );
   } else {
     LOG_FATAL << "Could not instantiate concrete MC.  WTF?" << endm;
     return kStFATAL;
@@ -366,6 +367,17 @@ int StGeant4Maker::Init() {
 
   // VMC SD manager appears to be the last thing initialized when gMC->Init()
   // is called... so we should initialize our hits here...
+
+  //
+  // Some geant4 configurations
+  //
+  const char* g4cmd[] = {
+    "/mcPhysics/printGlobalCuts",
+    "/mcPhysics/printGlobalControls",
+  };
+
+  for ( auto cmd : g4cmd )   gG4->ProcessGeantCommand( cmd );
+
 
   LOG_INFO << "Initialize GEANT4 Physics" << endm;
   gG4 -> BuildPhysics();
@@ -688,7 +700,7 @@ void StGeant4Maker::BeginPrimary()
 
   int current = mMCStack->GetCurrentTrackNumber();
   truthTable.push_back( mMCStack->GetPersistentTrack( current ) );
- 
+
 }
 //________________________________________________________________________________________________
 void StarVMCApplication::FinishPrimary(){ _g4maker->FinishPrimary(); }
