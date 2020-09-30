@@ -195,7 +195,7 @@ void loadStar(const Char_t *mytag="dev2021", Bool_t agml = true  )
 
 bool __initialized = false;
 
-bool initChain() {
+bool initChain( std::vector<std::string> _cmds={ "std::cout << \"Chain has been initialized.\" << std::endl;" } ) {
   if ( !__initialized ) { 
     //    gROOT->ProcessLine(Form("chain->SetAttr(\"Random:G4\",%i)",__rngSeed));
     // Setup RNG seed and map all ROOT TRandom here
@@ -203,6 +203,9 @@ bool initChain() {
     // gROOT->ProcessLine("StarRandom::capture();"); 
     // gMessMgr->Info() << "RNG seed set to " << __rngSeed << endm;
     gROOT->ProcessLine("chain->Init();"); 
+    for ( auto cmd : _cmds ) {
+      gROOT->ProcessLine( cmd.c_str() );
+    }
     __initialized = true; 
   }
   return true;
