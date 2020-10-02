@@ -214,11 +214,14 @@ struct SD2Table_FST {
 // Generic EMC copy (no increment on track hits)
 struct SD2Table_EMC {
   void operator()( StSensitiveDetector* sd, St_g2t_emc_hit* table, St_g2t_track* track ) {
+    
+    TString sdname = sd->GetName();
+
     // Retrieve the hit collection 
     StCalorimeterHitCollection* collection = (StCalorimeterHitCollection *)sd->hits();
     // Iterate over all hits
     for ( auto hit : collection->hits() ) {
-      
+
       g2t_emc_hit_st g2t_hit; memset(&g2t_hit,0,sizeof(g2t_emc_hit_st)); 
       
       g2t_hit.id        = hit->id;
@@ -234,8 +237,7 @@ struct SD2Table_EMC {
 
       int idtruth = hit->idtruth;
       g2t_track_st* trk = (g2t_track_st*)track->At(idtruth-1);
-
-      TString sdname = sd->GetName();
+      
       if      ( sdname == "CSCI" ) 
 	trk->n_emc_hit++;
       else if ( sdname == "ESCI" )
