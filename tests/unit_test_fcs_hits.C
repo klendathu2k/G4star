@@ -2105,6 +2105,35 @@ void unit_test_fcs_hits() {
      	return result;
        });
 
+    check_track( "The track should have a stop vertex",           [=](const g2t_track_st* t){
+     	return (t->stop_vertex_p>0)?PASS:FAIL;      
+      });
+    check_track( "The stop vertex should be in the vertex table", [=](const g2t_track_st* t){
+     	std::string result = FAIL;
+     	int istop = t->stop_vertex_p;
+     	const g2t_vertex_st* vertex = (istop>0) ? static_cast<const g2t_vertex_st*>( vertex_table->At(istop-1) ) : 0;
+     	if ( vertex ) {
+     	  result = PASS;
+     	}
+     	return result;
+       });
+
+    check_track( "The stop vertex should be after the calorimeter face", [=](const g2t_track_st* t){
+     	std::string result = FAIL;
+     	int istop = t->stop_vertex_p;
+     	const g2t_vertex_st* vertex = (istop>0) ? static_cast<const g2t_vertex_st*>( vertex_table->At(istop-1) ) : 0;
+     	if ( vertex ) {
+	  if ( vertex->ge_x[2] >= cell.z ) 
+	    result = PASS;     	
+	  else 
+	    result = Form("stop z=%8.4f ",vertex->ge_x[2]) + FAIL;
+	}
+     	return result;
+       });
+
+
+
+
     check_track( "The track should be primary",                    [=](const g2t_track_st* t){
      	std::string result          = PASS;
      	if ( t->eta ==-999 ) result = FAIL;
