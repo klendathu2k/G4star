@@ -9,6 +9,7 @@ class CalorimeterHit;
 #include <TVector.h>
 #include <vector>
 #include <map>
+#include <iostream>
 
 class StHitCollection : public TNamed {
 
@@ -75,12 +76,13 @@ private:
 protected:
 
   std::vector<CalorimeterHit*> mHits;
-  std::map<int, CalorimeterHit*> mHitsByVolume;
   double mBirk[3];
   double mEsum;
 
   ClassDef(StCalorimeterHitCollection,0);
 
 };
+
+std::ostream&  operator<<(std::ostream& os,  const TrackerHit& hit);
 
 #endif

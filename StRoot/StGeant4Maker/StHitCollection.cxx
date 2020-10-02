@@ -33,7 +33,7 @@ ostream&  operator<<(ostream& os,  const TrackerHit& hit) {
   }
 
    // Printout hit information
-   os << Form( "Tracker Hit [%i %i %i]\n\t[%s]\n\t[%s]\n\tpos:(%f,%f,%f)(%f,%f,%f)\n\tmom:(%f,%f,%f),(%f,%f,%f) \n\tde=%f nstep=%i",
+   os << Form( "Tracker Hit [i=%i t=%i v=%i] \t[%s]\n\t[%s]\n\tpos:(%f,%f,%f)(%f,%f,%f)\n\tmom:(%f,%f,%f),(%f,%f,%f) \n\tde=%f nstep=%i",
                hit.id, hit.idtruth,hit.volId,
                hit.path.Data(),
 	       numbv.Data(),
@@ -103,7 +103,7 @@ StHitCollection::StHitCollection( const char* name, const char* title ) : TNamed
 //_____________________________________________________________________________________________
 StTrackerHitCollection::StTrackerHitCollection( const char* name, const char* title ) : StHitCollection(name,title), mHits() { }
 //_____________________________________________________________________________________________
-StCalorimeterHitCollection::StCalorimeterHitCollection( const char* name, const char* title ) : StHitCollection(name,title), mHits(), mHitsByVolume(), mBirk{1.0,0.0130,9.6E-6},mEsum(0) { }
+StCalorimeterHitCollection::StCalorimeterHitCollection( const char* name, const char* title ) : StHitCollection(name,title), mHits(), mBirk{1.0,0.0130,9.6E-6},mEsum(0) { }
 //_____________________________________________________________________________________________
 
 
@@ -132,11 +132,11 @@ void StTrackerHitCollection::ProcessHits() {
   StMCParticleStack* stack = (StMCParticleStack *)mc->GetStack();
   
   // Get list of tracks from particle stack
-  std::vector<StarMCParticle*>& truthTable = stack->GetParticleTable();
+  std::vector<StarMCParticle*>& truthTable    = stack->GetTruthTable();
+  std::vector<StarMCParticle*>& particleTable = stack->GetParticleTable();
 
   // This should be the current particle truth 
   StarMCParticle* truth = truthTable.back();
-  truth->addHit(); 
 
   bool isNewTrack      = mc->IsNewTrack();
   bool isTrackEntering = mc->IsTrackEntering();
@@ -157,6 +157,7 @@ void StTrackerHitCollection::ProcessHits() {
     }
 
     mHits.push_back( hit = new TrackerHit );
+    truth->addHit( hit );
 
     // Get the current path to the sensitive volume
     hit->path = mc->CurrentVolPath(); 
@@ -183,7 +184,11 @@ void StTrackerHitCollection::ProcessHits() {
     hit->id = mHits.size();
 
     // Assign the hit the ID truth of the current track (index + 1)
-    hit->idtruth = truthTable.size();
+    //    hit->idtruth = particleTable.size();
+    //    hit->idtruth = truthTable.size();
+    hit->idtruth = stack->GetIdTruth ( truth );
+
+
 
     // Score entrance momentum and 
     mc->TrackMomentum( hit->momentum_in[0], hit->momentum_in[1],  hit->momentum_in[2],  hit->momentum_in[3] ); 
@@ -271,11 +276,12 @@ void StCalorimeterHitCollection::ProcessHits() {
   StMCParticleStack* stack = (StMCParticleStack *)mc->GetStack();
   
   // Get list of tracks from particle stack
-  std::vector<StarMCParticle*>& truthTable = stack->GetParticleTable();
+  std::vector<StarMCParticle*>& truthTable = stack->GetTruthTable();
+  std::vector<StarMCParticle*>& particleTable = stack->GetParticleTable();
 
   // This should be the current particle truth 
   StarMCParticle* truth = truthTable.back();
-  truth->addHit(); 
+
 
   bool isNewTrack      = mc->IsNewTrack();
   bool isTrackEntering = mc->IsTrackEntering();
@@ -299,6 +305,7 @@ void StCalorimeterHitCollection::ProcessHits() {
     }
 
     mHits.push_back( hit = new CalorimeterHit );
+    truth->addHit( hit );
 
     // Get the current path to the sensitive volume
     hit->path = mc->CurrentVolPath(); 
@@ -323,10 +330,12 @@ void StCalorimeterHitCollection::ProcessHits() {
     hit->volId = agmlext->GetVolumeId( hit->numbv );
 
     // Assign the hit a unqiue ID (index + 1)
-    hit->id = mHits.size();
+    hit->id = 1 + mHits.size();
 
     // Assign the hit the ID truth of the current track (index + 1)
-    hit->idtruth = truthTable.size();
+    //    hit->idtruth = particleTable.size();
+    //    hit->idtruth = truthTable.size();
+    hit->idtruth = stack->GetIdTruth ( truth );
 
     // Score entrance
     mc->TrackPosition( hit->position_in[0], hit->position_in[1],  hit->position_in[2] );
@@ -363,17 +372,19 @@ void StCalorimeterHitCollection::ProcessHits() {
 }
 //_____________________________________________________________________________________________
 void StCalorimeterHitCollection::EndOfEvent() {
-  LOG_INFO << "END OF EVENT" << endm;
   // Aggregate hits in each calorimeter sensitive volume
   int count=0;
   int idtruth=0;
   double demax=-9E9;
+  std::map<int, CalorimeterHit*> hitsByVolume;
+
   for ( auto hit : mHits ) {
     int volumeId = hit->volId;
-    auto myhit   = mHitsByVolume[volumeId];
+    auto myhit   = hitsByVolume[volumeId];
+
     if ( 0==myhit ) {
-      myhit = mHitsByVolume[volumeId] = new CalorimeterHit();
-      myhit->id = count++;
+      myhit = hitsByVolume[volumeId] = new CalorimeterHit();
+      myhit->id = ++count;
       myhit->idtruth=hit->idtruth;
       std::copy( hit->volu, hit->volu+DetectorHit::maxdepth, myhit->volu );
       std::copy( hit->copy, hit->copy+DetectorHit::maxdepth, myhit->copy );
@@ -381,19 +392,28 @@ void StCalorimeterHitCollection::EndOfEvent() {
       myhit->path  = hit->path;      
       myhit->user.resize(hit->user.size());
       std::copy(hit->position_in,hit->position_in+4,myhit->position_in);
-      if ( hit->de > demax ) {
-	myhit->idtruth=hit->idtruth;
-      }
+      myhit->idtruth=hit->idtruth;      
     }
+
+    myhit->idtruth = TMath::Min( hit->idtruth, myhit->idtruth );
     myhit->nsteps += hit->nsteps;
     myhit->de     += hit->de;
-    for ( int i=0;i<myhit->user.size();i++ ) {
-      myhit->user[i]+=hit->user[i];
-    }    
+
+    if ( hit->user.size() == myhit->user.size() ) 
+      {
+	for ( int i=0;i<myhit->user.size();i++ ) {
+	  myhit->user[i]+=hit->user[i];
+	}    	
+      }
+    else 
+      {
+	LOG_INFO << "Size mismatch in user hit vector, skip adding this hit. " << endm;
+      }
   }
 
   mHits.clear();
-  for ( auto kv : mHitsByVolume ) {
+
+  for ( auto kv : hitsByVolume ) {
     mHits.push_back( kv.second );
   }
   

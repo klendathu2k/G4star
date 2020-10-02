@@ -17,30 +17,6 @@ TGeoNavigator* navigator = 0;
 #include <TString.h>
 
 #include <TMath.h> 
-// //____________________________________________________________________________________________
-// ostream&  operator<<(ostream& os,  const TrackerHit& hit) {
-//    // Printout hit information
-//    os << Form( "Tracker Hit [%i %i]\n\t[%s]\n\tpos:(%f,%f,%f)(%f,%f,%f)\n\tmom:(%f,%f,%f),(%f,%f,%f) \n\tde=%f nstep=%i",
-//                hit.id, hit.idtruth,
-//                hit.path.Data(),
-// 	       hit.position_in[0],  
-//                hit.position_in[1],  
-//                hit.position_in[2],  
-//                hit.position_out[0],  
-//                hit.position_out[1],  
-//                hit.position_out[2],  
-// 	       hit.momentum_in[0],  
-//                hit.momentum_in[1],  
-//                hit.momentum_in[2],  
-//                hit.momentum_out[0],  
-//                hit.momentum_out[1],  
-//                hit.momentum_out[2],  
-//                hit.de,
-//                hit.nsteps );
-//    return os; 
-   
-// }
-
 //____________________________________________________________________________________________
 DetectorHit::DetectorHit() : id(0), idtruth(0), volu{0,0,0,0,0, 0,0,0,0,0, 0,0,0,0,0}, copy{0,0,0,0,0, 0,0,0,0,0, 0,0,0,0,0}, numbv{0,0,0,0,0, 0,0,0,0,0, 0,0,0,0,0}, path(), nsteps(0), user()
 { 

@@ -34,6 +34,20 @@ ostream&  operator<<(ostream& os,  const StarMCParticle& part) {
 	     part.vx(),part.vy(),part.vz() 
             );
 
+
+
+  if ( part.start() ) {
+    os << std::endl << " [start] " << *part.start();
+  }
+
+  for ( auto i : part.intermediate() ) {
+    os << std::endl << " [inter] " << *i;
+  }
+
+  if ( part.stop() ) {
+    os << std::endl << " [stop]  " << *part.stop();
+  }
+
   return os;
 }
 ostream&  operator<<(ostream& os,  const      TParticle& part) {
@@ -62,9 +76,11 @@ StMCParticleStack::StMCParticleStack( const Char_t *name ) :
   mStackSize(0),
   mStack(),
   mStackIdx(),
+  mTruthTable(),
   mParticleTable(),
   mVertexTable(),
-  mStackToTable()
+  mStackToTable(),
+  mIdTruthFromParticle()
 {
 
   mArray     = new TClonesArray("TParticle", kDefaultArraySize );
@@ -143,6 +159,11 @@ void StMCParticleStack::PushTrack( int toDo, int parent, int pdg,
     StarMCVertex* vertex = GetVertex( vx, vy, vz, vt, mech );
 
     mParticleTable.push_back(new StarMCParticle(particle,vertex));
+
+    mIdTruthFromParticle[ mParticleTable.back() ] = mParticleTable.size();
+    // if ( parent > 0 ) { 
+    //   mTruthTable.push_back( mParticleTable.back() );
+    // }
 
     // Set corrspondance between stack ID and table ID
     mStackToTable[ntr] = mParticleTable.back();
@@ -299,6 +320,7 @@ void StMCParticleStack::Clear( const Option_t *opts )
   mStackSize = 0;
 
   mVertexTable.clear();
+  mTruthTable.clear();
   mParticleTable.clear(); 
 
 }
@@ -317,7 +339,9 @@ StarMCParticle::StarMCParticle( TParticle* part, StarMCVertex* vert ) :
   mIntermediateVertices(),
   mStopVertex(0),
   mIdStack(-1), 
-  mNumHits(0) {
+  mNumHits(0),
+  mHits()
+{
   
 }
 //___________________________________________________________________________________________________________________						

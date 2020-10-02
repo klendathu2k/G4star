@@ -32,7 +32,7 @@ stats< tag::count,
 >>;
 #endif
 
-void unit_test_track_data_model() {
+void unit_test_track_data_model_ntrack() {
 
   gROOT->ProcessLine("initChain();");
 
@@ -48,23 +48,72 @@ void unit_test_track_data_model() {
   LOG_TEST << "=======================================================" << std::endl;
 
   timer.Start();
-
-  // // Generate 10 e+
-  // for ( int i=0;i<9;i++ ) 
-  //   add_particle( "e+", 0.4251, 3.1415/4, 10.0 );
-  throw_particle( "e+", 0.4251, 3.1415/4, 10.0 );
-
-  //throw_particle( "mu+", 0.4251, 3.1415/4, 10.0 );
-
+  
+  int    _ntrack = 500;
+  double _pt = 10.0;
+  // for ( int i=1;i<_ntrack;i++ ) 
+  //   add_particle( "mu+", 0.4251, 3.1415/4*(1.0+0.8*double(i)), _pt );
+  // throw_particle( "mu+", 0.4251, 3.1415/4, _pt );
+  throw_particle( _ntrack, "mu+", 0.1, 10.0, -0.95, 0.95, 0.0, TMath::TwoPi() );
   timer.Stop();
   
   auto* chain = StMaker::GetChain();
   vertex_table = dynamic_cast<TTable*>( chain->GetDataSet("g2t_vertex")  );
   track_table  = dynamic_cast<TTable*>( chain->GetDataSet("g2t_track")   );
   hit_table    = dynamic_cast<TTable*>( chain->GetDataSet("g2t_emc_hit") );
-  
+
+  // Track table validation
+  check_track_table( Form("The first %i tracks should be primary muons",_ntrack),   [=](g2t_track_st* begin_, g2t_track_st* end_) {
+      std::string result = PASS;
+      g2t_track_st* track = begin_;
+      for ( int i=0;i<_ntrack;i++ ) {
+	if ( track->eg_pid != -13 ) result = FAIL;
+	track++;
+      }
+      return result;
+    });
+  check_track_table( Form("The first %i tracks should have 0.1 < pT < 10.0 GeV",_ntrack),     [=](g2t_track_st* begin_, g2t_track_st* end_) {
+      std::string result = PASS;
+      g2t_track_st* track = begin_;
+      for ( int i=0;i<_ntrack;i++ ) {
+	//if ( TMath::Abs(track->pt - _pt) > 0.001*_pt ) result = FAIL;
+	if ( track->pt<0.1 || track->pt>10.0 ) result = FAIL;
+	track++;
+      }
+      return result;
+    });
+  check_track_table( "80% of primary tracks should have >= 70 TPC hits", [=](g2t_track_st* begin_, g2t_track_st* end_) {
+      std::string result = PASS;
+      g2t_track_st* track = begin_;
+      std::vector<int> nh;
+      double fail=0;
+      for ( int i=0;i<_ntrack;i++ ) {
+	if ( track->n_tpc_hit<70 ) fail+=1;
+	track++;
+      }
+      fail /= _ntrack;
+      if ( fail > 0.80 ) result = Form("fail rate=%f%% ",fail*100.0) + FAIL;
+      return result;
+    });
+
+  check_track_table( "Primary tracks should have < 78 hits",             [=](g2t_track_st* begin_, g2t_track_st* end_) {
+      std::string result = PASS;
+      g2t_track_st* track = begin_;
+      std::vector<int> nh;
+      double fail=0;
+      std::string nf = "";
+      for ( int i=0;i<_ntrack;i++ ) {
+	if ( track->n_tpc_hit>=78 ) { fail+=1; nf += Form("%i ",track->n_tpc_hit); }
+	track++;
+      }
+      fail /= _ntrack;
+      if ( fail > 0.00 ) result = Form("fail rate=%f%% %s",fail*100.0,nf.c_str()) + FAIL;
+      return result;
+    });
+
+ 
   // TRACK VALIDATION
-  for ( int idx=0;idx<track_table->GetNRows();idx++ ) {
+  if (0)  for ( int idx=0;idx<track_table->GetNRows();idx++ ) {
 
   check_track( "A particle must have been processed by geant",                      [=](const g2t_track_st* t){
       LOG_TEST << "-----------------------------------------------------------" << std::endl;
@@ -190,14 +239,13 @@ void unit_test_track_data_model() {
 
       return result;
     }, idx);
-
   
   }
 
   expectedId=0;
   idIsNotUnique.clear();
   // VERTEX VALIDATION
-  for ( int idx=0;idx<vertex_table->GetNRows();idx++ ) {
+  if (0) for ( int idx=0;idx<vertex_table->GetNRows();idx++ ) {
   check_vertex( "A vertex must have been processed by geant",                      [=](const g2t_vertex_st* t){
       LOG_TEST << "-----------------------------------------------------------" << std::endl;
       assert(t);
@@ -272,7 +320,7 @@ void unit_test_track_data_model() {
   }
 
   // Hit accumulation
-  for ( int idx=0;idx<hit_table->GetNRows();idx++ ) {
+  if (0) for ( int idx=0;idx<hit_table->GetNRows();idx++ ) {
     auto hit = static_cast<const g2t_emc_hit_st*>( hit_table->At(idx) );
     if ( 0==hit ) continue;
     edep( hit->de * 1000 );
@@ -281,6 +329,7 @@ void unit_test_track_data_model() {
   }
 
   // Print out energy deposition
+  if (0) 
   {
     
     int    _count         = boost::accumulators::count(edep);
@@ -302,7 +351,10 @@ void unit_test_track_data_model() {
   }
 
   // Print the track list
-  track_table->Print(0, track_table->GetNRows());
+  if (0) 
+    track_table->Print(0, _ntrack);
+  else if (0) 
+    track_table->Print(0, track_table->GetNRows() );
   
 
 }

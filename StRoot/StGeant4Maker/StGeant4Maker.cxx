@@ -17,7 +17,6 @@
 #include "StarGenerator/UTIL/StarRandom.h"
 
 #include "TString.h"
-#include "StMCTruthTable.h"
 #include "StSensitiveDetector.h"
 
 #include <CLHEP/Random/Random.h>
@@ -111,8 +110,8 @@ struct SD2Table_TPC {
 
       int idtruth = hit->idtruth;
       g2t_track_st* trk = (g2t_track_st*)track->At(idtruth-1);
-      trk->n_tpc_hit++;
-      
+      trk->n_tpc_hit++;     
+
     }
     // TODO: increment hit count on track 
   } 
@@ -215,11 +214,14 @@ struct SD2Table_FST {
 // Generic EMC copy (no increment on track hits)
 struct SD2Table_EMC {
   void operator()( StSensitiveDetector* sd, St_g2t_emc_hit* table, St_g2t_track* track ) {
+    
+    TString sdname = sd->GetName();
+
     // Retrieve the hit collection 
     StCalorimeterHitCollection* collection = (StCalorimeterHitCollection *)sd->hits();
     // Iterate over all hits
     for ( auto hit : collection->hits() ) {
-      
+
       g2t_emc_hit_st g2t_hit; memset(&g2t_hit,0,sizeof(g2t_emc_hit_st)); 
       
       g2t_hit.id        = hit->id;
@@ -235,12 +237,17 @@ struct SD2Table_EMC {
 
       int idtruth = hit->idtruth;
       g2t_track_st* trk = (g2t_track_st*)track->At(idtruth-1);
-
-      TString sdname = sd->GetName();
+      
       if      ( sdname == "CSCI" ) 
 	trk->n_emc_hit++;
       else if ( sdname == "ESCI" )
 	trk->n_eem_hit++;
+      else if ( sdname == "PSCI" )
+	trk->n_pre_hit++;
+      else if ( sdname == "WSCI" )
+	trk->n_wca_hit++;
+      else if ( sdname == "HSCI" )
+	trk->n_hca_hit++;
     }
   } 
 } sd2table_emc; 
@@ -265,7 +272,6 @@ StGeant4Maker::StGeant4Maker( const char* nm ) :
   mMCStack        ( new StMCParticleStack( "MCstack" ) ),
   mMagfield       ( NULL ),
   mRunConfig      ( NULL ),
-  mTruthTable     ( new StMCTruthTable() ),
   mCurrentNode    (0),
   mPreviousNode   (0),
   mCurrentVolume  (0),
@@ -282,8 +288,8 @@ StGeant4Maker::StGeant4Maker( const char* nm ) :
   SetAttr( "G4VmcOpt:Name",  "Geant4"  );
   SetAttr( "G4VmcOpt:Title", "The Geant4 Monte Carlo" );
   SetAttr( "G4VmcOpt:Phys",  "FTFP_BERT" ); // default physics list
-  //  SetAttr( "G4VmcOpt:Process", "stepLimit+specialCuts" ); // special process
-  SetAttr( "G4VmcOpt:Process", "stepLimit+specialCuts+stackPopper" ); // special process
+  //  SetAttr( "G4VmcOpt:Process", "stepLimiter+specialCuts" ); // special process
+  SetAttr( "G4VmcOpt:Process", "stepLimiter+specialCuts+stackPopper" ); // special process
 
   SetAttr( "AgMLOpt:TopVolume", "HALL" );
 
@@ -353,6 +359,7 @@ int StGeant4Maker::Init() {
     gG4->SetStack( mMCStack );  
     gG4->SetMagField( mMagfield );
     gG4 -> SetRootGeometry();
+    gG4->ProcessGeantCommand( "/mcControl/g3Defaults" );
   } else {
     LOG_FATAL << "Could not instantiate concrete MC.  WTF?" << endm;
     return kStFATAL;
@@ -368,6 +375,17 @@ int StGeant4Maker::Init() {
 
   // VMC SD manager appears to be the last thing initialized when gMC->Init()
   // is called... so we should initialize our hits here...
+
+  //
+  // Some geant4 configurations
+  //
+  const char* g4cmd[] = {
+    "/mcPhysics/printGlobalCuts",
+    "/mcPhysics/printGlobalControls",
+  };
+
+  for ( auto cmd : g4cmd )   gG4->ProcessGeantCommand( cmd );
+
 
   LOG_INFO << "Initialize GEANT4 Physics" << endm;
   gG4 -> BuildPhysics();
@@ -564,14 +582,12 @@ int  StGeant4Maker::ConfigureGeometry() {
 void StarVMCApplication::BeginEvent(){ _g4maker->BeginEvent(); }
 void StGeant4Maker::BeginEvent(){
 
-  mTruthTable->BeginEvent();
 
 }
 //________________________________________________________________________________________________
 void StarVMCApplication::FinishEvent(){ _g4maker -> FinishEvent(); }
 void StGeant4Maker::FinishEvent(){
 
-  mTruthTable->FinishEvent();
 
   LOG_INFO << "End of Event" << endm;
 
@@ -687,6 +703,11 @@ void StarVMCApplication::BeginPrimary(){ _g4maker -> BeginPrimary(); }
 void StGeant4Maker::BeginPrimary()
 {
 
+  std::vector<StarMCParticle*>& truthTable    = mMCStack->GetTruthTable();
+  truthTable.clear();
+
+  int current = mMCStack->GetCurrentTrackNumber();
+  truthTable.push_back( mMCStack->GetPersistentTrack( current ) );
 
 }
 //________________________________________________________________________________________________
@@ -742,8 +763,6 @@ void StGeant4Maker::UpdateHistory() {
     acurr = dynamic_cast<AgMLExtension*>( mCurrentNode->GetMotherVolume()->GetUserExtension() );
   }
 
-
-
   // If the previous or current extension is null, there is no change in the tracking state.
 
   if ( aprev ) {     
@@ -759,12 +778,24 @@ void StGeant4Maker::UpdateHistory() {
 
 }
 //________________________________________________________________________________________________
-int regionTransition( int curr, int prev ) {
-  return curr - prev;
+int StGeant4Maker::regionTransition( int curr, int prev ) {
+  TString previous = (mPreviousNode) ? mPreviousNode->GetName() : "";
+  int result = 0;
+
+  // TODO:  This is a hack.  We need to update the geometry and group these three
+  //        detectors underneath a single integration volume / region.
+  if ( previous == "PMOD" || 
+       previous == "WMOD" || 
+       previous == "HMOD" )
+    result = 0;
+  else
+    result = curr - prev;
+
   //     2      2       0     no transition
   //     2      1       1     into tracking from calorimeter
   //     1      2      -1     into calorimeter from tracking
   //     1      1       0     no transition
+
 }
 //________________________________________________________________________________________________
 void StarVMCApplication::Stepping(){ _g4maker -> Stepping(); }
@@ -819,6 +850,9 @@ void StGeant4Maker::Stepping(){
 
     } 
 
+    LOG_INFO << "Stopping track at z=" << vz << endm;
+    mPreviousVolume->Print();
+    mCurrentVolume->Print();
     mc->StopTrack();
     
   }

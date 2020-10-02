@@ -90,6 +90,29 @@ void throw_particle( int n, const char* part, double ptmn, double ptmx, double e
   chain->Clear();
   chain->Make();
 }
+void add_particle( const char* part, double eta, double phid, double pT = 25.0, int q=1 ) {
+  double phi = TMath::Pi() * phid / 180.0;
+  TVector3 momentum;
+  momentum.SetPtEtaPhi(pT,eta,phi);
+  _pmom = momentum.Mag();
+  auto* chain = StMaker::GetChain();                                                                                                                                                                                                                                                
+  auto* _kine = dynamic_cast<StarKinematics*>( chain->GetMaker("StarKine") );                                                                                                                                                                                                       
+  auto* particle = _kine->AddParticle( part );                                                                                                                                                                                                                                      
+  particle->SetPx(momentum[0]);                                                                                                                                                                                                                                                     
+  particle->SetPy(momentum[1]);                                                                                                                                                                                                                                                     
+  particle->SetPz(momentum[2]);                                                                                                                                                                                                                                                     
+  double mass = particle->GetMass();                                                                                                                                                                                                                                                
+  double ener = sqrt( momentum.Mag2() + mass*mass );                                                                                                                                                                                                                                
+  particle->SetEnergy(ener);                                
+}
+//___________________________________________________________________
+std::string check_track_table( std::string message, std::function<std::string(g2t_track_st* begin_, g2t_track_st* end_)> f) {
+  g2t_track_st* first = static_cast<g2t_track_st*>( track_table->GetArray() );
+  g2t_track_st* last  = static_cast<g2t_track_st*>( track_table->GetArray() ) + track_table->GetNRows();
+  std::string result = "\u001b[37m [" + message + "] " + (track_table? f(first,last):FAIL );  
+  LOG_TEST << result << std::endl;
+  return result;
+}
 //___________________________________________________________________
 std::string check_track( std::string message, std::function<std::string(const g2t_track_st*)> f, int idx=0) {
   const g2t_track_st* track = static_cast<const g2t_track_st*>( track_table->At(idx) );  
@@ -131,7 +154,13 @@ ostream& operator<<(  ostream& os, const g2t_vertex_st& v ) {
 };
 //___________________________________________________________________
 ostream& operator<<(  ostream& os, const g2t_tpc_hit_st& h ) {
-  os << Form("g2t_XXX_hit id=%i de=%f ds=%f",h.id,h.de,h.ds);
+  os << Form("g2t_tpc_hit id=%i de=%f ds=%f",h.id,h.de,h.ds);
+  return os;
+};
+//___________________________________________________________________
+ostream& operator<<(  ostream& os, const g2t_emc_hit_st& h ) {
+  double r2 = h.x*h.x+h.y*h.y;
+  os << Form("g2t_emc_hit id=%i idtruth=%i volume=%i de=%f R=%f",h.id,h.track_p,h.volume_id,h.de,sqrt(r2));
   return os;
 };
 #endif
