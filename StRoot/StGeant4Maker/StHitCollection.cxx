@@ -379,6 +379,7 @@ void StCalorimeterHitCollection::EndOfEvent() {
   for ( auto hit : mHits ) {
     int volumeId = hit->volId;
     auto myhit   = mHitsByVolume[volumeId];
+
     if ( 0==myhit ) {
       myhit = mHitsByVolume[volumeId] = new CalorimeterHit();
       myhit->id = ++count;
@@ -391,12 +392,21 @@ void StCalorimeterHitCollection::EndOfEvent() {
       std::copy(hit->position_in,hit->position_in+4,myhit->position_in);
       myhit->idtruth=hit->idtruth;      
     }
+
     myhit->idtruth = TMath::Min( hit->idtruth, myhit->idtruth );
     myhit->nsteps += hit->nsteps;
     myhit->de     += hit->de;
-    for ( int i=0;i<myhit->user.size();i++ ) {
-      myhit->user[i]+=hit->user[i];
-    }    
+
+    if ( hit->user.size() == myhit->user.size() ) 
+      {
+	for ( int i=0;i<myhit->user.size();i++ ) {
+	  myhit->user[i]+=hit->user[i];
+	}    	
+      }
+    else 
+      {
+	LOG_INFO << "Size mismatch in user hit vector, skip adding this hit. " << endm;
+      }
   }
 
   mHits.clear();
