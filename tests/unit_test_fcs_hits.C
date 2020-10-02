@@ -2105,7 +2105,7 @@ void unit_test_fcs_hits() {
 	int volumeId = h->volume_id;
 	int expected = cell.volumeId;
 	int nhits = hit_table->GetNRows();
-	int actual = 0;
+	int actual = -999;
 	double emax = -999;
 	for ( int i=0; i<nhits; i++ ) {
 	  auto* voidhit=hit_table->At(i);
