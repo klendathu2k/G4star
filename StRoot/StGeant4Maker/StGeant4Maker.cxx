@@ -761,8 +761,6 @@ void StGeant4Maker::UpdateHistory() {
     acurr = dynamic_cast<AgMLExtension*>( mCurrentNode->GetMotherVolume()->GetUserExtension() );
   }
 
-
-
   // If the previous or current extension is null, there is no change in the tracking state.
 
   if ( aprev ) {     
@@ -778,12 +776,22 @@ void StGeant4Maker::UpdateHistory() {
 
 }
 //________________________________________________________________________________________________
-int regionTransition( int curr, int prev ) {
-  return curr - prev;
+int StGeant4Maker::regionTransition( int curr, int prev ) {
+  TString previous = (mPreviousNode) ? mPreviousNode->GetName() : "";
+  int result = 0;
+
+  // TODO:  This is a hack.  We need to update the geometry and group these three
+  //        detectors underneath a single integration volume / region.
+  if ( previous == "PMOD" )
+    result = 0;
+  else
+    result = curr - prev;
+
   //     2      2       0     no transition
   //     2      1       1     into tracking from calorimeter
   //     1      2      -1     into calorimeter from tracking
   //     1      1       0     no transition
+
 }
 //________________________________________________________________________________________________
 void StarVMCApplication::Stepping(){ _g4maker -> Stepping(); }
@@ -838,6 +846,9 @@ void StGeant4Maker::Stepping(){
 
     } 
 
+    LOG_INFO << "Stopping track at z=" << vz << endm;
+    mPreviousVolume->Print();
+    mCurrentVolume->Print();
     mc->StopTrack();
     
   }

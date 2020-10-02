@@ -157,6 +157,8 @@ protected:
   AgMLExtension* acurr;
   AgMLExtension* aprev;
 
+  int regionTransition( int, int );
+
   /// @param T specifies the type of the table   
   /// @param F specifies the functor class which retrieves the hits from geant  
   template<typename T, typename F>
