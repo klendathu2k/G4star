@@ -2055,38 +2055,39 @@ void unit_test_fcs_hits() {
   LOG_TEST << "Unit testing of tracks and FCS/ECAL hits on single muons"     << std::endl;
   LOG_TEST << "========================================================" << std::endl;
 
+  auto testCalos = [=](std::vector<Cell>& calorimeter, bool dowcal) {
 
-  for ( auto cell : wcal ) {
-    std::cout << "Generate 500 GeV muon @ eta=" << cell.eta << " phi=" << cell.phi << " volume=" << cell.volumeId << std::endl;
-
-    pm->SetVertex(cell.x,cell.y,cell.z-100.0);
-
-    auto* chain = StMaker::GetChain();  
-    {
-      auto* _kine = dynamic_cast<StarKinematics*>( chain->GetMaker("StarKine") );                                                                                                                                                                                                       
-      auto* particle = _kine->AddParticle( "mu+" );                                                                                                                                                                                                                                      
-      particle->SetPx(   0. );                                                                                                                                                                                                                                                     
-      particle->SetPy(   0. );                                                                                                                                                                                                                                                     
-      particle->SetPz( 250. );                                                                                                                                                                                                                                                     
-      double mass = particle->GetMass();                                                                                                                                                                                                                                                
-      double ener = sqrt( 250.*250. + mass*mass );                                                                                                                                                                                                                                
-      particle->SetEnergy(ener);                         
-      chain->Clear();
-      chain->Make();
-    }
-
-    vertex_table = dynamic_cast<TTable*>( chain->GetDataSet("g2t_vertex")  );
-    track_table  = dynamic_cast<TTable*>( chain->GetDataSet("g2t_track")   );
-    hit_table    = dynamic_cast<TTable*>( chain->GetDataSet("g2t_wca_hit") ) ;
-
-    check_track( "A muon must have been processed by geant",       [=](const g2t_track_st* t){
+    for ( auto cell : calorimeter ) {
+      std::cout << "Generate 500 GeV muon @ eta=" << cell.eta << " phi=" << cell.phi << " volume=" << cell.volumeId << std::endl;
+      
+      pm->SetVertex(cell.x,cell.y,cell.z-100.0);
+      
+      auto* chain = StMaker::GetChain();  
+      {
+	auto* _kine = dynamic_cast<StarKinematics*>( chain->GetMaker("StarKine") );                                                                                                                                                                                                       
+	auto* particle = _kine->AddParticle( "mu+" );                                                                                                                                                                                                                                      
+	particle->SetPx(   0. );                                                                                                                                                                                                                                                     
+	particle->SetPy(   0. );                                                                                                                                                                                                                                                     
+	particle->SetPz( 250. );                                                                                                                                                                                                                                                     
+	double mass = particle->GetMass();                                                                                                                                                                                                                                                
+	double ener = sqrt( 250.*250. + mass*mass );                                                                                                                                                                                                                                
+	particle->SetEnergy(ener);                         
+	chain->Clear();
+	chain->Make();
+      }
+      
+      vertex_table = dynamic_cast<TTable*>( chain->GetDataSet("g2t_vertex")  );
+      track_table  = dynamic_cast<TTable*>( chain->GetDataSet("g2t_track")   );
+      hit_table    = dynamic_cast<TTable*>( chain->GetDataSet("g2t_wca_hit") ) ;
+      
+      check_track( "A muon must have been processed by geant",       [=](const g2t_track_st* t){
      	// Failure is tested by check_track when it tests for a valid track pointer
 	return PASS; 
       });
-    check_track( "The track should have a start vertex",           [=](const g2t_track_st* t){
+      check_track( "The track should have a start vertex",           [=](const g2t_track_st* t){
      	return (t->start_vertex_p>0)?PASS:FAIL;      
       });
-    check_track( "The start vertex should be in the vertex table", [=](const g2t_track_st* t){
+      check_track( "The start vertex should be in the vertex table", [=](const g2t_track_st* t){
      	std::string result = FAIL;
      	int istart = t->start_vertex_p;
      	const g2t_vertex_st* vertex = (istart>0) ? static_cast<const g2t_vertex_st*>( vertex_table->At(istart-1) ) : 0;
@@ -2095,7 +2096,7 @@ void unit_test_fcs_hits() {
      	}
      	return result;
        });
-    check_track( "The start vertex should be before the calorimeter", [=](const g2t_track_st* t){
+      check_track( "The start vertex should be before the calorimeter", [=](const g2t_track_st* t){
      	std::string result = FAIL;
      	int istart = t->start_vertex_p;
      	const g2t_vertex_st* vertex = (istart>0) ? static_cast<const g2t_vertex_st*>( vertex_table->At(istart-1) ) : 0;
@@ -2104,11 +2105,11 @@ void unit_test_fcs_hits() {
 	    result = PASS;     	
      	return result;
        });
-
-    check_track( "The track should have a stop vertex",           [=](const g2t_track_st* t){
+      
+      check_track( "The track should have a stop vertex",           [=](const g2t_track_st* t){
      	return (t->stop_vertex_p>0)?PASS:FAIL;      
       });
-    check_track( "The stop vertex should be in the vertex table", [=](const g2t_track_st* t){
+      check_track( "The stop vertex should be in the vertex table", [=](const g2t_track_st* t){
      	std::string result = FAIL;
      	int istop = t->stop_vertex_p;
      	const g2t_vertex_st* vertex = (istop>0) ? static_cast<const g2t_vertex_st*>( vertex_table->At(istop-1) ) : 0;
@@ -2117,8 +2118,8 @@ void unit_test_fcs_hits() {
      	}
      	return result;
        });
-
-    check_track( "The stop vertex should be after the calorimeter face", [=](const g2t_track_st* t){
+      
+      check_track( "The stop vertex should be after the calorimeter face", [=](const g2t_track_st* t){
      	std::string result = FAIL;
      	int istop = t->stop_vertex_p;
      	const g2t_vertex_st* vertex = (istop>0) ? static_cast<const g2t_vertex_st*>( vertex_table->At(istop-1) ) : 0;
@@ -2130,36 +2131,34 @@ void unit_test_fcs_hits() {
 	}
      	return result;
        });
-
-
-
-
-    check_track( "The track should be primary",                    [=](const g2t_track_st* t){
+      
+      
+      check_track( "The track should be primary",                    [=](const g2t_track_st* t){
      	std::string result          = PASS;
      	if ( t->eta ==-999 ) result = FAIL;
       	return result;
        });
-
-
-
-    check_track( "The track should have WCA hits" ,                [=](const g2t_track_st* t){
+      
+      if ( dowcal ) 
+	check_track( "The track should have WCA hits" ,                [=](const g2t_track_st* t){
      	std::string result          = PASS;
      	if ( t->n_wca_hit < 1 ) result = FAIL;
       	return result;
        });
-    check_track( "The track should have HCA hits" ,                [=](const g2t_track_st* t){
+      else
+	check_track( "The track should have HCA hits" ,                [=](const g2t_track_st* t){
      	std::string result          = PASS;
      	if ( t->n_hca_hit < 1 ) result = FAIL;
       	return result;
        });
-    check_track( "The track should have PRE hits" ,                [=](const g2t_track_st* t){
-     	std::string result          = PASS;
-     	if ( t->n_pre_hit < 1 ) result = FAIL;
-      	return result;
-       });
-
-
-    check_emc_hit( Form("Expect the most energetic hit to have volumeId=%i",cell.volumeId), [=](const g2t_emc_hit_st* h){
+      
+      // check_track( "The track should have PRE hits" ,                [=](const g2t_track_st* t){
+    //  	std::string result          = PASS;
+    //  	if ( t->n_pre_hit < 1 ) result = FAIL;
+    //   	return result;
+    //    });
+      
+      check_emc_hit( Form("Expect the most energetic hit to have volumeId=%i",cell.volumeId), [=](const g2t_emc_hit_st* h){
 	int volumeId = h->volume_id;
 	int expected = cell.volumeId;
 	int nhits = hit_table->GetNRows();
@@ -2179,12 +2178,14 @@ void unit_test_fcs_hits() {
 	}
 	return result;
       });
+
+    }
       
 
-  }
-      
-      
+  };
 
+  testCalos( wcal, true );
+  testCalos( hcal, false );
 
 }
 
