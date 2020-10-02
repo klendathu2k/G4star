@@ -782,7 +782,9 @@ int StGeant4Maker::regionTransition( int curr, int prev ) {
 
   // TODO:  This is a hack.  We need to update the geometry and group these three
   //        detectors underneath a single integration volume / region.
-  if ( previous == "PMOD" )
+  if ( previous == "PMOD" || 
+       previous == "WMOD" || 
+       previous == "HMOD" )
     result = 0;
   else
     result = curr - prev;
