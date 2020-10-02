@@ -103,7 +103,7 @@ StHitCollection::StHitCollection( const char* name, const char* title ) : TNamed
 //_____________________________________________________________________________________________
 StTrackerHitCollection::StTrackerHitCollection( const char* name, const char* title ) : StHitCollection(name,title), mHits() { }
 //_____________________________________________________________________________________________
-StCalorimeterHitCollection::StCalorimeterHitCollection( const char* name, const char* title ) : StHitCollection(name,title), mHits(), mHitsByVolume(), mBirk{1.0,0.0130,9.6E-6},mEsum(0) { }
+StCalorimeterHitCollection::StCalorimeterHitCollection( const char* name, const char* title ) : StHitCollection(name,title), mHits(), mBirk{1.0,0.0130,9.6E-6},mEsum(0) { }
 //_____________________________________________________________________________________________
 
 
@@ -376,12 +376,14 @@ void StCalorimeterHitCollection::EndOfEvent() {
   int count=0;
   int idtruth=0;
   double demax=-9E9;
+  std::map<int, CalorimeterHit*> hitsByVolume;
+
   for ( auto hit : mHits ) {
     int volumeId = hit->volId;
-    auto myhit   = mHitsByVolume[volumeId];
+    auto myhit   = hitsByVolume[volumeId];
 
     if ( 0==myhit ) {
-      myhit = mHitsByVolume[volumeId] = new CalorimeterHit();
+      myhit = hitsByVolume[volumeId] = new CalorimeterHit();
       myhit->id = ++count;
       myhit->idtruth=hit->idtruth;
       std::copy( hit->volu, hit->volu+DetectorHit::maxdepth, myhit->volu );
@@ -411,13 +413,9 @@ void StCalorimeterHitCollection::EndOfEvent() {
 
   mHits.clear();
 
-  for ( auto kv : mHitsByVolume ) {
+  for ( auto kv : hitsByVolume ) {
     mHits.push_back( kv.second );
   }
-
-  mHitsByVolume.clear();
-
-  LOG_INFO << "Aggregate hit count = " << mHits.size() << endm;
   
 }
 //_____________________________________________________________________________________________

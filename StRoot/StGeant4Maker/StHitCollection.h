@@ -76,7 +76,6 @@ private:
 protected:
 
   std::vector<CalorimeterHit*> mHits;
-  std::map<int, CalorimeterHit*> mHitsByVolume;
   double mBirk[3];
   double mEsum;
 
