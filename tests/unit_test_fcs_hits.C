@@ -2095,11 +2095,23 @@ void unit_test_fcs_hits() {
      	}
      	return result;
        });
+    check_track( "The start vertex should be before the calorimeter", [=](const g2t_track_st* t){
+     	std::string result = FAIL;
+     	int istart = t->start_vertex_p;
+     	const g2t_vertex_st* vertex = (istart>0) ? static_cast<const g2t_vertex_st*>( vertex_table->At(istart-1) ) : 0;
+     	if ( vertex ) 
+	  if ( vertex->ge_x[2] < cell.z ) 
+	    result = PASS;     	
+     	return result;
+       });
+
     check_track( "The track should be primary",                    [=](const g2t_track_st* t){
      	std::string result          = PASS;
      	if ( t->eta ==-999 ) result = FAIL;
       	return result;
        });
+
+
 
     check_track( "The track should have WCA hits" ,                [=](const g2t_track_st* t){
      	std::string result          = PASS;
