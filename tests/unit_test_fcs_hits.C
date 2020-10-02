@@ -2184,7 +2184,7 @@ void unit_test_fcs_hits() {
 
   };
 
-  testCalos( wcal, true );
+  //  testCalos( wcal, true );
   testCalos( hcal, false );
 
 }
