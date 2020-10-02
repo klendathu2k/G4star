@@ -240,6 +240,12 @@ struct SD2Table_EMC {
 	trk->n_emc_hit++;
       else if ( sdname == "ESCI" )
 	trk->n_eem_hit++;
+      else if ( sdname == "PSCI" )
+	trk->n_pre_hit++;
+      else if ( sdname == "WSCI" )
+	trk->n_wca_hit++;
+      else if ( sdname == "HSCI" )
+	trk->n_hca_hit++;
     }
   } 
 } sd2table_emc; 
