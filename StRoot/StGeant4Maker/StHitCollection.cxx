@@ -410,9 +410,14 @@ void StCalorimeterHitCollection::EndOfEvent() {
   }
 
   mHits.clear();
+
   for ( auto kv : mHitsByVolume ) {
     mHits.push_back( kv.second );
   }
+
+  mHitsByVolume.clear();
+
+  LOG_INFO << "Aggregate hit count = " << mHits.size() << endm;
   
 }
 //_____________________________________________________________________________________________
