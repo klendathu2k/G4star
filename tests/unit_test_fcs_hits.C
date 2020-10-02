@@ -2101,6 +2101,23 @@ void unit_test_fcs_hits() {
       	return result;
        });
 
+    check_track( "The track should have WCA hits" ,                [=](const g2t_track_st* t){
+     	std::string result          = PASS;
+     	if ( t->n_wca_hit < 1 ) result = FAIL;
+      	return result;
+       });
+    check_track( "The track should have HCA hits" ,                [=](const g2t_track_st* t){
+     	std::string result          = PASS;
+     	if ( t->n_hca_hit < 1 ) result = FAIL;
+      	return result;
+       });
+    check_track( "The track should have PRE hits" ,                [=](const g2t_track_st* t){
+     	std::string result          = PASS;
+     	if ( t->n_pre_hit < 1 ) result = FAIL;
+      	return result;
+       });
+
+
     check_emc_hit( Form("Expect the most energetic hit to have volumeId=%i",cell.volumeId), [=](const g2t_emc_hit_st* h){
 	int volumeId = h->volume_id;
 	int expected = cell.volumeId;
