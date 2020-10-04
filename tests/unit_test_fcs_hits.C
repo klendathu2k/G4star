@@ -2078,7 +2078,10 @@ void unit_test_fcs_hits() {
       
       vertex_table = dynamic_cast<TTable*>( chain->GetDataSet("g2t_vertex")  );
       track_table  = dynamic_cast<TTable*>( chain->GetDataSet("g2t_track")   );
-      hit_table    = dynamic_cast<TTable*>( chain->GetDataSet("g2t_wca_hit") ) ;
+      if ( dowcal ) 
+	hit_table    = dynamic_cast<TTable*>( chain->GetDataSet("g2t_wca_hit") ) ;
+      else 
+	hit_table    = dynamic_cast<TTable*>( chain->GetDataSet("g2t_hca_hit") ) ;
       
       check_track( "A muon must have been processed by geant",       [=](const g2t_track_st* t){
      	// Failure is tested by check_track when it tests for a valid track pointer
