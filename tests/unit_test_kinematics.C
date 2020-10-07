@@ -25,6 +25,7 @@ void unit_test_kinematics() {
 
   auto* chain = StMaker::GetChain();
 
+  auto no_op = [=]() -> std::string { return "-same-"; }  ;
   auto add_deuteron = [=]() {
     std::string result = "Deuteron";
     const double ptmn = 0.1;
@@ -40,7 +41,7 @@ void unit_test_kinematics() {
     return result;
   };
   
-  check_kine( "After adding a particle to the generator, a single particle appears in the event", add_deuteron, [=]() {
+  check_kine( "After adding a particle to the generator, a single particle appears in the event", add_deuteron, [=](){
       std::string result = FAIL;
       int np = _kine->GetNumberOfParticles();
       if ( 1 == np ) {
@@ -49,6 +50,34 @@ void unit_test_kinematics() {
       result = Form(" /number of particles = %i/ ", np) + result;
       return result;
     });
+  check_kine( "The particle should be accessible in the event structure at element 1",            no_op,        [=](){
+      auto& event = *pm->event();
+      auto  part  = event[1];
+      if ( part ) 
+	return PASS;
+      else
+	return FAIL;
+    });
+  check_kine( "The particle should have PDG id id=1000010020",                                    no_op,        [=](){
+      auto& event = *pm->event();
+      auto  part  = event[1];
+      std::string result = FAIL;
+      if ( 1000010020 == part->GetId() )
+	result = PASS;
+      
+      result = Form("/id = %i/ ",part->GetId()) + result;
+      return result;      
+    });
+  check_kine( "The particle should have mass > 0",                                                no_op,        [=](){
+      std::string result = FAIL;
+      auto& event = *pm->event();
+      auto  part  = event[1];
+      auto  mass  = part->GetMass();
+      if ( mass > 0 ) result = PASS;
+      result = Form("/mass = %f GeV/ ",mass) + result;
+      return result;
+    });
+
 
 
 
