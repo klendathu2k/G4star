@@ -41,11 +41,13 @@ Int_t StarKinematics::Generate()
 {
   
   // Copy user event into mEvent
-  for ( Int_t i=0;i<mUser->GetNumberOfParticles(); i++ )
+  mNumberOfParticles = mUser->GetNumberOfParticles();
+
+  for ( Int_t i=0;i<mNumberOfParticles; i++ )
     {
       mEvent -> AddParticle( (*mUser)[i] );
     }
-
+    
   // And clear the user event
   mUser->Clear();
 
