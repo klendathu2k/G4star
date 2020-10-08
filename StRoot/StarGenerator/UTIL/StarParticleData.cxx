@@ -140,8 +140,10 @@ StarParticleData::StarParticleData( const Char_t *_name, TDataSet *parent ) :
   // to help define PDG ids for the heavy ions
   //
 
-  TParticlePDG *D     = new TParticlePDG( "D",     "Deuteron", /* mass */ 0.0,  true,  0., 1.0, "heavyion", hid(1,2,0),   0, 45 );
-  TParticlePDG *He3   = new TParticlePDG( "He3",   "Helium-3", /* mass */ 0.0,  true,  0., 2.0, "heavyion", hid(2,1,0),   0, 49 );
+  const double u = 931.49410242 / 1000; // GeV
+
+  TParticlePDG *D     = new TParticlePDG( "D",     "Deuteron", /* mass */ 2.01410177811*u,  true,  0., 1.0, "heavyion", hid(1,2,0),   0, 45 );
+  TParticlePDG *He3   = new TParticlePDG( "He3",   "Helium-3", /* mass */ 3.0160293    *u,  true,  0., 2.0, "heavyion", hid(2,1,0),   0, 49 );
   TParticlePDG *Cu    = new TParticlePDG( "Cu",    "Copper",   /* mass */ 0.0,  true,  0., 29,  "heavyion", hid(29,64,0),  0, 0 );
   TParticlePDG *Au    = new TParticlePDG( "Au",    "Gold",     /* mass */ 0.0,  true,  0., 79,  "heavyion", hid(79,197,0), 0, 0 );
   TParticlePDG *U     = new TParticlePDG( "U",     "Uranium",  /* mass */ 0.0,  true,  0., 92,  "heavyion", hid(92,238,0), 0, 0 );
