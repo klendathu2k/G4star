@@ -26,7 +26,7 @@ public:
     int phi    = numbv[1];
     int superl = numbv[2];
 
-    TLorentzVector _direction;
+    TLorentzVector _direction(0,0,0,0);
     TVirtualMC::GetMC()->TrackPosition( _direction );
 
     double xg[4], xl[4];
