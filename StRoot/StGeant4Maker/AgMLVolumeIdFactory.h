@@ -16,25 +16,36 @@
 
 class AgMLVolumeIdFactory {
 public:
-
-  static AgMLVolumeId* Create( TString name ) { 
+ 
+  static AgMLVolumeId* Create( TString name, bool test=false ) { 
 
     static std::map<TString,AgMLVolumeId*> VolumeId;
 
     AgMLVolumeId* id = VolumeId[name];
+    if ( 0==id ) {
+      if      ( name == "TPAD" && test==false )  
+	id = new AgMLTpcVolumeId;
+      else if ( name == "TPAD" && test==true )
+	id = new AgMLTpcVolumeIdTest__;
+      else if ( name == "FTUS" )
+	id = new AgMLFstVolumeId;
+      else if ( name == "TGCG" )
+	id = new AgMLStgVolumeId;
+      else if ( name == "WSCI" )
+	id = new AgMLWcaVolumeId;
+      else if ( name == "HSCI" )
+	id = new AgMLHcaVolumeId;
+      else if ( name == "PSCI" )
+	id = new AgMLPreVolumeId;
+      else if ( name == "EPDT" )
+	id = new AgMLEpdVolumeId;
+      else if ( name == "CSCI" )
+	id = new AgMLEmcVolumeId;
+      VolumeId[name] = id;
+    }
     
-    if ( name == "TPAD" ) { return (id)? id : id=new AgMLTpcVolumeId; }
-    if ( name == "FTUS" ) { return (id)? id : id=new AgMLFstVolumeId; }
-    if ( name == "TGCG" ) { return (id)? id : id=new AgMLStgVolumeId; }
-    if ( name == "WSCI" ) { return (id)? id : id=new AgMLWcaVolumeId; }
-    if ( name == "HSCI" ) { return (id)? id : id=new AgMLHcaVolumeId; }
-    if ( name == "PSCI" ) { return (id)? id : id=new AgMLPreVolumeId; }
-    if ( name == "EPDT" ) { return (id)? id : id=new AgMLEpdVolumeId; }
-    if ( name == "CSCI" ) { return (id)? id : id=new AgMLEmcVolumeId; }
-    
-    assert(id==0);
-    return 0;
-    
+    return id;
+
   };
   
 };
