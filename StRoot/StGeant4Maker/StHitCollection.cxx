@@ -240,10 +240,17 @@ void StTrackerHitCollection::ProcessHits() {
 }
 //_____________________________________________________________________________________________
 void StTrackerHitCollection::EndOfEvent() {
+  for ( auto h : mHits ) {
+    if ( h ) delete h;
+  }
+  mHits.clear();
   // Do nothing 
 }
 //_____________________________________________________________________________________________
 void StTrackerHitCollection::Clear() {
+  for ( auto h : mHits ) {
+    if ( h ) delete h;
+  }
   mHits.clear();
 }
 
@@ -411,6 +418,9 @@ void StCalorimeterHitCollection::EndOfEvent() {
       }
   }
 
+  for ( auto h : mHits ) {
+    if (h) delete h;
+  }
   mHits.clear();
 
   for ( auto kv : hitsByVolume ) {
@@ -422,6 +432,9 @@ void StCalorimeterHitCollection::EndOfEvent() {
 
 //_____________________________________________________________________________________________
 void StCalorimeterHitCollection::Clear() {
+  for ( auto h : mHits ) {
+    if (h) delete h;
+  }
   mHits.clear();
   mEsum=0;
 }
