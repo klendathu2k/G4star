@@ -132,6 +132,7 @@ void AgPosition::SetIdeal()
 AgPosition::AgPosition() :
   AgTransform(),
   AgParameterList(),
+  TNamed("agposition","default initialization"),
   mOrderOps(kRotTran),
   mX(0),
   mY(0),
