@@ -261,30 +261,6 @@ public:
     return false; 
   };
 
-
-  // //
-  // // Could simplify selextion by using c++11 lambdas...
-  // //
-  // //   HEXG.use( []( hexg_t h ){ return h.type == 1; } )
-  // //
-  // template<class Struct>
-  // bool use2( std::function<bool(Struct)> predicate ) {
-  //   auto x = std::find_if( table.begin(), table.end(), predicate );
-  //   if ( x == table.end() ) return false;
-
-  //   if ( *x ) { 
-  //     current = *(*x);
-  //     return true;
-  //   };
-
-  //   return false;
-  // };
-
-
-
-
-
-
   /// Cast to a refence to the current version
   operator T&(){ return current; }
 
