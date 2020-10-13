@@ -220,7 +220,12 @@ class AgMLStructure : public AgMLStructureBase
 public:
 
   AgMLStructure( const char *_name ) : AgMLStructureBase(), name(_name) { };
-
+ ~AgMLStructure() {   
+   for ( auto t : table ) { // cleanup the table
+     if (t) delete (t);
+   }
+ };
+  
   void fill() {
     table.push_back( new T( current ) );
     int index = table.size() - 1; // current FILL index
