@@ -240,10 +240,6 @@ void StTrackerHitCollection::ProcessHits() {
 }
 //_____________________________________________________________________________________________
 void StTrackerHitCollection::EndOfEvent() {
-  for ( auto h : mHits ) {
-    if ( h ) delete h;
-  }
-  mHits.clear();
   // Do nothing 
 }
 //_____________________________________________________________________________________________
