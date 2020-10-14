@@ -158,7 +158,7 @@ void StMCParticleStack::PushTrack( int toDo, int parent, int pdg,
 
     StarMCVertex* vertex = GetVertex( vx, vy, vz, vt, mech );
 
-    mParticleTable.push_back(new StarMCParticle(particle,vertex));
+    mParticleTable.push_back(new StarMCParticle(particle,vertex)); // mParticleTable owns the pointer
 
     mIdTruthFromParticle[ mParticleTable.back() ] = mParticleTable.size();
     // if ( parent > 0 ) { 
@@ -203,7 +203,7 @@ StarMCVertex* StMCParticleStack::GetVertex( double vx, double vy, double vz, dou
   }
 
   if ( 0==vertex ) {
-    mVertexTable.push_back( vertex = new StarMCVertex(vx,vy,vz,vt) ); 
+    mVertexTable.push_back( vertex = new StarMCVertex(vx,vy,vz,vt) ); // mVertexTable owns pointer
     auto* navigator = gGeoManager->GetCurrentNavigator();
     auto* volume    = navigator->GetCurrentVolume();
     mVertexTable.back()->setVolume( volume->GetName() );
@@ -318,6 +318,9 @@ void StMCParticleStack::Clear( const Option_t *opts )
   mCurrent = -1;
   mArraySize = 0;
   mStackSize = 0;
+
+  for ( auto v : mVertexTable ) { if (v) delete v; }
+  for ( auto p : mParticleTable ) { if (p) delete p; }
 
   mVertexTable.clear();
   mTruthTable.clear();
