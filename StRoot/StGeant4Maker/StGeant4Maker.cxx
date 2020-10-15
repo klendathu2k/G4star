@@ -289,7 +289,8 @@ StGeant4Maker::StGeant4Maker( const char* nm ) :
   SetAttr( "G4VmcOpt:Title", "The Geant4 Monte Carlo" );
   SetAttr( "G4VmcOpt:Phys",  "FTFP_BERT" ); // default physics list
   //  SetAttr( "G4VmcOpt:Process", "stepLimiter+specialCuts" ); // special process
-  SetAttr( "G4VmcOpt:Process", "stepLimiter+specialCuts+stackPopper" ); // special process
+  SetAttr( "G4VmcOpt:Process", "stepLimiter+specialControls+specialCuts+stackPopper" ); // special process
+  //  SetAttr( "G4VmcOpt:Process", "stepLimiter+stackPopper" ); // special process
 
   SetAttr( "AgMLOpt:TopVolume", "HALL" );
 
@@ -307,14 +308,31 @@ StGeant4Maker::StGeant4Maker( const char* nm ) :
   SetAttr("CUTHAD", 0.01);
   SetAttr("CUTNEU", 0.01);
   SetAttr("CUTMUO", 0.01);
-  SetAttr("BCUTE",  /*     R 'Cut for electron brems.'     D=*/     -1.);
-  SetAttr("BCUTM",  /*     R 'Cut for muon brems.'         D=-1.*/  -1.);
-  SetAttr("DCUTE",  /*     R 'Cut for electron delta-rays' D=*/     -1.);
-  SetAttr("DCUTM",  /*     R 'Cut for muon delta-rays'     D=-1.*/  -1.);
+  SetAttr("BCUTE",  /*     R 'Cut for electron brems.'     D=*/     0.0001);
+  SetAttr("BCUTM",  /*     R 'Cut for muon brems.'         D=-1.*/  0.0001);
+  SetAttr("DCUTE",  /*     R 'Cut for electron delta-rays' D=*/     0.0001);
+  SetAttr("DCUTM",  /*     R 'Cut for muon delta-rays'     D=-1.*/  0.0001);
   SetAttr("PPCUTM", /*     R 'Cut for e+e- pairs by muons' D=0.01*/ 0.01);
   SetAttr("TOFMAX", /*     R 'Time of flight cut'          D=*/     1.E+10);
 
-  
+  // Setup default physics
+  SetAttr("PAIR", 1);
+  SetAttr("COMP", 1);
+  SetAttr("PHOT", 1);
+  SetAttr("PFIS", 1);
+  SetAttr("DRAY", 1);
+  SetAttr("ANNI", 1);
+  SetAttr("BREM", 1);
+  SetAttr("HADR", 1);
+  SetAttr("MUNU", 1);
+  SetAttr("DCAY", 1);
+  SetAttr("LOSS", 2);
+  SetAttr("MULS", 1);
+  SetAttr("CKOV", 1);
+  SetAttr("RAYL", 1);
+  SetAttr("LABS", 1);
+  SetAttr("SYNC", 1);
+    
   // TODO-- 
   //  SetAttr( "AgMLOpt:Hits:Deactivate", "ECAL:*,TPCE:*,*" );
   //  SetAttr( "AgMLOpt:Hits:Activate", "TPAD,CSUP,ESCI" );
@@ -350,6 +368,25 @@ int StGeant4Maker::Init() {
   gG4->SetCut( "DCUTE" , DAttr("dcute") );
   gG4->SetCut( "BCUTM" , DAttr("bcutm") );
   gG4->SetCut( "DCUTM" , DAttr("dcutm") );
+  
+  // Set default physics flags
+  gG4->SetProcess("PAIR",   IAttr("PAIR"));
+  gG4->SetProcess("COMP",   IAttr("COMP"));
+  gG4->SetProcess("PHOT",   IAttr("PHOT"));
+  gG4->SetProcess("PFIS",   IAttr("PFIS"));
+  gG4->SetProcess("DRAY",   IAttr("DRAY"));
+  gG4->SetProcess("ANNI",   IAttr("ANNI"));
+  gG4->SetProcess("BREM",   IAttr("BREM"));
+  gG4->SetProcess("HADR",   IAttr("HADR"));
+  gG4->SetProcess("MUNU",   IAttr("MUNU"));
+  gG4->SetProcess("DCAY",   IAttr("DCAY"));
+  gG4->SetProcess("LOSS",   IAttr("LOSS"));
+  gG4->SetProcess("MULS",   IAttr("MULS"));
+  gG4->SetProcess("CKOV",   IAttr("CKOV"));
+  gG4->SetProcess("RAYL",   IAttr("RAYL"));
+  gG4->SetProcess("LABS",   IAttr("LABS"));
+  gG4->SetProcess("SYNC",   IAttr("SYNC"));
+
 
   LOG_INFO << "Create StarMagFieldAdaprtor" << endm;
   mMagfield = new StarMagFieldAdaptor(/*nada*/);
@@ -359,7 +396,7 @@ int StGeant4Maker::Init() {
     gG4->SetStack( mMCStack );  
     gG4->SetMagField( mMagfield );
     gG4 -> SetRootGeometry();
-    gG4->ProcessGeantCommand( "/mcControl/g3Defaults" );
+    //    gG4->ProcessGeantCommand( "/mcControl/g3Defaults" );
   } else {
     LOG_FATAL << "Could not instantiate concrete MC.  WTF?" << endm;
     return kStFATAL;
