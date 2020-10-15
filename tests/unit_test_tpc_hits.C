@@ -1,6 +1,8 @@
 #include "tests/unit_tests.h"
 #include <assert.h>
 
+// TODO: Implement test of prompt-hits
+
 #ifndef __CINT__
 #include <boost/accumulators/accumulators.hpp>
 #include <boost/accumulators/statistics/stats.hpp>
