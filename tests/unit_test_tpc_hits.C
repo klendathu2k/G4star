@@ -77,7 +77,9 @@ void unit_test_tpc_hits( int longtest=0 ) {
     time( timer.CpuTime() );
     timer.Reset();
 
-    LOG_TEST << "-------------------------------------------------------------------------- sector=" << sector << std::endl;
+
+    LOG_TEST << "======================================================================================" << std::endl;
+    LOG_TEST << GIVEN << "A muon thrown down the center of TPC sector " << sector << std::endl;
 
     check_track( "A muon must have been processed by geant",       [=](const g2t_track_st* t){
 	std::string result = Form("sector=%i ", sector);
@@ -165,13 +167,16 @@ void unit_test_tpc_hits( int longtest=0 ) {
       return result;
     });
 
-    LOG_TEST << "Checking hits on track in sector " << sector << std::endl;
+
 
     for ( int i=0;i<hit_table->GetNRows();i++ ) {
 
       auto hit = static_cast<const g2t_tpc_hit_st*>( hit_table->At(i) );
       if ( 0==hit ) continue;     // skip null entries
       if ( 1!=hit->track_p ) continue; // not interested in secondaries
+
+      LOG_TEST << "------------------------------------------------------------------" << std::endl;
+      LOG_TEST << GIVEN << "A hit on that track" << std::endl;
 
       edep( TMath::Abs(hit->de) * 1E6 ); // GeV MeV keV
       step( hit->ds );
