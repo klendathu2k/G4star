@@ -113,7 +113,7 @@ void unit_test_epd_hits() {
       check_track( "Expect 1 hit in the dev2021 geometry",          [=](const g2t_track_st* t){
 	  int n = t->n_epd_hit;
 	  std::string  result = FAIL;
-	  if ( n==5 )  result = PASS;
+	  if ( n==1 )  result = PASS;
 	  result = Form(" n=%i ",n) + result;
 	  return result;
 	}); 
