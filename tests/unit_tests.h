@@ -14,6 +14,7 @@
 #include <g2t_tpc_hit.h>
 #include <g2t_fts_hit.h>
 #include <g2t_emc_hit.h>
+#include <g2t_epd_hit.h>
 #include <TTable.h>
 #include <TROOT.h>
 #include <string>
