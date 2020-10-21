@@ -119,27 +119,30 @@ void unit_test_epd_hits() {
 	}); 
 
 
-      // for ( int i=0;i<hit_table->GetNRows();i++ ) {
+      LOG_TEST << "GetNRows = " << hit_table->GetNRows() << std::endl;
 
-      // 	auto hit = static_cast<const g2t_emc_hit_st*>( hit_table->At(i) );
-      // 	if ( 0==hit ) continue;     // skip null entries
-      // 	if ( 1!=hit->track_p ) continue; // not interested in secondaries
+      for ( int i=0;i<hit_table->GetNRows();i++ ) {
 
-      // 	check_emc_hit( "Print the hit...", hit, [=](const g2t_emc_hit_st* h) {
-      // 	    LOG_TEST << "id=" << h->id 
-      // 		     << " track_p=" << h->track_p 
-      // 		     << " volume_id=" << h->volume_id 
-      // 		     << " de="  << h->de 
-      // 		     << std::endl;
-      // 	    return PASS;
-      // 	  });
-      // 	check_emc_hit( "The hit should have a nonzero volume_id",hit,[=](const g2t_emc_hit_st* h) {
-      // 	    std::string result = FAIL;
-      // 	    if ( h->volume_id > 0 ) result = PASS;
-      // 	    result = Form(" volumeId=%i ", h->volume_id ) + result;
-      // 	    return result;
-      // 	  });
-      // 	check_emc_hit( "The hit's volume_id should be < 2*100000",hit,[=](const g2t_emc_hit_st* h) {
+       	auto hit = static_cast<const g2t_epd_hit_st*>( hit_table->At(i) );
+       	if ( 0==hit ) continue;     // skip null entries
+       	if ( 1!=hit->track_p ) continue; // not interested in secondaries
+
+	check_emc_hit( "Print the hit...", hit, [=](const g2t_emc_hit_st* h) {
+       	    LOG_TEST << "id=" << h->id 
+       		     << " track_p=" << h->track_p 
+       		     << " volume_id=" << h->volume_id 
+		     << " de="  << h->de 
+		     << std::endl;
+	    return PASS;
+	  });
+	check_emc_hit( "The hit should have a nonzero volume_id",hit,[=](const g2t_emc_hit_st* h) {
+       	    std::string result = FAIL;
+       	    if ( h->volume_id > 0 ) result = PASS;
+       	    result = Form(" volumeId=%i ", h->volume_id ) + result;
+       	    return result;
+       	  });
+
+	// 	check_emc_hit( "The hit's volume_id should be < 2*100000",hit,[=](const g2t_emc_hit_st* h) {
       // 	    std::string result = FAIL;
       // 	    if ( h->volume_id < 200000 ) result = PASS;
       // 	    result = Form(" volumeId=%i ", h->volume_id ) + result;
@@ -205,13 +208,13 @@ void unit_test_epd_hits() {
       // 	    result = Form(" ... depth=%i ", depth ) + result;
       // 	    return result;
       // 	  });
-      // 	check_emc_hit( "The hit should have an energy deposit > 0",hit,[=](const g2t_emc_hit_st* h) {
-      // 	    std::string result = FAIL;
-      // 	    if ( h->de > 0 ) result = PASS;
-      // 	    return result;
-      // 	  });
+       	check_emc_hit( "The hit should have an energy deposit > 0",hit,[=](const g2t_emc_hit_st* h) {
+       	    std::string result = FAIL;
+	    if ( h->de > 0 ) result = PASS;
+	    return result;
+	  });
 	
-      // }
+      }
       
       }
 
