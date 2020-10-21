@@ -141,7 +141,7 @@ struct SD2Table_EPD {
 
       int idtruth = hit->idtruth;
       g2t_track_st* trk = (g2t_track_st*)track->At(idtruth-1);
-      //      trk->n_epd_hit++;
+      trk->n_epd_hit++;
       
     }
 
