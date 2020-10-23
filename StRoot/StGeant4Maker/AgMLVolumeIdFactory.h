@@ -13,6 +13,7 @@
 #include <AgMLPreVolumeId.h>
 #include <AgMLEpdVolumeId.h>
 #include <AgMLEmcVolumeId.h>
+#include <AgMLEEmcVolumeId.h>
 
 class AgMLVolumeIdFactory {
 public:
@@ -41,6 +42,8 @@ public:
 	id = new AgMLEpdVolumeId;
       else if ( name == "CSCI" )
 	id = new AgMLEmcVolumeId;
+      else if ( name == "ESCI" )
+	id = new AgMLEEmcVolumeId;
       VolumeId[name] = id;
     }
     

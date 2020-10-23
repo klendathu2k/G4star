@@ -68,18 +68,17 @@ void Kinematics()
 // ----------------------------------------------------------------------------
 // ----------------------------------------------------------------------------
 // ----------------------------------------------------------------------------
-void initStarG3( Int_t nevents=0, Int_t rngSeed=1234 )
+void initStarG3( const char* tag="dev2021", Int_t nevents=0, Int_t rngSeed=1234 )
 { 
 
   gROOT->ProcessLine(".L bfc.C");
   {
-    TString simple = "dev2021 geant gstar usexgeom agml ";
+    TString simple = tag; simple += " geant gstar usexgeom agml ";
     bfc(0, simple );
   }
 
   gSystem->SetFlagsDebug("-g -std=c++0x");
   gSystem->SetFlagsOpt("-g -std=c++0x");
-
 
   gSystem->Load( "libVMC.so");
 

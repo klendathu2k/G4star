@@ -2057,9 +2057,7 @@ void unit_test_fcs_hits() {
 
   auto testCalos = [=](std::vector<Cell>& calorimeter, bool dowcal) {
 
-    for ( auto cell : calorimeter ) {
-      std::cout << "Generate 500 GeV muon @ eta=" << cell.eta << " phi=" << cell.phi << " volume=" << cell.volumeId << std::endl;
-      
+    for ( auto cell : calorimeter ) {      
       pm->SetVertex(cell.x,cell.y,cell.z-100.0);
       
       auto* chain = StMaker::GetChain();  
@@ -2083,6 +2081,9 @@ void unit_test_fcs_hits() {
       else 
 	hit_table    = dynamic_cast<TTable*>( chain->GetDataSet("g2t_hca_hit") ) ;
       
+
+      LOG_TEST << GIVEN << "a 500 GeV muon @ eta=" << cell.eta << " phi=" << cell.phi << " volume=" << cell.volumeId << std::endl;
+
       check_track( "A muon must have been processed by geant",       [=](const g2t_track_st* t){
      	// Failure is tested by check_track when it tests for a valid track pointer
 	return PASS; 
@@ -2186,7 +2187,7 @@ void unit_test_fcs_hits() {
       
 
   };
-
+  
   testCalos( wcal, true );
   testCalos( hcal, false );
 

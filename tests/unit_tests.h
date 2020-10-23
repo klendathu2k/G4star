@@ -14,6 +14,7 @@
 #include <g2t_tpc_hit.h>
 #include <g2t_fts_hit.h>
 #include <g2t_emc_hit.h>
+#include <g2t_epd_hit.h>
 #include <TTable.h>
 #include <TROOT.h>
 #include <string>
@@ -26,6 +27,7 @@ const std::string YES  = "\u001b[33m - yes - \u001b[0m";
 const std::string UNKN = "\u001b[33m -unknown- \u001b[0m";
 const std::string TODO = "\u001b[36m -todo- \u001b[0m";
 const std::string NADA = "\u001b[36m - N/A - \u001b[0m";
+const std::string GIVEN = "\u001b[34m - given - \u001b[0m";
 #else
 const std::string FAIL = " -failed- ";
 const std::string PASS = " -passed- ";
@@ -35,7 +37,7 @@ const std::string NADA = " - n/a - ";
 #endif
 using namespace std;
 //___________________________________________________________________
-#define LOG_TEST std::cout << " \u001b[35m -require- \u001b[0m"
+#define LOG_TEST std::cout << " \u001b[35m | \u001b[0m"
 //___________________________________________________________________
 TTable* hit_table    = 0;
 TTable* track_table  = 0;
@@ -145,6 +147,36 @@ std::string check_emc_hit( std::string message, const g2t_emc_hit_st* hit, std::
   LOG_TEST << result << std::endl;
   return result;
 };
+std::string check_emc_hit( std::string message, std::function<std::string(const g2t_emc_hit_st*)> f, int idx=0) {
+  const g2t_emc_hit_st* hit = static_cast<const g2t_emc_hit_st*>( hit_table->At(idx) );
+  std::string result = "\u001b[37m [" + message + "] " + (hit? f(hit):FAIL);
+  LOG_TEST << result << std::endl;
+  return result;
+};
+//___________________________________________________________________
+std::string check_epd_hit( std::string message, const g2t_epd_hit_st* hit, std::function<std::string(const g2t_epd_hit_st*)> f) {
+  std::string result = "\u001b[37m [" + message + "] " + (hit? f(hit):FAIL);
+  LOG_TEST << result << std::endl;
+  return result;
+};
+std::string check_epd_hit( std::string message, std::function<std::string(const g2t_epd_hit_st*)> f, int idx=0) {
+  const g2t_epd_hit_st* hit = static_cast<const g2t_epd_hit_st*>( hit_table->At(idx) );
+  std::string result = "\u001b[37m [" + message + "] " + (hit? f(hit):FAIL);
+  LOG_TEST << result << std::endl;
+  return result;
+};
+
+//___________________________________________________________________
+template<typename Hit>
+TH1F* gimmeTH1F( std::string name, std::string title, int nbin, double xmn, double xmx, 
+		 std::function<bool(const Hit*, TH1F* histogram)> filler ) {
+  TH1F* histo = new TH1F(name.c_str(), title.c_str(), nbin, xmn, xmx );
+  for ( int i=0;i<hit_table->GetNRows();i++ ){
+    const Hit* hit = static_cast<const Hit*>( hit_table->At(i) );
+    filler( hit, histo );
+  }
+  return histo;
+}
 //___________________________________________________________________
 ostream& operator<<(  ostream& os, const g2t_vertex_st& v ) {
   os << Form("g2t_vertex id=%i ",v.id);
@@ -163,4 +195,16 @@ ostream& operator<<(  ostream& os, const g2t_emc_hit_st& h ) {
   os << Form("g2t_emc_hit id=%i idtruth=%i volume=%i de=%f R=%f",h.id,h.track_p,h.volume_id,h.de,sqrt(r2));
   return os;
 };
+//___________________________________________________________________
+// ostream& operator<<(  ostream& os, const g2t_wca_hit_st& h ) {
+//   double r2 = h.x*h.x+h.y*h.y;
+//   os << Form("g2t_wca_hit id=%i idtruth=%i volume=%i de=%f R=%f",h.id,h.track_p,h.volume_id,h.de,sqrt(r2));
+//   return os;
+// };
+// //___________________________________________________________________
+// ostream& operator<<(  ostream& os, const g2t_hca_hit_st& h ) {
+//   double r2 = h.x*h.x+h.y*h.y;
+//   os << Form("g2t_hca_hit id=%i idtruth=%i volume=%i de=%f R=%f",h.id,h.track_p,h.volume_id,h.de,sqrt(r2));
+//   return os;
+// };
 #endif

@@ -51,7 +51,7 @@ const std::map<double,std::string> scale2string = {
 double _eta  = 0; 
 double _phid = 0;
 //___________________________________________________________________
-const int ntracks = 7000;
+const int ntracks = 100;
 //___________________________________________________________________
 
 struct tpcTag  { 
@@ -385,8 +385,7 @@ void unit_test_muons() {
       return result;      
     }, keV, [](const g2t_fts_hit_st* h){ return h->ds>0; });
 
-
-
+  chain->Clear();
 
 }
 //___________________________________________________________________

@@ -1439,6 +1439,7 @@ Bfc_st BFC[] = { // standard chains
 
   // EPD
   {"epdHit",    "", "", "epdDb,event",            "StEpdHitMaker", "StEpdHitMaker","EPD hit maker", kFALSE},
+  {"epdutil",   "", "", "",                       "",              "StEpdUtil",    "EPD utilities", false}, 
 
   {"tpc" ,"","","TpxRaw,TpxClu,tpcI" ,"","","WARNING *** Option is OBSOLETE *** use TpxClu instead",kFALSE},
   {"tpcI" ,"tpcChain","","db,tpcDB,TpcHitMover",                "StMaker","StChain","tpc with ITTF",kFALSE},
