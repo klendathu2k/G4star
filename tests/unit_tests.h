@@ -154,6 +154,19 @@ std::string check_emc_hit( std::string message, std::function<std::string(const 
   return result;
 };
 //___________________________________________________________________
+std::string check_epd_hit( std::string message, const g2t_epd_hit_st* hit, std::function<std::string(const g2t_epd_hit_st*)> f) {
+  std::string result = "\u001b[37m [" + message + "] " + (hit? f(hit):FAIL);
+  LOG_TEST << result << std::endl;
+  return result;
+};
+std::string check_epd_hit( std::string message, std::function<std::string(const g2t_epd_hit_st*)> f, int idx=0) {
+  const g2t_epd_hit_st* hit = static_cast<const g2t_epd_hit_st*>( hit_table->At(idx) );
+  std::string result = "\u001b[37m [" + message + "] " + (hit? f(hit):FAIL);
+  LOG_TEST << result << std::endl;
+  return result;
+};
+
+//___________________________________________________________________
 template<typename Hit>
 TH1F* gimmeTH1F( std::string name, std::string title, int nbin, double xmn, double xmx, 
 		 std::function<bool(const Hit*, TH1F* histogram)> filler ) {
