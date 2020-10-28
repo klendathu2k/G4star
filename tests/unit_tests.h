@@ -148,6 +148,12 @@ std::string check_ctf_hit( std::string message, const g2t_ctf_hit_st* hit, std::
   return result;
 };
 //___________________________________________________________________
+std::string check_mtd_hit( std::string message, const g2t_mtd_hit_st* hit, std::function<std::string(const g2t_mtd_hit_st*)> f) {
+  std::string result = "\u001b[37m [" + message + "] " + (hit? f(hit):FAIL);
+  LOG_TEST << result << std::endl;
+  return result;
+};
+//___________________________________________________________________
 std::string check_emc_hit( std::string message, const g2t_emc_hit_st* hit, std::function<std::string(const g2t_emc_hit_st*)> f) {
   std::string result = "\u001b[37m [" + message + "] " + (hit? f(hit):FAIL);
   LOG_TEST << result << std::endl;
