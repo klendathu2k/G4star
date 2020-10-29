@@ -54,26 +54,26 @@ void throw_muon_in_tpc_sector( int sectorid, int charge = 1 ) {
   assert(vertex_table);
 
 }
-void throw_muon_in_btof_tray( int trayid, int east, int charge = 1 ) {
-  const double sectors[] = { 
-    60.0, 30.0, 0.0, 330.0, 300.0, 270., 240.0, 210.0, 180.0, 150.0, 120.0, 90.0,
-    120.0, 150.0, 180.0, 210.0, 240.0, 270.0, 300.0, 330.0, 0.0, 30.0, 60.0, 90.0
-  };
-  double eta = (sectorid<=12) ? 0.5 : -0.5;
-  _eta = eta;
-  double phid = sectors[sectorid-1];
-  _phid = phid; 
-  throw_muon( eta, phid, 500.0, charge ); // energetic
+// void throw_muon_in_btof_tray( int trayid, int east, int charge = 1 ) {
+//   const double sectors[] = { 
+//     60.0, 30.0, 0.0, 330.0, 300.0, 270., 240.0, 210.0, 180.0, 150.0, 120.0, 90.0,
+//     120.0, 150.0, 180.0, 210.0, 240.0, 270.0, 300.0, 330.0, 0.0, 30.0, 60.0, 90.0
+//   };
+//   double eta = (sectorid<=12) ? 0.5 : -0.5;
+//   _eta = eta;
+//   double phid = sectors[sectorid-1];
+//   _phid = phid; 
+//   throw_muon( eta, phid, 500.0, charge ); // energetic
 
-  auto* chain = StMaker::GetChain();
-  vertex_table = dynamic_cast<TTable*>( chain->GetDataSet("g2t_vertex")  );
-  track_table  = dynamic_cast<TTable*>( chain->GetDataSet("g2t_track")   );
-  hit_table    = dynamic_cast<TTable*>( chain->GetDataSet("g2t_tfr_hit") ) ;
-  hit_table->Print(0,1);
+//   auto* chain = StMaker::GetChain();
+//   vertex_table = dynamic_cast<TTable*>( chain->GetDataSet("g2t_vertex")  );
+//   track_table  = dynamic_cast<TTable*>( chain->GetDataSet("g2t_track")   );
+//   hit_table    = dynamic_cast<TTable*>( chain->GetDataSet("g2t_tfr_hit") ) ;
+//   hit_table->Print(0,1);
 
-  assert(vertex_table);
+//   assert(vertex_table);
 
-}
+// }
 //______________________________________________________________________
 void unit_test_btof_hits( int longtest=0 ) {
 
