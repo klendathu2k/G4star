@@ -36,47 +36,9 @@ stats< tag::count,
 
 #include <TVector3.h>
 
-
-
 //___________________________________________________________________
 double _eta  = 0; 
 double _phid = 0;
-void throw_muon_in_tpc_sector( int sectorid, int charge = 1 ) {
-  assert(sectorid>0 && sectorid <= 24);
-  const double sectors[] = { 
-    60.0, 30.0, 0.0, 330.0, 300.0, 270., 240.0, 210.0, 180.0, 150.0, 120.0, 90.0,
-    120.0, 150.0, 180.0, 210.0, 240.0, 270.0, 300.0, 330.0, 0.0, 30.0, 60.0, 90.0
-  };
-  double eta = (sectorid<=12) ? 0.25 : -0.25;
-  _eta = eta;
-  double phid = sectors[sectorid-1];
-  _phid = phid; 
-  throw_muon( eta, phid, 500.0, charge ); // energetic
-
-
-  assert(vertex_table);
-
-}
-// void throw_muon_in_btof_tray( int trayid, int east, int charge = 1 ) {
-//   const double sectors[] = { 
-//     60.0, 30.0, 0.0, 330.0, 300.0, 270., 240.0, 210.0, 180.0, 150.0, 120.0, 90.0,
-//     120.0, 150.0, 180.0, 210.0, 240.0, 270.0, 300.0, 330.0, 0.0, 30.0, 60.0, 90.0
-//   };
-//   double eta = (sectorid<=12) ? 0.5 : -0.5;
-//   _eta = eta;
-//   double phid = sectors[sectorid-1];
-//   _phid = phid; 
-//   throw_muon( eta, phid, 500.0, charge ); // energetic
-
-//   auto* chain = StMaker::GetChain();
-//   vertex_table = dynamic_cast<TTable*>( chain->GetDataSet("g2t_vertex")  );
-//   track_table  = dynamic_cast<TTable*>( chain->GetDataSet("g2t_track")   );
-//   hit_table    = dynamic_cast<TTable*>( chain->GetDataSet("g2t_tfr_hit") ) ;
-//   hit_table->Print(0,1);
-
-//   assert(vertex_table);
-
-// }
 //______________________________________________________________________
 void unit_test_mtd_hits( int longtest=0 ) {
 
@@ -98,13 +60,14 @@ void unit_test_mtd_hits( int longtest=0 ) {
 
   for ( auto cell : cells ) {
 
-    throw_muon( cell.eta, cell.phi * 180.0 / TMath::Pi() );
+    throw_muon( _eta = cell.eta, cell.phi * 180.0 / TMath::Pi() );
     auto* chain = StMaker::GetChain();
     vertex_table = dynamic_cast<TTable*>( chain->GetDataSet("g2t_vertex")  );
     track_table  = dynamic_cast<TTable*>( chain->GetDataSet("g2t_track")   );
     if ( hit_table    = dynamic_cast<TTable*>( chain->GetDataSet("g2t_mtd_hit") ) ) {
       hit_table->Print(0,1);
     }
+
 
     check_track( "A muon must have been processed by geant",       [=](const g2t_track_st* t){
 	assert(t);
@@ -205,16 +168,16 @@ void unit_test_mtd_hits( int longtest=0 ) {
       edep( TMath::Abs(hit->de) * 1E6 ); // GeV MeV keV
       step( hit->ds );
 
-      check_mtd_hit( "Print the hit...", hit, [=](const g2t_mtd_hit_st* h) {
-	  LOG_TEST << "id=" << h->id 
-		   << " track_p=" << h->track_p 
-		   << " volume_id=" << h->volume_id 
-		   << " xglobal="  << h->xglobal[0] 
-		   << " yglobal="  << h->xglobal[1] 
-		   << " zglobal="  << h->xglobal[2] 	    
-		   << std::endl;
-	  return PASS;
-	});
+      // check_mtd_hit( "Print the hit...", hit, [=](const g2t_mtd_hit_st* h) {
+      // 	  LOG_TEST << "id=" << h->id 
+      // 		   << " track_p=" << h->track_p 
+      // 		   << " volume_id=" << h->volume_id 
+      // 		   << " xglobal="  << h->xglobal[0] 
+      // 		   << " yglobal="  << h->xglobal[1] 
+      // 		   << " zglobal="  << h->xglobal[2] 	    
+      // 		   << std::endl;
+      // 	  return PASS;
+      // 	});
 
       check_mtd_hit( "The hit should have a nonzero volume_id",hit,[=](const g2t_mtd_hit_st* h) {
        	  std::string result = FAIL;
@@ -290,12 +253,34 @@ void unit_test_mtd_hits( int longtest=0 ) {
 	});
 
       check_mtd_hit( "Track's momentum at hit should be < initial value",hit,    [=](const g2t_mtd_hit_st* h){
+
 	  std::string result = FAIL;
 	  double px = h->p[0];
 	  double py = h->p[1];
 	  double pz = h->p[2];
 	  double p2 = px*px + py*py + pz*pz;
 	  if ( p2 < _pmom*_pmom ) result = PASS;
+	  return result;
+	});
+      check_mtd_hit( "The sector (aka backleg) should decode as 1..30", hit, [=]( const g2t_mtd_hit_st* h) {
+	  std::string result = FAIL;
+	  int sector = h->volume_id / 1000;
+	  if ( sector >= 1 && sector <= 30 ) result = PASS;
+	  result = Form("sector=%i ",sector) + result;
+	  return result;
+	});
+      check_mtd_hit( "The module should decode as 1..5", hit, [=]( const g2t_mtd_hit_st* h) {
+	  std::string result = FAIL;
+	  int module = h->volume_id % 1000 / 100;
+	  if ( module >= 1 && module <= 5 ) result = PASS;
+	  result = Form("module=%i ",module) + result;
+	  return result;
+	});
+      check_mtd_hit( "The layer should decode as 1..5", hit, [=]( const g2t_mtd_hit_st* h) {
+	  std::string result = FAIL;
+	  int layer = h->volume_id % 10;
+	  if ( layer >= 1 && layer <= 5 ) result = PASS;
+	  result = Form("layer=%i ",layer) + result;
 	  return result;
 	});
     }
