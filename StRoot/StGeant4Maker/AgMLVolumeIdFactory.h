@@ -14,10 +14,12 @@
 #include <AgMLEpdVolumeId.h>
 #include <AgMLEmcVolumeId.h>
 #include <AgMLEEmcVolumeId.h>
+#include <AgMLBTofVolumeId.h>
+#include <AgMLMtdVolumeId.h>
 
 class AgMLVolumeIdFactory {
 public:
- 
+
   static AgMLVolumeId* Create( TString name, bool test=false ) { 
 
     static std::map<TString,AgMLVolumeId*> VolumeId;
@@ -44,6 +46,10 @@ public:
 	id = new AgMLEmcVolumeId;
       else if ( name == "ESCI" )
 	id = new AgMLEEmcVolumeId;
+      else if ( name == "BRSG" ) 
+	id = new AgMLBtofVolumeId;
+      else if ( name == "MIGG" ) 
+	id = new AgMLMtdVolumeId;
       VolumeId[name] = id;
     }
     

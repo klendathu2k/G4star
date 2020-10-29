@@ -22,9 +22,9 @@ public:
   virtual int id( int* numbv ) const { 
 
 
-    int rileft = numbv[0];
-    int phi    = numbv[1];
-    int superl = numbv[2];
+    int rileft = numbv[0]; // east barrel vs west barrel
+    int phi    = numbv[1]; // module
+    int superl = numbv[2]; // before / after SMD layer
 
     TLorentzVector _direction(0,0,0,0);
     TVirtualMC::GetMC()->TrackPosition( _direction );
