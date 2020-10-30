@@ -40,7 +40,7 @@ stats< tag::count,
 double _eta  = 0; 
 double _phid = 0;
 //______________________________________________________________________
-void unit_test_mtd_hits( int longtest=0 ) {
+void unit_test_mtd_hits( int longtest=0, double _pt=25.0 ) {
 
   gROOT->ProcessLine("initChain();");
 
@@ -60,7 +60,7 @@ void unit_test_mtd_hits( int longtest=0 ) {
 
   for ( auto cell : cells ) {
 
-    throw_muon( _eta = cell.eta, cell.phi * 180.0 / TMath::Pi() );
+    throw_muon( _eta = cell.eta, cell.phi * 180.0 / TMath::Pi(), _pt );
     auto* chain = StMaker::GetChain();
     vertex_table = dynamic_cast<TTable*>( chain->GetDataSet("g2t_vertex")  );
     track_table  = dynamic_cast<TTable*>( chain->GetDataSet("g2t_track")   );
@@ -168,57 +168,86 @@ void unit_test_mtd_hits( int longtest=0 ) {
       edep( TMath::Abs(hit->de) * 1E6 ); // GeV MeV keV
       step( hit->ds );
 
-      // check_mtd_hit( "Print the hit...", hit, [=](const g2t_mtd_hit_st* h) {
-      // 	  LOG_TEST << "id=" << h->id 
-      // 		   << " track_p=" << h->track_p 
-      // 		   << " volume_id=" << h->volume_id 
-      // 		   << " xglobal="  << h->xglobal[0] 
-      // 		   << " yglobal="  << h->xglobal[1] 
-      // 		   << " zglobal="  << h->xglobal[2] 	    
-      // 		   << std::endl;
-      // 	  return PASS;
-      // 	});
-
-      check_mtd_hit( "The hit should have a nonzero volume_id",hit,[=](const g2t_mtd_hit_st* h) {
+      check_mtd_hit( "The hit should have a nonzero volume_id",           hit,[=](const g2t_mtd_hit_st* h) {
        	  std::string result = FAIL;
           if ( h->volume_id > 0 ) result = PASS;
      	  result = Form("id=%i vid=%i de=%f ds=%f ",h->id,h->volume_id,h->de,h->ds) + result;
      	  return result;
      	});
-      check_mtd_hit( "The hit should have an energy deposit > 0",hit,[=](const g2t_mtd_hit_st* h) {
+      check_mtd_hit( "The hit should have an energy deposit > 0",         hit,[=](const g2t_mtd_hit_st* h) {
        	  std::string result = FAIL; // undetermined
 	  if       ( h->de > 0 ) result = PASS;
 	  return result;
 	});
-      check_mtd_hit( "The hit should have a step size > 0",hit,[=](const g2t_mtd_hit_st* h) {
+      check_mtd_hit( "The hit should have a step size > 0",               hit,[=](const g2t_mtd_hit_st* h) {
 	  std::string result = FAIL;
 	  if ( h->ds > 0 ) result = PASS;
 	  return result;
 	});
-      check_mtd_hit( "The hit should have a path length > 0",hit,[=](const g2t_mtd_hit_st* h) {
+      check_mtd_hit( "The hit should have a path length > 0",             hit,[=](const g2t_mtd_hit_st* h) {
 	  std::string result = FAIL;
 	  if ( h->s_track > 0 ) result = PASS;
 	  return result;
 	});
-      check_mtd_hit( "The hit should have time-of-flight > 0",hit,[=](const g2t_mtd_hit_st* h) {
+      check_mtd_hit( "The hit should have time-of-flight > 0",            hit,[=](const g2t_mtd_hit_st* h) {
 	  std::string result = FAIL;
 	  if ( h->tof > 0 ) result = PASS;
 	  result = Form(" tof=%f ",h->tof) + result;
 	  return result;
 	});
-      check_mtd_hit( "The hit should have a nonzero momentum",hit,[=](const g2t_mtd_hit_st* h) {
+      check_mtd_hit( "The hit should have a nonzero momentum",            hit,[=](const g2t_mtd_hit_st* h) {
 	  std::string result = FAIL;
 	  if ( h->p[0] != 0 ) result = PASS;
 	  if ( h->p[1] != 0 ) result = PASS;
 	  if ( h->p[2] != 0 ) result = PASS;
 	  return result;
 	});
-      check_mtd_hit( "The hit should have a length > 0",hit,[=](const g2t_mtd_hit_st* h) {
+      check_mtd_hit( "The hit should have a length > 0",                  hit,[=](const g2t_mtd_hit_st* h) {
 	  std::string result = FAIL;
 	  if ( h->s_track > 0 ) result = PASS;
 	  return result;
 	});
-      check_mtd_hit( "The track length and tof*c agree to w/in 0.15 mm ",hit,[=](const g2t_mtd_hit_st* h) {
+
+      check_mtd_hit( "The hit should be at a radius > 364.25",            hit,[=](const g2t_mtd_hit_st* h) {
+	  std::string result = FAIL;
+	  double R2 = h->xglobal[0]*h->xglobal[0] + h->xglobal[1]*h->xglobal[1];
+	  if ( R2 > 364.25*364.25 ) result = PASS;
+	  result = Form(" R=%f ",sqrt(R2)) + result;
+	  return result;
+	});
+      check_mtd_hit( "The hit should be at a radius < 430.0",             hit,[=](const g2t_mtd_hit_st* h) {
+	  std::string result = FAIL;
+	  double R2 = h->xglobal[0]*h->xglobal[0] + h->xglobal[1]*h->xglobal[1];
+	  if ( R2 < 430.0*430.0 ) result = PASS;
+	  result = Form(" R=%f ",sqrt(R2)) + result;
+	  return result;
+	});
+
+      check_mtd_hit( "Track's momentum at hit should be < initial value", hit,[=](const g2t_mtd_hit_st* h) {
+	  std::string result = FAIL;
+	  double px = h->p[0];
+	  double py = h->p[1];
+	  double pz = h->p[2];
+	  double p2 = px*px + py*py + pz*pz;
+	  if ( p2 < _pmom*_pmom ) result = PASS;
+	  return result;
+	});
+
+
+      if ( Conditional (
+	    check_mtd_hit("Conditional: Is the track's momentum at hit > 50% of its initial value", hit,[=](const g2t_mtd_hit_st* h) {
+		std::string result = FAIL;
+		double px = h->p[0];
+		double py = h->p[1];
+		double pz = h->p[2];
+		double p2 = px*px + py*py + pz*pz;
+		if ( p2 > 0.25* _pmom*_pmom ) result = YES;
+		return result;
+	      })
+			)
+	   ) {
+	   
+	check_mtd_hit( "The track length and tof*c agree to w/in 0.15 mm ",         hit,[=](const g2t_mtd_hit_st* h) {
 	  // There should be some tolerance on this, b/c of roundoff error at each tracking step
 	  std::string result = FAIL;
 	  double c_tof = 2.99792458E10 /* cm/s */ * h->tof;
@@ -228,22 +257,7 @@ void unit_test_mtd_hits( int longtest=0 ) {
 	  result = Form("c_tof=%f cm  strack=%f cm diff=%f cm ",c_tof,s_trk,diff) + result;
 	  return result;
 	});
-
-      check_mtd_hit( "The hit be at a radius > 364.25",hit,[=](const g2t_mtd_hit_st* h) {
-	  std::string result = FAIL;
-	  double R2 = h->xglobal[0]*h->xglobal[0] + h->xglobal[1]*h->xglobal[1];
-	  if ( R2 > 364.25*364.25 ) result = PASS;
-	  result = Form(" R=%f ",sqrt(R2)) + result;
-	  return result;
-	});
-      check_mtd_hit( "The hit be at a radius < 430.0",hit,[=](const g2t_mtd_hit_st* h) {
-	  std::string result = FAIL;
-	  double R2 = h->xglobal[0]*h->xglobal[0] + h->xglobal[1]*h->xglobal[1];
-	  if ( R2 < 430.0*430.0 ) result = PASS;
-	  result = Form(" R=%f ",sqrt(R2)) + result;
-	  return result;
-	});
-      check_mtd_hit( "The track length at the hit should be >= radius at the hit",hit,[=](const g2t_mtd_hit_st* h) {
+	check_mtd_hit( "The track length at the hit should be >= radius at the hit",hit,[=](const g2t_mtd_hit_st* h) {
 	  std::string result = FAIL;
 	  double R2 = h->xglobal[0]*h->xglobal[0] + h->xglobal[1]*h->xglobal[1];
 	  double L2 = h->s_track * h->s_track;
@@ -252,31 +266,29 @@ void unit_test_mtd_hits( int longtest=0 ) {
 	  return result;
 	});
 
-      check_mtd_hit( "Track's momentum at hit should be < initial value",hit,    [=](const g2t_mtd_hit_st* h){
+      } else {
 
-	  std::string result = FAIL;
-	  double px = h->p[0];
-	  double py = h->p[1];
-	  double pz = h->p[2];
-	  double p2 = px*px + py*py + pz*pz;
-	  if ( p2 < _pmom*_pmom ) result = PASS;
-	  return result;
-	});
-      check_mtd_hit( "The sector (aka backleg) should decode as 1..30", hit, [=]( const g2t_mtd_hit_st* h) {
+	LOG_TEST << "The track length and tof*c agree to w/in 0.15 mm "          << NADA << std::endl;
+	LOG_TEST << "The track length at the hit should be >= radius at the hit" << NADA << std::endl;
+
+      }
+
+     
+      check_mtd_hit( "The sector (aka backleg) should decode as 1..30",   hit,[=](const g2t_mtd_hit_st* h) {
 	  std::string result = FAIL;
 	  int sector = h->volume_id / 1000;
 	  if ( sector >= 1 && sector <= 30 ) result = PASS;
 	  result = Form("sector=%i ",sector) + result;
 	  return result;
 	});
-      check_mtd_hit( "The module should decode as 1..5", hit, [=]( const g2t_mtd_hit_st* h) {
+      check_mtd_hit( "The module should decode as 1..5",                  hit,[=](const g2t_mtd_hit_st* h) {
 	  std::string result = FAIL;
 	  int module = h->volume_id % 1000 / 100;
 	  if ( module >= 1 && module <= 5 ) result = PASS;
 	  result = Form("module=%i ",module) + result;
 	  return result;
 	});
-      check_mtd_hit( "The layer should decode as 1..5", hit, [=]( const g2t_mtd_hit_st* h) {
+      check_mtd_hit( "The layer should decode as 1..5",                   hit,[=]( const g2t_mtd_hit_st* h) {
 	  std::string result = FAIL;
 	  int layer = h->volume_id % 10;
 	  if ( layer >= 1 && layer <= 5 ) result = PASS;
