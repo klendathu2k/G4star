@@ -69,6 +69,7 @@
 #include "g2t/St_g2t_epd_Module.h"
 #include "g2t/St_g2t_tfr_Module.h"
 #include "g2t/St_g2t_mtd_Module.h"
+#include "g2t/St_g2t_vpd_Module.h"
 //________________________________________________________________________________________________
 #include <StHitCollection.h> 
 //________________________________________________________________________________________________
@@ -294,6 +295,46 @@ struct SD2Table_CTF {
     }
   } 
 } sd2table_ctf; 
+
+
+struct SD2Table_VPD {
+  void operator()( StSensitiveDetector* sd, St_g2t_vpd_hit* table, St_g2t_track* track ) {
+    
+    TString sdname = sd->GetName();
+
+    // Retrieve the hit collection 
+    StTrackerHitCollection* collection = (StTrackerHitCollection *)sd->hits();
+    // Iterate over all hits
+    for ( auto hit : collection->hits() ) {
+
+      g2t_vpd_hit_st g2t_hit; memset(&g2t_hit,0,sizeof(g2t_vpd_hit_st)); 
+      
+      g2t_hit.id        = hit->id;
+      // TODO: add pointer to next hit on the track 
+      g2t_hit.track_p   = hit->idtruth;
+      g2t_hit.volume_id = hit->volId;
+      g2t_hit.de        = hit->de;
+      g2t_hit.ds        = hit->ds;
+
+      g2t_hit.x[0]      = (hit->position_in[0] + hit->position_out[0]) * 0.5;
+      g2t_hit.x[1]      = (hit->position_in[1] + hit->position_out[1]) * 0.5;
+      g2t_hit.x[2]      = (hit->position_in[2] + hit->position_out[2]) * 0.5;
+      g2t_hit.tof       = (hit->position_in[3] + hit->position_out[3]) * 0.5;
+      g2t_hit.p[0]      = (hit->momentum_in[0] + hit->momentum_out[0]) * 0.5;
+      g2t_hit.p[1]      = (hit->momentum_in[1] + hit->momentum_out[1]) * 0.5;
+      g2t_hit.p[2]      = (hit->momentum_in[2] + hit->momentum_out[2]) * 0.5;
+      g2t_hit.s_track   = hit->length;
+      
+      table -> AddAt( &g2t_hit );     
+
+      int idtruth = hit->idtruth;
+      g2t_track_st* trk = (g2t_track_st*)track->At(idtruth-1);
+
+      trk->n_tof_hit++;
+      
+    }
+  } 
+} sd2table_vpd; 
 
 struct SD2Table_MTD {
   void operator()( StSensitiveDetector* sd, St_g2t_mtd_hit* table, St_g2t_track* track ) {
@@ -821,6 +862,7 @@ void StGeant4Maker::FinishEvent(){
   AddHits<St_g2t_emc_hit>( "HCAH", {"HSCI"}, "g2t_hca_hit", sd2table_emc  ); 
 
   AddHits<St_g2t_ctf_hit>( "BTOH", {"BRSG"}, "g2t_tfr_hit", sd2table_ctf  );
+  AddHits<St_g2t_vpd_hit>( "VPDH", {"VRAD"}, "g2t_vpd_hit", sd2table_vpd  );
   AddHits<St_g2t_mtd_hit>( "MUTH", {"MIGG"}, "g2t_mtd_hit", sd2table_mtd  );
 
   //  g2t_track->Print(0,10);
