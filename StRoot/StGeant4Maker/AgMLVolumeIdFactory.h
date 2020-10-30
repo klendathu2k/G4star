@@ -16,6 +16,7 @@
 #include <AgMLEEmcVolumeId.h>
 #include <AgMLBTofVolumeId.h>
 #include <AgMLMtdVolumeId.h>
+#include <AgMLVpdVolumeId.h>
 
 class AgMLVolumeIdFactory {
 public:
@@ -50,6 +51,8 @@ public:
 	id = new AgMLBtofVolumeId;
       else if ( name == "MIGG" ) 
 	id = new AgMLMtdVolumeId;
+      else if ( name == "VRAD" ) 
+	id = new AgMLVpdVolumeId;
       VolumeId[name] = id;
     }
     
