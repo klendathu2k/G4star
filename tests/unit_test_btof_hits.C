@@ -55,7 +55,7 @@ void throw_muon_in_tpc_sector( int sectorid, int charge = 1 ) {
 
 }
 //______________________________________________________________________
-void unit_test_btof_hits( int longtest=0 ) {
+void unit_test_btof_hits( int longtest=10 ) {
 
   gROOT->ProcessLine("initChain();");
 
@@ -179,16 +179,6 @@ void unit_test_btof_hits( int longtest=0 ) {
       edep( TMath::Abs(hit->de) * 1E6 ); // GeV MeV keV
       step( hit->ds );
 
-      check_ctf_hit( "Print the hit...", hit, [=](const g2t_ctf_hit_st* h) {
-	  LOG_TEST << "id=" << h->id 
-		   << " track_p=" << h->track_p 
-		   << " volume_id=" << h->volume_id 
-		   << " x="  << h->x[0] 
-		   << " y="  << h->x[1] 
-		   << " z="  << h->x[2] 	    
-		   << std::endl;
-	  return PASS;
-	});
       check_ctf_hit( "The hit should have a nonzero volume_id",                    hit,[=](const g2t_ctf_hit_st* h) {
        	  std::string result = FAIL;
           if ( h->volume_id > 0 ) result = PASS;
@@ -297,7 +287,6 @@ void unit_test_btof_hits( int longtest=0 ) {
 
   }
 
-#if 0
   std::cout << std::endl << std::endl;
 
   // Print out energy deposition
@@ -318,18 +307,18 @@ void unit_test_btof_hits( int longtest=0 ) {
   }
 
   // Print out step sizes
-  {
+  if ( 1 ){
   
     double _mean          = boost::accumulators::mean(step);
     double _median        = boost::accumulators::median(step);
     double _min           = boost::accumulators::min(step);
     double _max           = boost::accumulators::max(step);
-    double _error_of_mean = boost::accumulators::error_of<tag::mean>(step); 
+    //    double _error_of_mean = boost::accumulators::error_of<tag::mean>(step); 
     LOG_TEST << Form( "step size: mean          = %f cm", _mean )          << std::endl;
     LOG_TEST << Form( "step size: median        = %f cm", _median )        << std::endl;
     LOG_TEST << Form( "step size: min           = %f cm", _min  )          << std::endl;
     LOG_TEST << Form( "step size: max           = %f cm", _max  )          << std::endl;
-    LOG_TEST << Form( "step size: error of mean = %f cm", _error_of_mean ) << std::endl;
+    //    LOG_TEST << Form( "step size: error of mean = %f cm", _error_of_mean ) << std::endl;
 
   }
 
@@ -352,7 +341,7 @@ void unit_test_btof_hits( int longtest=0 ) {
   // Reset accumulators
   edep = step = time = {};
   
-  if ( longtest > 0 ) {
+  if ( longtest > 1 ) {
 
     std::cout << "-/ running long test with N pi+/pi- =" << longtest << " /-" << std::endl;
 
@@ -396,17 +385,17 @@ void unit_test_btof_hits( int longtest=0 ) {
       double _median        = boost::accumulators::median(step);
       double _min           = boost::accumulators::min(step);
       double _max           = boost::accumulators::max(step);
-      double _error_of_mean = boost::accumulators::error_of<tag::mean>(step); 
+      //      double _error_of_mean = boost::accumulators::error_of<tag::mean>(step); 
       LOG_TEST << Form( "step size: mean          = %f cm", _mean )          << std::endl;
       LOG_TEST << Form( "step size: median        = %f cm", _median )        << std::endl;
       LOG_TEST << Form( "step size: min           = %f cm", _min  )          << std::endl;
       LOG_TEST << Form( "step size: max           = %f cm", _max  )          << std::endl;
-      LOG_TEST << Form( "step size: error of mean = %f cm", _error_of_mean ) << std::endl;
+      //      LOG_TEST << Form( "step size: error of mean = %f cm", _error_of_mean ) << std::endl;
 
     }
 
   }
-#endif
+
 
 }
 //___________________________________________________________________
