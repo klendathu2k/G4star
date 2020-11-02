@@ -20,13 +20,13 @@
 #include <string>
 #define __COLOR__
 #ifdef __COLOR__
-const std::string FAIL = "\u001b[31m -failed- \u001b[0m";
-const std::string PASS = "\u001b[32m -passed- \u001b[0m";
-const std::string NOPE = "\u001b[33m - nope - \u001b[0m";
-const std::string YES  = "\u001b[33m - yes - \u001b[0m";
-const std::string UNKN = "\u001b[33m -unknown- \u001b[0m";
-const std::string TODO = "\u001b[36m -todo- \u001b[0m";
-const std::string NADA = "\u001b[36m - N/A - \u001b[0m";
+const std::string FAIL  = "\u001b[31m -failed- \u001b[0m";
+const std::string PASS  = "\u001b[32m -passed- \u001b[0m";
+const std::string NOPE  = "\u001b[33m - nope - \u001b[0m";
+const std::string YES   = "\u001b[33m - yes - \u001b[0m";
+const std::string UNKN  = "\u001b[33m -unknown- \u001b[0m";
+const std::string TODO  = "\u001b[36m -todo- \u001b[0m";
+const std::string NADA  = "\u001b[36m - N/A - \u001b[0m";
 const std::string GIVEN = "\u001b[34m - given - \u001b[0m";
 #else
 const std::string FAIL = " -failed- ";
@@ -35,9 +35,20 @@ const std::string UNKN = " -unknown- ";
 const std::string TODO = " -todo- ";
 const std::string NADA = " - n/a - ";
 #endif
+
+std::string __PREFIX__ = " \u001b[35m | \u001b[0m";
+
+bool Conditional( std::string result ) {
+  bool value = true;
+  if ( result.find(FAIL) != std::string::npos ) {
+    value = false;
+  }
+  return value;
+}
+
 using namespace std;
 //___________________________________________________________________
-#define LOG_TEST std::cout << " \u001b[35m | \u001b[0m"
+#define LOG_TEST std::cout << __PREFIX__
 //___________________________________________________________________
 TTable* hit_table    = 0;
 TTable* track_table  = 0;

@@ -3,13 +3,16 @@
 double _eta  = 0; 
 double _phid = 0;
 //___________________________________________________________________
-void throw_muon_in_stg_wedge( int wedgeid, int inout, int charge = 1 ) {
+//void throw_muon_in_stg_wedge( int wedgeid, int inout, int charge = 1 ) {
+void throw_muon_in_stg_wedge( double eta, double phid ) {
 
   // TODO... 
-  double eta  = 2.8;  _eta=eta;
-  double phid = 15.0; _phid=phid;
+  //double eta  = 2.8;  
+  _eta=eta;
+  //double phid = 15.0; 
+  _phid=phid;
 
-  throw_muon( eta, phid, 500.0, charge ); // energetic
+  throw_muon( eta, phid, 5.0, 1 ); // energetic
 
   vertex_table = dynamic_cast<TTable*>( chain->GetDataSet("g2t_vertex")  ) ;
   track_table  = dynamic_cast<TTable*>( chain->GetDataSet("g2t_track")   ) ;
@@ -29,17 +32,14 @@ void unit_test_stg_hits() {
   LOG_TEST << "Unit testing of tracks and sTGC hits on single muons"     << std::endl;
   LOG_TEST << "=======================================================" << std::endl;
 
-  throw_muon_in_stg_wedge( 0, 0 );
+  double etas[] = { 2.75, 3.25, 3.75 };
+  double phis[] = { 15.0, 45.0, 75.0, 105.0, 135.0, 165.0, 195.0, 225.0, 255.0, 285.0, 315.0, 345.0 };
+
+  for ( auto e : etas ) {
+    for ( auto p : phis ) {
+
+  throw_muon_in_stg_wedge( e, p );
   
-  check_track( "Print the track table", [=]( const g2t_track_st* ){
-      int nrows = track_table->GetNRows();
-      std::string result = FAIL;
-      if ( nrows > 0 ) {
-	track_table->Print(0,5);
-	result = PASS;
-      }
-      return result;
-    });
   check_track( "A muon must have been processed by geant",       [=](const g2t_track_st* t){
 	// Failure is tested by check_track when it tests for a valid track pointer
 	return PASS; 
@@ -109,22 +109,11 @@ void unit_test_stg_hits() {
       return result;
     });
   
-  //  LOG_TEST << "Checking hits on track in sector " << sector << std::endl;
-
   for ( int i=0;i<hit_table->GetNRows();i++ ) {
     auto hit = static_cast<const g2t_fts_hit_st*>( hit_table->At(i) );
     if ( 0==hit ) continue;     // skip null entries
     if ( 1!=hit->track_p ) continue; // not interested in secondaries
-    check_stg_hit( "Print the hit...", hit, [=](const g2t_fts_hit_st* h) {
-	LOG_TEST << "id=" << h->id 
-		 << " track_p=" << h->track_p 
-		 << " volume_id=" << h->volume_id 
-		 << " x="  << h->x[0] 
-		 << " y="  << h->x[1] 
-		 << " z="  << h->x[2] 	    
-		 << std::endl;
-	return PASS;
-      });
+
     check_stg_hit( "The hit should have a nonzero volume_id",hit,[=](const g2t_fts_hit_st* h) {
 	std::string result = FAIL;
 	if ( h->volume_id > 0 ) result = PASS;
@@ -147,12 +136,12 @@ void unit_test_stg_hits() {
 	if ( h->p[2] != 0 ) result = PASS;
 	return result;
       });
-    check_stg_hit( "The volume ID should be in 1..48",hit,[=](const g2t_fts_hit_st* h) {
-	std::string result=PASS;
-	if ( h->volume_id<1||h->volume_id>48 ) result=FAIL;
-	result = Form(" volume_id = %i ",h->volume_id) + result;
-	return result;
-      });   
+    // check_stg_hit( "The volume ID should be in 1..48",hit,[=](const g2t_fts_hit_st* h) {
+    // 	std::string result=PASS;
+    // 	if ( h->volume_id<1||h->volume_id>48 ) result=FAIL;
+    // 	result = Form(" volume_id = %i ",h->volume_id) + result;
+    // 	return result;
+    //   });   
     check_stg_hit( "Track's momentum at hit should be < initial value",hit,    [=](const g2t_fts_hit_st* h){
 	std::string result = FAIL;
 	double px = h->p[0];
@@ -166,8 +155,36 @@ void unit_test_stg_hits() {
      	// TODO
 	return TODO;
       });
-    
+    check_stg_hit( "The hit position and tof*c agree to w/in 0.15 mm ",          hit,[=](const g2t_fts_hit_st* h) {
+	// There should be some tolerance on this, b/c of roundoff error at each tracking step
+	std::string result = FAIL;
+	double c_tof = 2.99792458E10 /* cm/s */ * h->tof;
+	double s_trk = 
+	  sqrt( h->x[0]*h->x[0] +
+		h->x[1]*h->x[1] +
+		h->x[2]*h->x[2] );			    
+	double diff = abs(c_tof-s_trk);
+	if ( diff < 0.015 ) result = PASS;
+	result = Form("c_tof=%f cm  strack=%f cm diff=%f cm ",c_tof,s_trk,diff) + result;
+	return result;
+      });    
+    check_stg_hit( "The station should decode as 1..4",hit,[=](const g2t_fts_hit_st* h) {
+	std::string result=FAIL;
+	int station = h->volume_id / 10;
+	if ( station>=1 && station<=4 ) result=PASS;
+	result = Form(" volume_id=%i ",h->volume_id) + result;
+	return result;
+      });   
+    check_stg_hit( "The chamber should decode as 1..4",hit,[=](const g2t_fts_hit_st* h) {
+	std::string result=FAIL;
+	int chamber = h->volume_id % 10;
+	if ( chamber>=1 && chamber<=4 ) result=PASS;
+	result = Form(" volume_id=%i ",h->volume_id) + result;
+	return result;
+      });              
+  }
 
+    }
   }
 
 }

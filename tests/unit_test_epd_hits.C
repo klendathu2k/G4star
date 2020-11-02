@@ -34,7 +34,6 @@ void unit_test_epd_hits() {
   LOG_TEST << "Unit testing of tracks and EPD hits on single muons"     << std::endl;
   LOG_TEST << "=======================================================" << std::endl;
 
-
   TVector3 direction;
 
   for ( int eastwest=-1; eastwest<=+1; eastwest+=2 ) {
@@ -45,10 +44,21 @@ void unit_test_epd_hits() {
       LOG_TEST << "eastwest    = " << eastwest << std::endl;
       LOG_TEST << "supersector = " << supersector << std::endl;
       LOG_TEST << "tilenumber  = " << tilenumber << std::endl;
-    
-      direction = epd.TileCenter( supersector, tilenumber, eastwest );
 
-      direction.Print();
+      /* from g2t_volume_id
+	 " EPD volume_id "                                                                                                                   
+	 " 100,000 : east or west "                                                                                                          
+	 "   1,000 : Position clock wise, 1 to 12 "                                                                                          
+	 "      10 : Tile number 1 to 31, refer EPD Drupal page"                                                                             
+	 "       1 : 1 T1 trap or T2 thin; 0 T1 triangular or T2 thick  
+      */
+
+      int expected_id = 
+	100000 * (3+eastwest)/2  +
+	  1000 * supersector     +
+	    10 * tilenumber      ;
+      // we cannot target further...	
+      direction = epd.TileCenter( supersector, tilenumber, eastwest );
      		      
       throw_muon_in_epd_tile( direction.Eta(), direction.Phi()*180.0/TMath::Pi() );
   
@@ -67,11 +77,11 @@ void unit_test_epd_hits() {
        	  }
        	  return result;
        	});
-       check_track( "There should not be a stop vertex in the EPD",  [=](const g2t_track_st* t){
+      check_track( "There should not be a stop vertex in the EPD",   [=](const g2t_track_st* t){
        	  std::string result = TODO;
        	  return result;
        	});
-       check_track( "The start vertex should be on the z-axis",       [=](const g2t_track_st* t){
+      check_track( "The start vertex should be on the z-axis",       [=](const g2t_track_st* t){
        	  std::string result = FAIL;
        	  int istart = t->start_vertex_p;
 	  
@@ -103,81 +113,79 @@ void unit_test_epd_hits() {
 	  
        	  return result;
        	});
-       check_track( "The track should be primary",                    [=](const g2t_track_st* t){
+      check_track( "The track should be primary",                    [=](const g2t_track_st* t){
        	  std::string result          = PASS;
        	  if ( t->eta ==-999 ) result = FAIL;
        	  return result;
        	});
-       check_track( Form("The track should have an eta=%f",_eta),     [=](const g2t_track_st* t){
+      check_track( Form("The track should have an eta=%f",_eta),     [=](const g2t_track_st* t){
        	  double delta = abs(t->eta-_eta);	
        	  return abs(t->eta-_eta)<1E-5 ?PASS:FAIL;      
        	});
-       check_track( "Expect 1 hit in the dev2021 geometry",          [=](const g2t_track_st* t){
+      check_track( "Expect 1 hit in the dev2021 geometry",           [=](const g2t_track_st* t){
        	  int n = t->n_epd_hit;
        	  std::string  result = FAIL;
        	  if ( n==1 )  result = PASS;
        	  result = Form(" n=%i ",n) + result;
        	  return result;
        	}); 
+      for ( int i=0;i<hit_table->GetNRows();i++ ) {
 
-
-       LOG_TEST << "GetNRows = " << hit_table->GetNRows() << std::endl;
-
-       for ( int i=0;i<hit_table->GetNRows();i++ ) {
-
-	   	auto hit = static_cast<const g2t_epd_hit_st*>( hit_table->At(i) );
-		if ( 0==hit ) continue;     // skip null entries
-		if ( 1!=hit->track_p ) continue; // not interested in secondaries
-
-		check_epd_hit( "Print the hit...", hit, [=](const g2t_epd_hit_st* h) {
-		    LOG_TEST << "id=" << h->id 
-			     << " track_p=" << h->track_p 
-        		     << " volume_id=" << h->volume_id 
-			     << " de="  << h->de 
+	auto hit = static_cast<const g2t_epd_hit_st*>( hit_table->At(i) );
+	if ( 0==hit ) continue;     // skip null entries
+	if ( 1!=hit->track_p ) continue; // not interested in secondaries
+	
+	check_epd_hit( "Print the hit...", hit, [=](const g2t_epd_hit_st* h) {
+	    LOG_TEST << "id=" << h->id 
+		     << " track_p=" << h->track_p 
+		     << " volume_id=" << h->volume_id 
+		     << " de="  << h->de 
 			     << std::endl;
-		    return PASS;
-		  });
-		check_epd_hit( "The hit should have a nonzero volume_id",hit,[=](const g2t_epd_hit_st* h) {
-		    std::string result = FAIL;
-		    if ( h->volume_id > 0 ) result = PASS;
-		    result = Form(" volumeId=%i ", h->volume_id ) + result;
-		    return result;
-		  });
-		check_epd_hit( "The decoded side from volume_id should be 1 or 2 (E or W)",hit,[=](const g2t_epd_hit_st* h) {
-		    std::string result = FAIL;
-		    int ew = h->volume_id / 100000;
-		    if ( ew == 1 || ew == 2 ) result = PASS;
-		    result = Form("(eastwest=%i) ",ew) + result;
-		    return result;
-		  });
-		check_epd_hit( "The decoded position from volume_id should be 1..12",hit,[=](const g2t_epd_hit_st* h) {
-		    std::string result = FAIL;
-		    int ew = h->volume_id % 100000 / 1000;
-		    if ( ew >= 1 && ew <= 12 ) result = PASS;
-		    result = Form("(position=%i) ",ew) + result;
-		    return result;
-		  });
-		check_epd_hit( "The decoded tile from volume_id should be 1..31",hit,[=](const g2t_epd_hit_st* h) {
-		    std::string result = FAIL;
-		    int ew = h->volume_id % 1000 / 10;
-		    if ( ew >= 1 && ew <= 31 ) result = PASS;
-		    result = Form("(tile=%i) ",ew) + result;
-		    return result;
-		  });
-		check_epd_hit( "The decoded inner/outer tile from volume_id should be 1..2",hit,[=](const g2t_epd_hit_st* h) {
-		    std::string result = FAIL;
-		    int ew = h->volume_id % 10;
-		    if ( ew == 1 || ew == 2 ) result = PASS;
-		    result = Form("(in/out=%i) ",ew) + result;
-		    return result;
-		  });
+	    return PASS;
+	  });
 
-		      
-      //  	check_epd_hit( "The hit should have an energy deposit > 0",hit,[=](const g2t_epd_hit_st* h) {
-      //  	    std::string result = FAIL;
-      // 	    if ( h->de > 0 ) result = PASS;
-      // 	    return result;
-      // 	  });
+	check_epd_hit( "The hit should have a nonzero volume_id",hit,[=](const g2t_epd_hit_st* h) {
+	    std::string result = FAIL;
+	    if ( h->volume_id > 0 ) result = PASS;
+	    result = Form(" volumeId=%i ", h->volume_id ) + result;
+	    return result;
+	  });
+	check_epd_hit( "The decoded side from volume_id should be 1 or 2 (E or W)",hit,[=](const g2t_epd_hit_st* h) {
+	    std::string result = FAIL;
+	    int ew = h->volume_id / 100000;
+	    if ( ew == 1 || ew == 2 ) result = PASS;
+	    result = Form("(eastwest=%i) ",ew) + result;
+	    return result;
+	  });
+	check_epd_hit( "The decoded position from volume_id should be 1..12",hit,[=](const g2t_epd_hit_st* h) {
+	    std::string result = FAIL;
+	    int ew = h->volume_id % 100000 / 1000;
+	    if ( ew >= 1 && ew <= 12 ) result = PASS;
+	    result = Form("(position=%i) ",ew) + result;
+	    return result;
+	  });
+	check_epd_hit( "The decoded tile from volume_id should be 1..31",hit,[=](const g2t_epd_hit_st* h) {
+	    std::string result = FAIL;
+	    int ew = h->volume_id % 1000 / 10;
+	    if ( ew >= 1 && ew <= 31 ) result = PASS;
+	    result = Form("(tile=%i) ",ew) + result;
+	    return result;
+	  });
+	check_epd_hit( "The decoded tile shape from volume_id should be 0..1",hit,[=](const g2t_epd_hit_st* h) {
+	    std::string result = FAIL;
+	    int ew = h->volume_id % 10;
+	    if ( ew == 1 || ew == 0 ) result = PASS;
+	    result = Form("(in/out=%i) ",ew) + result;
+	    return result;
+	  });
+	check_epd_hit( Form("The volume_id should be %i or %i",expected_id,expected_id+1),hit,[=](const g2t_epd_hit_st* h) {
+	    std::string result = FAIL;
+	    int ew = h->volume_id;
+	    if      ( ew == expected_id   ) result=PASS;
+	    else if ( ew == expected_id+1 ) result=PASS;
+	    result = Form("(expected=%i (or+1) volumeId=%i eta=%f phi=%f) ",expected_id,ew,_eta,_phid) + result;
+	    return result;
+	  });
 	
        }
       
@@ -186,7 +194,5 @@ void unit_test_epd_hits() {
     }
 
   }
-
-
 
 }

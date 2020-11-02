@@ -54,26 +54,6 @@ void throw_muon_in_tpc_sector( int sectorid, int charge = 1 ) {
   assert(vertex_table);
 
 }
-// void throw_muon_in_btof_tray( int trayid, int east, int charge = 1 ) {
-//   const double sectors[] = { 
-//     60.0, 30.0, 0.0, 330.0, 300.0, 270., 240.0, 210.0, 180.0, 150.0, 120.0, 90.0,
-//     120.0, 150.0, 180.0, 210.0, 240.0, 270.0, 300.0, 330.0, 0.0, 30.0, 60.0, 90.0
-//   };
-//   double eta = (sectorid<=12) ? 0.5 : -0.5;
-//   _eta = eta;
-//   double phid = sectors[sectorid-1];
-//   _phid = phid; 
-//   throw_muon( eta, phid, 500.0, charge ); // energetic
-
-//   auto* chain = StMaker::GetChain();
-//   vertex_table = dynamic_cast<TTable*>( chain->GetDataSet("g2t_vertex")  );
-//   track_table  = dynamic_cast<TTable*>( chain->GetDataSet("g2t_track")   );
-//   hit_table    = dynamic_cast<TTable*>( chain->GetDataSet("g2t_tfr_hit") ) ;
-//   hit_table->Print(0,1);
-
-//   assert(vertex_table);
-
-// }
 //______________________________________________________________________
 void unit_test_btof_hits( int longtest=0 ) {
 
@@ -209,47 +189,46 @@ void unit_test_btof_hits( int longtest=0 ) {
 		   << std::endl;
 	  return PASS;
 	});
-
-      check_ctf_hit( "The hit should have a nonzero volume_id",hit,[=](const g2t_ctf_hit_st* h) {
+      check_ctf_hit( "The hit should have a nonzero volume_id",                    hit,[=](const g2t_ctf_hit_st* h) {
        	  std::string result = FAIL;
           if ( h->volume_id > 0 ) result = PASS;
      	  result = Form("id=%i vid=%i de=%f ds=%f ",h->id,h->volume_id,h->de,h->ds) + result;
      	  return result;
      	});
-      check_ctf_hit( "The hit should have an energy deposit > 0",hit,[=](const g2t_ctf_hit_st* h) {
+      check_ctf_hit( "The hit should have an energy deposit > 0",                  hit,[=](const g2t_ctf_hit_st* h) {
        	  std::string result = FAIL; // undetermined
 	  if       ( h->de > 0 ) result = PASS;
 	  return result;
 	});
-      check_ctf_hit( "The hit should have a step size > 0",hit,[=](const g2t_ctf_hit_st* h) {
+      check_ctf_hit( "The hit should have a step size > 0",                        hit,[=](const g2t_ctf_hit_st* h) {
 	  std::string result = FAIL;
 	  if ( h->ds > 0 ) result = PASS;
 	  return result;
 	});
-      check_ctf_hit( "The hit should have a path length > 0",hit,[=](const g2t_ctf_hit_st* h) {
+      check_ctf_hit( "The hit should have a path length > 0",                      hit,[=](const g2t_ctf_hit_st* h) {
 	  std::string result = FAIL;
 	  if ( h->s_track > 0 ) result = PASS;
 	  return result;
 	});
-      check_ctf_hit( "The hit should have time-of-flight > 0",hit,[=](const g2t_ctf_hit_st* h) {
+      check_ctf_hit( "The hit should have time-of-flight > 0",                     hit,[=](const g2t_ctf_hit_st* h) {
 	  std::string result = FAIL;
 	  if ( h->tof > 0 ) result = PASS;
 	  result = Form(" tof=%f ",h->tof) + result;
 	  return result;
 	});
-      check_ctf_hit( "The hit should have a nonzero momentum",hit,[=](const g2t_ctf_hit_st* h) {
+      check_ctf_hit( "The hit should have a nonzero momentum",                     hit,[=](const g2t_ctf_hit_st* h) {
 	  std::string result = FAIL;
 	  if ( h->p[0] != 0 ) result = PASS;
 	  if ( h->p[1] != 0 ) result = PASS;
 	  if ( h->p[2] != 0 ) result = PASS;
 	  return result;
 	});
-      check_ctf_hit( "The hit should have a length > 0",hit,[=](const g2t_ctf_hit_st* h) {
+      check_ctf_hit( "The hit should have a length > 0",                           hit,[=](const g2t_ctf_hit_st* h) {
 	  std::string result = FAIL;
 	  if ( h->s_track > 0 ) result = PASS;
 	  return result;
 	});
-      check_ctf_hit( "The track length and tof*c agree to w/in 0.15 mm ",hit,[=](const g2t_ctf_hit_st* h) {
+      check_ctf_hit( "The track length and tof*c agree to w/in 0.15 mm ",          hit,[=](const g2t_ctf_hit_st* h) {
 	  // There should be some tolerance on this, b/c of roundoff error at each tracking step
 	  std::string result = FAIL;
 	  double c_tof = 2.99792458E10 /* cm/s */ * h->tof;
@@ -259,22 +238,21 @@ void unit_test_btof_hits( int longtest=0 ) {
 	  result = Form("c_tof=%f cm  strack=%f cm diff=%f cm ",c_tof,s_trk,diff) + result;
 	  return result;
 	});
-
-      check_ctf_hit( "The hit be at a radius > 207.8",hit,[=](const g2t_ctf_hit_st* h) {
+      check_ctf_hit( "The hit be at a radius > 207.8",                             hit,[=](const g2t_ctf_hit_st* h) {
 	  std::string result = FAIL;
 	  double R2 = h->x[0]*h->x[0] + h->x[1]*h->x[1];
 	  if ( R2 > 207.8*207.8 ) result = PASS;
 	  result = Form(" R=%f ",sqrt(R2)) + result;
 	  return result;
 	});
-      check_ctf_hit( "The hit be at a radius < 221.0",hit,[=](const g2t_ctf_hit_st* h) {
+      check_ctf_hit( "The hit be at a radius < 221.0",                             hit,[=](const g2t_ctf_hit_st* h) {
 	  std::string result = FAIL;
 	  double R2 = h->x[0]*h->x[0] + h->x[1]*h->x[1];
 	  if ( R2 < 221.0*221.0 ) result = PASS;
 	  result = Form(" R=%f ",sqrt(R2)) + result;
 	  return result;
 	});
-      check_ctf_hit( "The track length at the hit should be >= radius at the hit",hit,[=](const g2t_ctf_hit_st* h) {
+      check_ctf_hit( "The track length at the hit should be >= radius at the hit", hit,[=](const g2t_ctf_hit_st* h) {
 	  std::string result = FAIL;
 	  double R2 = h->x[0]*h->x[0] + h->x[1]*h->x[1];
 	  double L2 = h->s_track * h->s_track;
@@ -282,14 +260,37 @@ void unit_test_btof_hits( int longtest=0 ) {
 	  result = Form(" R=%f L=%f",sqrt(R2),sqrt(L2)) + result;
 	  return result;
 	});
-
-      check_ctf_hit( "Track's momentum at hit should be < initial value",hit,    [=](const g2t_ctf_hit_st* h){
+      check_ctf_hit( "Track's momentum at hit should be < initial value",          hit,[=](const g2t_ctf_hit_st* h) {
 	  std::string result = FAIL;
 	  double px = h->p[0];
 	  double py = h->p[1];
 	  double pz = h->p[2];
 	  double p2 = px*px + py*py + pz*pz;
 	  if ( p2 < _pmom*_pmom ) result = PASS;
+	  return result;
+	});
+      check_ctf_hit( "BTOF half should decode as 1..2",                            hit,[=](const g2t_ctf_hit_st* h) {
+       	  std::string result = FAIL;
+	  int half = h->volume_id / 100000;
+	  if ( half == 1 || half == 2) result = PASS;
+	  return result;
+	});
+      check_ctf_hit( "BTOF sector/tray should decode as 1..60",                    hit,[=](const g2t_ctf_hit_st* h) {
+       	  std::string result = FAIL;
+	  int sector = h->volume_id % 100000 / 1000;
+	  if ( sector >= 1 && sector <= 60 ) result = PASS;
+	  return result;
+	});
+      check_ctf_hit( "BTOF module should decode as 1..33",                         hit,[=](const g2t_ctf_hit_st* h) {
+       	  std::string result = FAIL;
+	  int module = h->volume_id % 1000 / 10;
+	  if ( module >= 1 && module <= 33 ) result = PASS;
+	  return result;
+	});
+      check_ctf_hit( "BTOF layer should decode as 1..6",                           hit,[=](const g2t_ctf_hit_st* h) {
+       	  std::string result = FAIL;
+	  int layer = h->volume_id % 10;
+	  if ( layer >=1 && layer <= 6 ) result = PASS;
 	  return result;
 	});
     }
