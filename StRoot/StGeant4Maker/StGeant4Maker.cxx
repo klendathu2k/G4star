@@ -150,7 +150,6 @@ struct SD2Table_EPD {
 
   } 
 } sd2table_epd; 
-
 // Copy to sTGC and FST structures
 struct SD2Table_STGC {
   void operator()( StSensitiveDetector* sd, St_g2t_fts_hit* table, St_g2t_track* track ) {
@@ -212,8 +211,6 @@ struct SD2Table_FST {
     }
   } 
 } sd2table_fst; 
-
-
 // Generic EMC copy (no increment on track hits)
 struct SD2Table_EMC {
   void operator()( StSensitiveDetector* sd, St_g2t_emc_hit* table, St_g2t_track* track ) {
@@ -254,9 +251,6 @@ struct SD2Table_EMC {
     }
   } 
 } sd2table_emc; 
-
-
-
 struct SD2Table_CTF {
   void operator()( StSensitiveDetector* sd, St_g2t_ctf_hit* table, St_g2t_track* track ) {
     
@@ -295,8 +289,6 @@ struct SD2Table_CTF {
     }
   } 
 } sd2table_ctf; 
-
-
 struct SD2Table_VPD {
   void operator()( StSensitiveDetector* sd, St_g2t_vpd_hit* table, St_g2t_track* track ) {
     
@@ -335,7 +327,6 @@ struct SD2Table_VPD {
     }
   } 
 } sd2table_vpd; 
-
 struct SD2Table_MTD {
   void operator()( StSensitiveDetector* sd, St_g2t_mtd_hit* table, St_g2t_track* track ) {
     
@@ -420,14 +411,9 @@ StGeant4Maker::StGeant4Maker( const char* nm ) :
   //  SetAttr( "G4VmcOpt:Process", "stepLimiter+specialCuts" ); // special process
   SetAttr( "G4VmcOpt:Process", "stepLimiter+specialControls+specialCuts+stackPopper" ); // special process
   //  SetAttr( "G4VmcOpt:Process", "stepLimiter+stackPopper" ); // special process
-
   SetAttr( "AgMLOpt:TopVolume", "HALL" );
-
   SetAttr( "Stepping:Punchout:Stop", 1 ); // 0=no action, 1=track stopped, 2=track stopped and re-injected            
-
   SetAttr( "Random:G4", 12345); 
-
-
   SetAttr( "field", -5.0 );
 
 
