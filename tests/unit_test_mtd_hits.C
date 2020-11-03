@@ -299,7 +299,6 @@ void unit_test_mtd_hits( int longtest=0, double _pt=25.0 ) {
 
   }
 
-#if 0
   std::cout << std::endl << std::endl;
 
   // Print out energy deposition
@@ -408,7 +407,7 @@ void unit_test_mtd_hits( int longtest=0, double _pt=25.0 ) {
     }
 
   }
-#endif
+
 
 }
 //___________________________________________________________________
