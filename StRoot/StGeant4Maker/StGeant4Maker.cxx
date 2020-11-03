@@ -380,8 +380,8 @@ static StGeant4Maker* _g4maker = 0;
 //________________________________________________________________________________________________
 StarParticleData &particleData = StarParticleData::instance();
 //________________________________________________________________________________________________
-StarVMCApplication::StarVMCApplication( const Char_t *name, const Char_t *title ) : TVirtualMCApplication(name,title) {
-
+StarVMCApplication::StarVMCApplication( const Char_t *name, const Char_t *title, double zmax, double rmax ) : 
+  TVirtualMCApplication(name,title),mZmax(zmax),mRmax(rmax)  {
 }
 //________________________________________________________________________________________________
 StGeant4Maker::StGeant4Maker( const char* nm ) : 
@@ -415,6 +415,9 @@ StGeant4Maker::StGeant4Maker( const char* nm ) :
   SetAttr( "Stepping:Punchout:Stop", 1 ); // 0=no action, 1=track stopped, 2=track stopped and re-injected            
   SetAttr( "Random:G4", 12345); 
   SetAttr( "field", -5.0 );
+
+  SetAttr( "Application:Zmax", DBL_MAX );
+  SetAttr( "Application:Rmax", DBL_MAX );
 
 
   // Setup default cuts
@@ -462,7 +465,7 @@ int StGeant4Maker::Init() {
   InitGeom();
 
   LOG_INFO << "Create VMC application" << endm;
-  mVmcApplication = new StarVMCApplication();
+  mVmcApplication = new StarVMCApplication("g4star","STAR G4/VMC",DAttr("Application:Zmax"),DAttr("Application:Rmax"));
 
   LOG_INFO << "Create VMC run configuration" << endm;
   mRunConfig = new TG4RunConfiguration( SAttr("G4VmcOpt:Nav"), SAttr("G4VmcOpt:Phys" ), SAttr("G4VmcOpt:Process") );
