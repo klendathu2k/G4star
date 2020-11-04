@@ -49,7 +49,6 @@ void throw_muon_in_tpc_sector( int sectorid, int charge = 1 ) {
   vertex_table = dynamic_cast<TTable*>( chain->GetDataSet("g2t_vertex")  );
   track_table  = dynamic_cast<TTable*>( chain->GetDataSet("g2t_track")   );
   hit_table    = dynamic_cast<TTable*>( chain->GetDataSet("g2t_tfr_hit") ) ;
-  hit_table->Print(0,1);
 
   assert(vertex_table);
 
