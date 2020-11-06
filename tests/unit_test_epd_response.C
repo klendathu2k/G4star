@@ -18,7 +18,7 @@ void throw_muon_in_epd_tile( double eta, double phid, int charge = 1 ) {
 }
 
 //___________________________________________________________________
-void unit_test_epd_response( int nevents=1000 ) {
+void unit_test_epd_response( int nevents=5000 ) {
 
   gROOT->ProcessLine("initChain();");
 
@@ -75,20 +75,26 @@ void unit_test_epd_response( int nevents=1000 ) {
   };
 
   TFile* file = TFile::Open("epd.response.root","recreate");
-  TH1F* hOneMip = new TH1F("hOneMip","Single muon incident @ 500 MeV; dE [MeV]",100,0.,10.0);
-  TH1F* hTwoMip = new TH1F("hTwoMip","Two muons incident @ 500 MeV; dE [MeV]",100,0.,10.0);
-  TH1F* hRedMip = new TH1F("hRedMip","Three muons incident @ 500 MeV; dE [MeV]",100,0.,10.0);
-  TH1F* hBluMip = new TH1F("hBluMip","Four muons incident @ 500 MeV; dE [MeV]",100,0.,10.0);
+  TH1F* hOneMip = new TH1F("hOneMip","Single muon incident @ 500 MeV; dE [MeV]",100,0.,10.0);  hOneMip->SetLineColor(6);
+  TH1F* hTwoMip = new TH1F("hTwoMip","Two muons incident @ 500 MeV; dE [MeV]",100,0.,10.0);    hTwoMip->SetLineColor(3);
+  TH1F* hRedMip = new TH1F("hRedMip","Three muons incident @ 500 MeV; dE [MeV]",100,0.,10.0);  hRedMip->SetLineColor(2);
+  TH1F* hBluMip = new TH1F("hBluMip","Four muons incident @ 500 MeV; dE [MeV]",100,0.,10.0);   hBluMip->SetLineColor(4);
+  TH1F* hSumMip = new TH1F("hSumMip","Four muons incident @ 500 MeV; dE [MeV]",100,0.,10.0);
 
   for ( int ievent=0;ievent<nevents;ievent++ ) {
-    throw_particle( "mu+", 1 );
-    hOneMip->Fill( sumHits( "g2t_epd_hit") );
+    double sum = 0;
+    throw_particle( "mu+", 1 );    
+    hOneMip->Fill( sum = sumHits( "g2t_epd_hit") );
+    hSumMip->Fill( sum );
     throw_particle( "mu+", 2 );
-    hTwoMip->Fill( sumHits( "g2t_epd_hit") );
+    hTwoMip->Fill( sum = sumHits( "g2t_epd_hit") );
+    hSumMip->Fill( sum );
     throw_particle( "mu+", 3 );
-    hRedMip->Fill( sumHits( "g2t_epd_hit") );
+    hRedMip->Fill( sum = sumHits( "g2t_epd_hit") );
+    hSumMip->Fill( sum );
     throw_particle( "mu+", 4 );
-    hBluMip->Fill( sumHits( "g2t_epd_hit") );
+    hBluMip->Fill( sun = sumHits( "g2t_epd_hit") );
+    hSumMip->Fill( sum );
   }
 
   file->Write();
