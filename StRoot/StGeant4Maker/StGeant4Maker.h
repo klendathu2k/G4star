@@ -35,7 +35,7 @@ public:
 //______________________________________________________________________________________
 class StarVMCApplication : public TVirtualMCApplication {
 public:
-  StarVMCApplication( const Char_t *name = "starsim", const Char_t *title="STAR VMC simulation" );
+  StarVMCApplication( const Char_t *name = "starsim", const Char_t *title="STAR VMC simulation", double zmax=DBL_MAX, double rmax=DBL_MAX );
  ~StarVMCApplication(){ /* nada */ };
 
   /// Geometry construction is the responsability of the STAR chain
@@ -82,10 +82,10 @@ public:
   virtual void FinishEvent();
 
   /// Define maximum radius for tracking (optional)
-  virtual Double_t TrackingRmax() const { return DBL_MAX; }
+  virtual Double_t TrackingRmax() const { return mRmax; }
 
   /// Define maximum z for tracking (optional)
-  virtual Double_t TrackingZmax() const { return DBL_MAX; }
+  virtual Double_t TrackingZmax() const { return mZmax; }
 
   /// Calculate user field \a b at point \a x
   virtual void Field(const Double_t* x, Double_t* b) const { StarMagField::Instance()->BField(x,b); }
@@ -95,6 +95,9 @@ public:
 
 private:
 protected:
+
+  double mZmax;
+  double mRmax;
 
   ClassDef(StarVMCApplication, 1);
 

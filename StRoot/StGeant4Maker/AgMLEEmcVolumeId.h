@@ -49,16 +49,16 @@ public:
                  +     10 *    eta
                  +           depth;
 
-    LOG_INFO << Form("AgML EEmc VolumdId = wheel=%i section=%i idx=%i phi30d=%i subsection=%i %i %i %i %i",
-		     numbv[0],
-		     numbv[1],
-		     numbv[2],
-		     phi30d,
-		     numbv[3],
-		     numbv[4],
-		     numbv[5], 
-		     numbv[6],
-		     volumeid ) << endm;    
+    // LOG_INFO << Form("AgML EEmc VolumdId = wheel=%i section=%i idx=%i phi30d=%i subsection=%i %i %i %i %i",
+    // 		     numbv[0],
+    // 		     numbv[1],
+    // 		     numbv[2],
+    // 		     phi30d,
+    // 		     numbv[3],
+    // 		     numbv[4],
+    // 		     numbv[5], 
+    // 		     numbv[6],
+    // 		     volumeid ) << endm;    
 
 
     return volumeid;
