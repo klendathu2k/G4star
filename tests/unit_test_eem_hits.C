@@ -2,8 +2,6 @@
 
 #include "StEEmcUtil/EEmcGeom/EEmcGeomSimple.h"
 
-const EEmcGeomSimple& eemc = EEmcGeomSimple::Instance();
-
 const int kEEmcNumDepths     =  5;
 const int kEEmcNumSectors    = 12; 
 const int kEEmcNumSubSectors =  5; 
@@ -76,6 +74,13 @@ EEmcVolumeId decode_eemc_volume_id( const int _volumeId ) {
 void unit_test_eem_hits() {
 
   gROOT->ProcessLine("initChain();");
+
+  if ( 0 == hasRuntimeArg("eemcutil") ) {
+    std::cout << "Please re-run with --eemcutil option" << std::endl;
+    assert(0);
+  }
+
+  const EEmcGeomSimple& eemc = EEmcGeomSimple::Instance();
 
   auto* pm = dynamic_cast<StarPrimaryMaker*>( StMaker::GetChain()->GetMaker("PrimaryMaker") );
   pm->SetVertex(0.,0.,0.);
