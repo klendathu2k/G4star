@@ -24,6 +24,11 @@ void unit_test_epd_hits() {
 
   gROOT->ProcessLine("initChain();");
 
+  if ( 0 == hasRuntimeArg("epdutil") ) {
+    std::cout << "Please re-run with --epdutil option" << std::endl;
+    assert(0);
+  }
+
   StEpdGeom epd;
 
   auto* pm = dynamic_cast<StarPrimaryMaker*>( StMaker::GetChain()->GetMaker("PrimaryMaker") );

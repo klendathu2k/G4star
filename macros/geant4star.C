@@ -32,6 +32,19 @@ struct __Fini {
   }
 } __fini__;
 
+bool hasRuntimeArg( const char* arg_ ) {
+  bool result = false;
+  for ( int i=0; i<gApplication->Argc();i++ ) {
+    TString arg = gApplication->Argv(i);
+    arg.ReplaceAll("--","");
+    if ( arg.Contains(arg_) ) {
+      result = true;
+      break;
+    }
+  }
+  return result;
+}
+
 void loadStar(const Char_t *mytag="dev2021", Bool_t agml = true  )
 {
 

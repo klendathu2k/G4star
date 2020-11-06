@@ -93,7 +93,7 @@ void unit_test_epd_response( int nevents=5000 ) {
     hRedMip->Fill( sum = sumHits( "g2t_epd_hit") );
     hSumMip->Fill( sum );
     throw_particle( "mu+", 4 );
-    hBluMip->Fill( sun = sumHits( "g2t_epd_hit") );
+    hBluMip->Fill( sum = sumHits( "g2t_epd_hit") );
     hSumMip->Fill( sum );
   }
 

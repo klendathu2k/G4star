@@ -54,7 +54,7 @@ void throw_muon_in_tpc_sector( int sectorid, int charge = 1 ) {
 
 }
 //______________________________________________________________________
-void unit_test_btof_hits( int longtest=10 ) {
+void unit_test_btof_hits( int longtest=0 ) {
 
   gROOT->ProcessLine("initChain();");
 
