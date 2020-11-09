@@ -2061,13 +2061,14 @@ void unit_test_fcs_hits() {
       
       auto* chain = StMaker::GetChain();  
       {
+	const double pz = 10.0;
 	auto* _kine = dynamic_cast<StarKinematics*>( chain->GetMaker("StarKine") );                                                                                                                                                                                                       
 	auto* particle = _kine->AddParticle( "mu+" );                                                                                                                                                                                                                                      
 	particle->SetPx(   0. );                                                                                                                                                                                                                                                     
 	particle->SetPy(   0. );                                                                                                                                                                                                                                                     
-	particle->SetPz( 250. );                                                                                                                                                                                                                                                     
+	particle->SetPz( pz );                                                                                                                                                                                                                                                     
 	double mass = particle->GetMass();                                                                                                                                                                                                                                                
-	double ener = sqrt( 250.*250. + mass*mass );                                                                                                                                                                                                                                
+	double ener = sqrt( pz*pz + mass*mass );                                                                                                                                                                                                                                
 	particle->SetEnergy(ener);                         
 	chain->Clear();
 	chain->Make();
