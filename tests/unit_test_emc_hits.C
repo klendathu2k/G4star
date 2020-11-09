@@ -173,7 +173,7 @@ void unit_test_emc_hits() {
 	    int volId = h->volume_id;
 	    int tow  = (h->volume_id % 100000) / 100;
 	    std::string result = FAIL;
-	    if ( tow>=1 && tow<= 40 ) result = PASS;
+	    if ( tow>=1 && tow<= 60 ) result = PASS;
 	    result = Form("phibin=%i ",tow) + result;
 	    return result;		
 	  });
