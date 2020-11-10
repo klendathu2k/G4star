@@ -2162,7 +2162,7 @@ void unit_test_fcs_hits() {
     //   	return result;
     //    });
       
-      check_emc_hit( Form("Expect the most energetic hit to have volumeId=%i",cell.volumeId), [=](const g2t_emc_hit_st* h){
+      check_emc_hit( "The hit has the expected volume ID", [=](const g2t_emc_hit_st* h){
 	int volumeId = h->volume_id;
 	int expected = cell.volumeId;
 	int nhits = hit_table->GetNRows();
@@ -2178,8 +2178,9 @@ void unit_test_fcs_hits() {
 	}
 	std::string result = PASS;
 	if ( actual != expected ) {
-	  result = Form(" got volumeId=%i ", actual ) + FAIL;
+	  result = FAIL;
 	}
+	result = Form("(expect=%i actual=%i)",expected,actual) + result;
 	return result;
       });
 

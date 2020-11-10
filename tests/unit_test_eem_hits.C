@@ -229,36 +229,36 @@ void unit_test_eem_hits() {
 	    result = Form(" ... sector=%i ", sector ) + result;
 	    return result;
 	  });
-	check_emc_hit( Form("The sector of the hit should be %i",sector),hit,[=](const g2t_emc_hit_st* h) {
+	check_emc_hit( "The hit has the expected sector",hit,[=](const g2t_emc_hit_st* h) {
 	    std::string result = FAIL;
 	    int volumeId = h->volume_id;
 	    EEmcVolumeId id = decode_eemc_volume_id( volumeId );
 	    if ( sector ==id.sector ) result = PASS;
-	    result = Form(" ... sector=%i ", id.sector ) + result;
+	    result = Form(" expect %i actual %i ", id.sector,sector ) + result;
 	    return result;
 	  });
-	check_emc_hit( Form("The sub-sector of the hit should be %i",subsector),hit,[=](const g2t_emc_hit_st* h) {
+	check_emc_hit( "The hit has the expected subsector",hit,[=](const g2t_emc_hit_st* h) {
 	    std::string result = FAIL;
 	    int volumeId = h->volume_id;
 	    EEmcVolumeId id = decode_eemc_volume_id( volumeId );
 	    if ( id.subsector == subsector ) result = PASS;
-	    result = Form(" ... subsector=%i ", id.subsector ) + result;
+	    result = Form(" expect %i actual %i ", id.subsector,subsector ) + result;
 	    return result;
 	  });
-	check_emc_hit( Form("The phibin of the hit should be %i",phibin),hit,[=](const g2t_emc_hit_st* h) {
+	check_emc_hit( "The hit has the expected phibin",hit,[=](const g2t_emc_hit_st* h) {
 	    std::string result = FAIL;
 	    int volumeId = h->volume_id;
 	    EEmcVolumeId id = decode_eemc_volume_id( volumeId );
 	    if ( id.phibin == phibin ) result = PASS;
-	    result = Form(" ... phibin=%i ", id.phibin ) + result;
+	    result = Form(" expect %i actual %i ", id.phibin, phibin ) + result;
 	    return result;
 	  });
-	check_emc_hit( Form("The etabin of the hit should be %i",etabin),hit,[=](const g2t_emc_hit_st* h) {
+	check_emc_hit( "The hit has the expected eta bin",hit,[=](const g2t_emc_hit_st* h) {
 	    std::string result = FAIL;
 	    int volumeId = h->volume_id;
 	    EEmcVolumeId id = decode_eemc_volume_id( volumeId );
 	    if ( etabin == id.etabin ) result = PASS;
-	    result = Form(" ... etabin=%i ", id.etabin ) + result;
+	    result = Form(" expect %i actual %i ", id.etabin, etabin ) + result;
 	    return result;
 	  });
 	check_emc_hit( "The depth of the hit should be 1-5",hit,[=](const g2t_emc_hit_st* h) {

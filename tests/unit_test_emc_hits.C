@@ -193,7 +193,7 @@ void unit_test_emc_hits() {
 	    result = Form("super layer=%i ",tow) + result;
 	    return result;		
 	  });
-	check_emc_hit( Form("Expected volume ID is %i (or %i)",cell.volumeId,cell.volumeId+1), hit, [=]( const g2t_emc_hit_st* h) {
+	check_emc_hit( "Hit has the expected volume ID", hit, [=]( const g2t_emc_hit_st* h) {
 	    std::string result = FAIL;
 	    if ( cell.volumeId == h->volume_id || cell.volumeId+1 == h->volume_id ) result = PASS;
 	    result = Form(" got volume id %i expect %i or %i ",h->volume_id,cell.volumeId,cell.volumeId+1) + result;
