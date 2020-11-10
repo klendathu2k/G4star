@@ -123,10 +123,14 @@ void unit_test_emc_hits() {
 	  if ( t->eta ==-999 ) result = FAIL;
      	return result;
 	});
-      check_track( Form("The track should have an eta=%f",_eta),     [=](const g2t_track_st* t){
+      check_track( "The track should has the expected eta",          [=](const g2t_track_st* t){
 	  double delta = abs(t->eta-_eta);	
 	  return abs(t->eta-_eta)<1E-5 ?PASS:FAIL;      
 	});
+      // check_track( "The track should has the expected phi",          [=](const g2t_track_st* t){
+      // 	  double delta = abs(t->phi-_phi);	
+      // 	  return delta<1E-5 ?PASS:FAIL;      
+      // 	});
       check_track( "Expect 2 hits in the dev2021 geometry",          [=](const g2t_track_st* t){
 	  int n = t->n_emc_hit;
 	  std::string  result = FAIL;
@@ -139,15 +143,6 @@ void unit_test_emc_hits() {
 	auto hit = static_cast<const g2t_emc_hit_st*>( hit_table->At(i) );
 	if ( 0==hit ) continue;     // skip null entries
 	if ( 1!=hit->track_p ) continue; // not interested in secondaries
-
-	check_emc_hit( "Print the hit...", hit, [=](const g2t_emc_hit_st* h) {
-	    LOG_TEST << "id=" << h->id 
-		     << " track_p=" << h->track_p 
-		     << " volume_id=" << h->volume_id 
-		     << " de="  << h->de 
-		     << std::endl;
-	    return PASS;
-	  });
 	check_emc_hit( "Energy deposition is positive", hit, [=]( const g2t_emc_hit_st* hit ) {
 	    std::string result = FAIL;
 	    if ( hit->de > 0 ) result = PASS;
@@ -193,7 +188,8 @@ void unit_test_emc_hits() {
 	    result = Form("super layer=%i ",tow) + result;
 	    return result;		
 	  });
-	check_emc_hit( "Hit has the expected volume ID", hit, [=]( const g2t_emc_hit_st* h) {
+	std::string side = (eta>0)?"west":"east"; 
+	check_emc_hit( Form("Hit has the expected volume ID %s",side.c_str()), hit, [=]( const g2t_emc_hit_st* h) {
 	    std::string result = FAIL;
 	    if ( cell.volumeId == h->volume_id || cell.volumeId+1 == h->volume_id ) result = PASS;
 	    result = Form(" got volume id %i expect %i or %i ",h->volume_id,cell.volumeId,cell.volumeId+1) + result;
