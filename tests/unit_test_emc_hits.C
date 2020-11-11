@@ -76,7 +76,7 @@ void unit_test_emc_hits() {
       check_track( "The start vertex should be in the vertex table", [=](const g2t_track_st* t){
 	  std::string result = FAIL;
 	  int istart = t->start_vertex_p;
-	  const g2t_vertex_st* vertex = (istart>0) ? static_cast<const g2t_vertex_st*>( vertex_table->At(istart-1) ) : 0;
+	  const g2t_vertex_st* vertex = (istart>0 && istart <= vertex_table->GetNRows()) ? static_cast<const g2t_vertex_st*>( vertex_table->At(istart-1) ) : 0;
 	  if ( vertex ) {
 	    result = PASS;
 	  }
@@ -91,7 +91,7 @@ void unit_test_emc_hits() {
 	  int istart = t->start_vertex_p;
 	  
 	  const g2t_vertex_st* v = 0;
-	  if ( istart > 0 ) 
+	  if ( istart > 0 && istart <= vertex_table->GetNRows() ) 
 	    v = static_cast<const g2t_vertex_st*>( vertex_table->At(istart-1) );
 	  else 
 	    result = " no vertex in table " + result;
@@ -125,7 +125,11 @@ void unit_test_emc_hits() {
 	});
       check_track( "The track should has the expected eta",          [=](const g2t_track_st* t){
 	  double delta = abs(t->eta-_eta);	
-	  return abs(t->eta-_eta)<1E-5 ?PASS:FAIL;      
+	  std::string result = FAIL;
+	  if ( abs(t->eta-_eta)<1E-5 ) 
+	    result = PASS;
+	  result = Form(" expect %f got %f ", _eta, t->eta ) + result;
+	  return result;
 	});
       // check_track( "The track should has the expected phi",          [=](const g2t_track_st* t){
       // 	  double delta = abs(t->phi-_phi);	
