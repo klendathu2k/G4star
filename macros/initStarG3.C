@@ -71,6 +71,12 @@ void Kinematics()
 void initStarG3( const char* tag="dev2021", Int_t nevents=0, Int_t rngSeed=1234 )
 { 
 
+  // Add a few things to the include path
+  gSystem->AddIncludePath(" -IStRoot -Igeom -IStarVMC -IStarVMC/Geometry/macros -I.${STAR_HOST_SYS}/include ");
+  gEnv->SetValue("Logger.Colors","YES");   
+
+  gSystem->SetAclicMode(TSystem::kDebug);
+
   gROOT->ProcessLine(".L bfc.C");
   {
     TString simple = tag; simple += " geant gstar usexgeom agml ";
