@@ -2081,7 +2081,6 @@ void unit_test_fcs_hits() {
       else 
 	hit_table    = dynamic_cast<TTable*>( chain->GetDataSet("g2t_hca_hit") ) ;
       
-
       LOG_TEST << GIVEN << "a 500 GeV muon @ eta=" << cell.eta << " phi=" << cell.phi << " volume=" << cell.volumeId << std::endl;
 
       check_track( "A muon must have been processed by geant",       [=](const g2t_track_st* t){
@@ -2161,8 +2160,9 @@ void unit_test_fcs_hits() {
     //  	if ( t->n_pre_hit < 1 ) result = FAIL;
     //   	return result;
     //    });
+
       
-      check_emc_hit( "The hit has the expected volume ID", [=](const g2t_emc_hit_st* h){
+      check_emc_hit( Form("The hit has the expected volume ID %s",(dowcal)?"WCAL":"HCAL"), [=](const g2t_emc_hit_st* h){
 	int volumeId = h->volume_id;
 	int expected = cell.volumeId;
 	int nhits = hit_table->GetNRows();
