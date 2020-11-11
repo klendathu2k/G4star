@@ -27,7 +27,7 @@ std::vector<Cell> cells;
 //___________________________________________________________________
 void throw_muon_in_bemc_tower( double eta, double phid, int charge = 1 ) {
 
-  throw_muon( eta, phid, 50.0, charge ); // energetic
+  throw_muon( eta, phid, 10.0, charge ); // energetic
   _eta = eta;
   _phid = phid;
 
