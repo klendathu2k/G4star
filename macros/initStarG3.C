@@ -95,6 +95,8 @@ void initStarG3( const char* tag="dev2021", Int_t nevents=0, Int_t rngSeed=1234 
   gSystem->Load( "libMathMore.so"   );  
   gSystem->Load( "xgeometry.so"     );
 
+  gSystem->Load( "StEpdUtil.so" );
+
   // Setup RNG seed and map all ROOT TRandom here
   StarRandom::seed( rngSeed );
   StarRandom::capture();
