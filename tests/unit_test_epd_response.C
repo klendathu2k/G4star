@@ -1,4 +1,5 @@
 #include "tests/unit_tests.h"
+#include <TRandom.h>
 
 //___________________________________________________________________
 double _eta  = 0; 
@@ -36,11 +37,10 @@ void unit_test_epd_response( int nevents=5000 ) {
     assert(sf>0);
     float sum = 0.;    
     auto* table = dynamic_cast<TTable*>( chain->GetDataSet( name ) ) ;
-    if (table) 
-      table->Print(0,1);
+    if (0!=table) 
       for ( int i=0;i<table->GetNRows();i++ ){
 	const g2t_epd_hit_st*  hit = static_cast<const g2t_epd_hit_st*>( table->At(i) );
-	sum+=hit->de;	
+	if ( hit ) sum+=hit->de;	
       };   
     return 1000.0*sum;
   };
