@@ -72,7 +72,7 @@ void initStarG3( const char* tag="dev2021", Int_t nevents=0, Int_t rngSeed=1234 
 { 
 
   // Add a few things to the include path
-  gSystem->AddIncludePath(" -IStRoot -Igeom -IStarVMC -IStarVMC/Geometry/macros -I.${STAR_HOST_SYS}/include ");
+  gSystem->AddIncludePath(" -IStRoot -I${STAR}/StRoot -Igeom -IStarVMC -I${STAR}/StarVMC -IStarVMC/Geometry/macros -I.${STAR_HOST_SYS}/include ");
   gEnv->SetValue("Logger.Colors","YES");   
 
   gSystem->SetAclicMode(TSystem::kDebug);
