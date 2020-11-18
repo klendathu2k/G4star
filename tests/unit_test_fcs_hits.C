@@ -2061,13 +2061,14 @@ void unit_test_fcs_hits() {
       
       auto* chain = StMaker::GetChain();  
       {
+	const double pz = 10.0;
 	auto* _kine = dynamic_cast<StarKinematics*>( chain->GetMaker("StarKine") );                                                                                                                                                                                                       
 	auto* particle = _kine->AddParticle( "mu+" );                                                                                                                                                                                                                                      
 	particle->SetPx(   0. );                                                                                                                                                                                                                                                     
 	particle->SetPy(   0. );                                                                                                                                                                                                                                                     
-	particle->SetPz( 250. );                                                                                                                                                                                                                                                     
+	particle->SetPz( pz );                                                                                                                                                                                                                                                     
 	double mass = particle->GetMass();                                                                                                                                                                                                                                                
-	double ener = sqrt( 250.*250. + mass*mass );                                                                                                                                                                                                                                
+	double ener = sqrt( pz*pz + mass*mass );                                                                                                                                                                                                                                
 	particle->SetEnergy(ener);                         
 	chain->Clear();
 	chain->Make();
@@ -2080,7 +2081,6 @@ void unit_test_fcs_hits() {
       else 
 	hit_table    = dynamic_cast<TTable*>( chain->GetDataSet("g2t_hca_hit") ) ;
       
-
       LOG_TEST << GIVEN << "a 500 GeV muon @ eta=" << cell.eta << " phi=" << cell.phi << " volume=" << cell.volumeId << std::endl;
 
       check_track( "A muon must have been processed by geant",       [=](const g2t_track_st* t){
@@ -2160,8 +2160,9 @@ void unit_test_fcs_hits() {
     //  	if ( t->n_pre_hit < 1 ) result = FAIL;
     //   	return result;
     //    });
+
       
-      check_emc_hit( Form("Expect the most energetic hit to have volumeId=%i",cell.volumeId), [=](const g2t_emc_hit_st* h){
+      check_emc_hit( Form("The hit has the expected volume ID %s",(dowcal)?"WCAL":"HCAL"), [=](const g2t_emc_hit_st* h){
 	int volumeId = h->volume_id;
 	int expected = cell.volumeId;
 	int nhits = hit_table->GetNRows();
@@ -2177,8 +2178,9 @@ void unit_test_fcs_hits() {
 	}
 	std::string result = PASS;
 	if ( actual != expected ) {
-	  result = Form(" got volumeId=%i ", actual ) + FAIL;
+	  result = FAIL;
 	}
+	result = Form("(expect=%i actual=%i)",expected,actual) + result;
 	return result;
       });
 

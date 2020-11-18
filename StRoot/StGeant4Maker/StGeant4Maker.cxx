@@ -350,11 +350,6 @@ struct SD2Table_MTD {
       g2t_hit.xglobal[1]      = (hit->position_in[1] + hit->position_out[1]) * 0.5;
       g2t_hit.xglobal[2]      = (hit->position_in[2] + hit->position_out[2]) * 0.5;
 
-      LOG_INFO << "g2t_hit.xglobal = " 
-	       << g2t_hit.xglobal[0] << " " 
-	       << g2t_hit.xglobal[1] << " " 
-	       << g2t_hit.xglobal[2] << " " << endm;
-
       g2t_hit.tof       = (hit->position_in[3] + hit->position_out[3]) * 0.5;
       g2t_hit.p[0]      = (hit->momentum_in[0] + hit->momentum_out[0]) * 0.5;
       g2t_hit.p[1]      = (hit->momentum_in[1] + hit->momentum_out[1]) * 0.5;

@@ -64,9 +64,8 @@ void unit_test_mtd_hits( int longtest=0, double _pt=25.0 ) {
     auto* chain = StMaker::GetChain();
     vertex_table = dynamic_cast<TTable*>( chain->GetDataSet("g2t_vertex")  );
     track_table  = dynamic_cast<TTable*>( chain->GetDataSet("g2t_track")   );
-    if ( hit_table    = dynamic_cast<TTable*>( chain->GetDataSet("g2t_mtd_hit") ) ) {
-      hit_table->Print(0,1);
-    }
+    hit_table    = dynamic_cast<TTable*>( chain->GetDataSet("g2t_mtd_hit") );
+
 
 
     check_track( "A muon must have been processed by geant",       [=](const g2t_track_st* t){
@@ -155,6 +154,8 @@ void unit_test_mtd_hits( int longtest=0, double _pt=25.0 ) {
       result = Form(" n=%i ",n) + result;
       return result;
     });
+
+    if ( 0==hit_table ) continue;
 
     for ( int i=0;i<hit_table->GetNRows();i++ ) {
 

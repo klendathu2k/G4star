@@ -71,6 +71,12 @@ void Kinematics()
 void initStarG3( const char* tag="dev2021", Int_t nevents=0, Int_t rngSeed=1234 )
 { 
 
+  // Add a few things to the include path
+  gSystem->AddIncludePath(" -IStRoot -I${STAR}/StRoot -Igeom -IStarVMC -I${STAR}/StarVMC -IStarVMC/Geometry/macros -I.${STAR_HOST_SYS}/include ");
+  gEnv->SetValue("Logger.Colors","YES");   
+
+  gSystem->SetAclicMode(TSystem::kDebug);
+
   gROOT->ProcessLine(".L bfc.C");
   {
     TString simple = tag; simple += " geant gstar usexgeom agml ";
@@ -88,6 +94,8 @@ void initStarG3( const char* tag="dev2021", Int_t nevents=0, Int_t rngSeed=1234 
 
   gSystem->Load( "libMathMore.so"   );  
   gSystem->Load( "xgeometry.so"     );
+
+  gSystem->Load( "StEpdUtil.so" );
 
   // Setup RNG seed and map all ROOT TRandom here
   StarRandom::seed( rngSeed );

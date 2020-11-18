@@ -1,0 +1,5 @@
+#!/bin/csh -f 
+
+root4star macros/initStarG3.C $argv 
+
+

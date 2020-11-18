@@ -27,7 +27,7 @@ std::vector<Cell> cells;
 //___________________________________________________________________
 void throw_muon_in_bemc_tower( double eta, double phid, int charge = 1 ) {
 
-  throw_muon( eta, phid, 50.0, charge ); // energetic
+  throw_muon( eta, phid, 10.0, charge ); // energetic
   _eta = eta;
   _phid = phid;
 
@@ -76,7 +76,7 @@ void unit_test_emc_hits() {
       check_track( "The start vertex should be in the vertex table", [=](const g2t_track_st* t){
 	  std::string result = FAIL;
 	  int istart = t->start_vertex_p;
-	  const g2t_vertex_st* vertex = (istart>0) ? static_cast<const g2t_vertex_st*>( vertex_table->At(istart-1) ) : 0;
+	  const g2t_vertex_st* vertex = (istart>0 && istart <= vertex_table->GetNRows()) ? static_cast<const g2t_vertex_st*>( vertex_table->At(istart-1) ) : 0;
 	  if ( vertex ) {
 	    result = PASS;
 	  }
@@ -91,7 +91,7 @@ void unit_test_emc_hits() {
 	  int istart = t->start_vertex_p;
 	  
 	  const g2t_vertex_st* v = 0;
-	  if ( istart > 0 ) 
+	  if ( istart > 0 && istart <= vertex_table->GetNRows() ) 
 	    v = static_cast<const g2t_vertex_st*>( vertex_table->At(istart-1) );
 	  else 
 	    result = " no vertex in table " + result;
@@ -123,10 +123,18 @@ void unit_test_emc_hits() {
 	  if ( t->eta ==-999 ) result = FAIL;
      	return result;
 	});
-      check_track( Form("The track should have an eta=%f",_eta),     [=](const g2t_track_st* t){
+      check_track( "The track should has the expected eta",          [=](const g2t_track_st* t){
 	  double delta = abs(t->eta-_eta);	
-	  return abs(t->eta-_eta)<1E-5 ?PASS:FAIL;      
+	  std::string result = FAIL;
+	  if ( abs(t->eta-_eta)<1E-5 ) 
+	    result = PASS;
+	  result = Form(" expect %f got %f ", _eta, t->eta ) + result;
+	  return result;
 	});
+      // check_track( "The track should has the expected phi",          [=](const g2t_track_st* t){
+      // 	  double delta = abs(t->phi-_phi);	
+      // 	  return delta<1E-5 ?PASS:FAIL;      
+      // 	});
       check_track( "Expect 2 hits in the dev2021 geometry",          [=](const g2t_track_st* t){
 	  int n = t->n_emc_hit;
 	  std::string  result = FAIL;
@@ -139,15 +147,6 @@ void unit_test_emc_hits() {
 	auto hit = static_cast<const g2t_emc_hit_st*>( hit_table->At(i) );
 	if ( 0==hit ) continue;     // skip null entries
 	if ( 1!=hit->track_p ) continue; // not interested in secondaries
-
-	check_emc_hit( "Print the hit...", hit, [=](const g2t_emc_hit_st* h) {
-	    LOG_TEST << "id=" << h->id 
-		     << " track_p=" << h->track_p 
-		     << " volume_id=" << h->volume_id 
-		     << " de="  << h->de 
-		     << std::endl;
-	    return PASS;
-	  });
 	check_emc_hit( "Energy deposition is positive", hit, [=]( const g2t_emc_hit_st* hit ) {
 	    std::string result = FAIL;
 	    if ( hit->de > 0 ) result = PASS;
@@ -173,7 +172,7 @@ void unit_test_emc_hits() {
 	    int volId = h->volume_id;
 	    int tow  = (h->volume_id % 100000) / 100;
 	    std::string result = FAIL;
-	    if ( tow>=1 && tow<= 40 ) result = PASS;
+	    if ( tow>=1 && tow<= 60 ) result = PASS;
 	    result = Form("phibin=%i ",tow) + result;
 	    return result;		
 	  });
@@ -193,7 +192,8 @@ void unit_test_emc_hits() {
 	    result = Form("super layer=%i ",tow) + result;
 	    return result;		
 	  });
-	check_emc_hit( Form("Expected volume ID is %i (or %i)",cell.volumeId,cell.volumeId+1), hit, [=]( const g2t_emc_hit_st* h) {
+	std::string side = (eta>0)?"west":"east"; 
+	check_emc_hit( Form("Hit has the expected volume ID %s",side.c_str()), hit, [=]( const g2t_emc_hit_st* h) {
 	    std::string result = FAIL;
 	    if ( cell.volumeId == h->volume_id || cell.volumeId+1 == h->volume_id ) result = PASS;
 	    result = Form(" got volume id %i expect %i or %i ",h->volume_id,cell.volumeId,cell.volumeId+1) + result;
