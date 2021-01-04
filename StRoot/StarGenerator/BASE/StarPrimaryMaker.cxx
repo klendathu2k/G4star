@@ -27,11 +27,13 @@ ClassImp(StarPrimaryMaker);
 //#include "AgStarReader.h"
 #include "StarGenerator/UTIL/StarRandom.h"
 
-#include "StarGenerator/FILT/StarFilterMaker.h"
+//#include "StarGenerator/FILT/StarFilterMaker.h"
 
 #include "TMCProcess.h"
 
 #include "tables/St_vertexSeed_Table.h"
+
+struct StarFilterMaker { /* temporary hack  */ };
 
 using namespace std;
 
@@ -110,10 +112,12 @@ Int_t StarPrimaryMaker::Init()
   // The filter is properly a maker, so initialize it.  Also create accepted event list.
   // and add it as an object set.
   //
+#ifdef __StarFilterMaker_h__
   if (mFilter) { 
     mFilter->Init();
     mAccepted=new TEventList(mFilter->GetName(),"Accepted events");
   }
+#endif // __StarFilterMaker_h__
 
   //
   // Intialize the TTree with one event branch for each sub generator
@@ -124,15 +128,20 @@ Int_t StarPrimaryMaker::Init()
     mFileName.ReplaceAll(".root",".gener.root");
   }
 
-  mFile = TFile::Open( mFileName, "recreate" );
-  if ( !mFile ) result = (result<kStWarn)? kStWarn : result;
+  if ( mFileName != "none" ) {
+    mFile = TFile::Open( mFileName, "recreate" );
+    if ( !mFile ) {
+      result = (result<kStWarn)? kStWarn : result;
+    }
+  }
 
   mTree = new TTree( "genevents", "TTree containing event generator information" );
 
   mPrimaryEvent = new StarGenEvent("primaryEvent","Primary Event... particle-wise information from all event generators");
   mTree->Branch("primaryEvent","StarGenEvent",&mPrimaryEvent,64000,99);
-
-  if (mFilter) mFilter->SetEvent(mPrimaryEvent);
+#ifdef __StarFilterMaker_h__
+    if (mFilter) mFilter->SetEvent(mPrimaryEvent);
+#endif
 
   TIter Next( GetMakeList() );
   StarGenerator *generator = 0; 
@@ -176,7 +185,8 @@ Int_t StarPrimaryMaker::Finish()
   // Calls finish on all sub makers to collect statisitcs
   StMaker::Finish();
 
-  // Now call finish on the filter
+  // // Now call finish on the filter
+#ifdef __StarFilterMaker_h__
   if ( mFilter ) {
 
     // Call finish on the generator
@@ -185,6 +195,7 @@ Int_t StarPrimaryMaker::Finish()
     mAccepted->Print("all");
     mTree->SetEventList( mAccepted );
   }
+#endif
 
   if (mFile) 
     { 
@@ -211,8 +222,10 @@ Int_t StarPrimaryMaker::Finish()
 	      continue;
 	    }
 	  StarGenStats stats = generator->Stats();
+#ifdef __StarFilterMaker_h__
 	  if ( mFilter ) stats.nFilterSeen   = mFilter->numberOfEvents();
 	  if ( mFilter ) stats.nFilterAccept = mFilter->acceptedEvents();
+#endif
 	  stats.Dump();
 	  stats.Write(); // write to fiel
 	}
@@ -252,10 +265,12 @@ Int_t StarPrimaryMaker::Make()
     Finalize();
 
     /// Apply the event filter (if available)
+#ifdef __StarFilterMaker_h__
     if (mFilter)
       {
-	mFilter->Make(); // properly this is a maker but we fake it here...
+     	mFilter->Make(); // properly this is a maker but we fake it here...
       }
+#endif// __StarFilterMaker_h__
 
     /// Print the event for debugging purposes
     if ( IAttr("Debug")==1 ) event()->Print("head");
@@ -340,9 +355,15 @@ void StarPrimaryMaker::AddGenerator( StarGenerator *gener )
 
 void StarPrimaryMaker::AddFilter( StarFilterMaker *filter )
 {
-  mFilter = filter;
+#ifdef __StarFilterMaker_h__
+	  mFilter = filter;
+#else
+	  mFilter = 0;
+#endif
   AddData( 0, ".filter" );
+#ifdef __StarFilterMaker_h__
   mFilter -> Shunt( GetDataSet( ".filter" ) );
+#endif
 }
 // --------------------------------------------------------------------------------------------------------------
 Int_t StarPrimaryMaker::PreGenerate()
