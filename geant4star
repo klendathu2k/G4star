@@ -1,6 +1,19 @@
 #!/bin/csh -f 
 
+# geant4star is local
+if ( -f macros/initStar.C ) then
 
-root.exe -l macros/initStar.C macros/geant4star.C $argv 
+    root.exe -l macros/initStar.C macros/geant4star.C $argv 
+
+# geant4star is in library
+else if ( -f $STAR/macros/initStar.C ) then
+
+    root.exe -l $STAR/macros/initStar.C $STAR/macros/geant4star.C $argv
+
+else
+
+    echo "Could not find geant4star macros"
+
+endif
 
 
