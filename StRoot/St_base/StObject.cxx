@@ -111,12 +111,13 @@ StObject::~StObject()
 //_____________________________________________________________________________
 void StObject::Browse(TBrowser *tb)
 {
-  StAutoBrowse::Browse(this,tb);
+  //  StAutoBrowse::Browse(this,tb);
 }
 //_____________________________________________________________________________
 Bool_t StObject::IsFolder() const
 {
-  return StAutoBrowse::Browse((TObject*)this,0);
+  //  return StAutoBrowse::Browse((TObject*)this,0);
+  return false;
 }
 //______________________________________________________________________________
 void StObject::Streamer(TBuffer &R__b)
