@@ -104,7 +104,9 @@ protected:
 };
 //______________________________________________________________________________________
 class StGeant4Maker : public StMaker {
+
 public:
+
   StGeant4Maker( const char* nm="geant4star" );
   ~StGeant4Maker(){ /* nada */ };
 
@@ -193,6 +195,14 @@ protected:
   };
 
   ClassDef(StGeant4Maker,1);
+
+public:
+
+  virtual const char *GetCVS() const
+  {
+    static const char cvs[]="Tag $Name:$ $Id:$ built "__DATE__" " __TIME__ ; 
+    return cvs;
+  }
 
 };
 //______________________________________________________________________________________
