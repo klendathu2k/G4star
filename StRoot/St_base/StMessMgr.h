@@ -104,6 +104,7 @@ class messVec;
 
 #include <Stsstream.h>
 #include <Stiostream.h>
+//#include <sstream>
 
 class StMessMgr : public ostrstream_ {
    friend ostream& operator<<(ostream& ,StMessage*);
