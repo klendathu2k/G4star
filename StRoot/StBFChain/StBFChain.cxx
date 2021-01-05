@@ -15,7 +15,7 @@
 #include "StIOMaker/StIOMaker.h"
 #include "StMessMgr.h"
 #include "StShadowMaker/StShadowMaker.h"
-#include "StEnumerations.h"
+#include "StEvent/StEnumerations.h"
 #include "TTree.h"
 #include "TEnv.h"
 #define STAR_LOGGER 1
