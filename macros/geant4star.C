@@ -65,7 +65,10 @@ void loadStar(const Char_t *mytag="dev2021", Bool_t agml = true  )
       // If the option matches key=value, treat this as an attribute to be
       // set on the G4 maker...
       if ( arg.Contains("=") ) {
-	// Skip for now
+	// Generally skip, but output triggers geant4out chain option
+	if ( arg.Contains("output") ) {
+	  chainOpts += " geant4out ";
+	}
       }
       else {
 	chainOpts += arg;
