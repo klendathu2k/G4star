@@ -25,6 +25,8 @@
 #include "GeometryUtils.h"
 #include "TString.h"
 
+#include "StChain/StEvtHddr.h"
+
 //_______________________________________________________________________________________________
 #include <AgMLVolumeIdFactory.h>
 //_______________________________________________________________________________________________
@@ -393,7 +395,8 @@ StGeant4Maker::StGeant4Maker( const char* nm ) :
   mPreviousVolume (0),
   mCurrentTrackingRegion(2),
   mPreviousTrackingRegion(2),
-  acurr(0),aprev(0)
+  acurr(0),aprev(0),
+  mEventHeader(0)
 { 
 
   // Setup default attributes
@@ -556,6 +559,16 @@ int StGeant4Maker::InitRun( int /* run */ ){
     StarMagField::Instance()->SetFactor(field);
   }
 
+  // Obtain a pointer to the event header
+  mEventHeader = (StEvtHddr*) ( GetTopChain()->GetDataSet("EvtHddr") );
+
+  // If it does not exist, create and register
+  if ( 0 == mEventHeader ) {
+    mEventHeader = new StEvtHddr(GetConst());                                                                                                                                                                
+    mEventHeader->SetRunNumber(0);                
+    SetOutput(mEventHeader);                      // Declare this event header for output
+  }
+
   return kStOK;
 }
 //________________________________________________________________________________________________
@@ -571,7 +584,7 @@ int  StGeant4Maker::InitGeom() {
   if ( 0==gGeoManager ) {
   for (int i = 0; DbAlias[i].tag; i++) // iterate over DB aliases
     {
-      StBFChain *bfc = dynamic_cast<StBFChain *>(GetTopChain());
+      StBFChain *bfc = (StBFChain *)(GetTopChain());
       if ( 0==bfc ) break; // nothing to do in this case...
 
       //
@@ -622,8 +635,23 @@ struct A { };
 struct B { };
 int StGeant4Maker::Make() {
 
+  static int runNumber    = 12345;
+
+  static int eventNumber  = 1;
+
   // Process one single event.  Control handed off to VMC application.
   gG4 -> ProcessRun( 1 );
+
+  // Update event header.  Note that event header's SetRunNumber method sets the run number AND updates the previous run number.
+
+  if ( runNumber != mEventHeader->GetRunNumber() ) mEventHeader -> SetRunNumber( runNumber );
+  mEventHeader -> SetEventNumber( eventNumber );
+  mEventHeader -> SetProdDateTime();
+
+  // SetDateTime();
+ 
+  // Increment event number
+  eventNumber++;
 
   return kStOK; 
 }
@@ -718,7 +746,7 @@ int  StGeant4Maker::ConfigureGeometry() {
     TGeoMedium* medium = volume->GetMedium();
     int id = medium->GetId();
     if ( media[id]>0 ) continue; // skip if medium already encountered
-    AgMLExtension* agmlExt = dynamic_cast<AgMLExtension*>( volume->GetUserExtension() );
+    AgMLExtension* agmlExt = (AgMLExtension*)( volume->GetUserExtension() );
     if ( 0==agmlExt ) continue;
     for ( auto kv : agmlExt->GetCuts() ) {
       gG4->Gstpar( media[id]=id, kv.first, kv.second );

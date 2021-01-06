@@ -24,6 +24,8 @@ class TG4RunConfiguration;
 
 class St_g2t_track; 
 
+class StEvtHddr;
+
 //______________________________________________________________________________________
 class StarMagFieldAdaptor : public TVirtualMagField {
 public:
@@ -162,6 +164,8 @@ protected:
   AgMLExtension* acurr;
   AgMLExtension* aprev;
 
+  StEvtHddr* mEventHeader;
+
   int regionTransition( int, int );
 
   /// @param T specifies the type of the table   
@@ -200,7 +204,7 @@ public:
 
   virtual const char *GetCVS() const
   {
-    static const char cvs[]="Tag $Name:$ $Id:$ built "__DATE__" " __TIME__ ; 
+    static const char cvs[]="Tag $Name:$ $Id:$ built __DATE__ __TIME__ "; 
     return cvs;
   }
 
