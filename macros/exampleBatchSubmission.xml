@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8" ?> 
+
+<!DOCTYPE note [
+<!ENTITY WORKINGDIR "/star/u/jwebb/work/2021/01-04-2021-g4star-eval/G4star" >
+<!ENTITY OUTPUTDIR  "/star/simu/simu/jwebb/stress" >
+<!ENTITY OUTDIR     "out">
+<!ENTITY LOGDIR     "log">
+<!ENTITY NEVENT     "1"> 
+<!ENTITY NJOBS      "100">
+]>
+
+<job name="geant4star_stress" 
+     nProcesses="&NJOBS;"
+     maxFilesPerProcess="1"
+     filesPerHour="10"
+     simulateSubmission="false">
+
+  <command>
+
+    setup 64b
+    starver eval
+    setup root 6.16.00
+    source /star/simu/simu/geant4.10.3.3/bin/geant4.csh
+    setenv ROOT_INCLUDE_PATH $STAR/.$STAR_HOST_SYS/include/:$STAR/StRoot/StStarLogger/
+
+
+    hostname 
+
+    cp -R &WORKINGDIR;/macros .
+    cp -R &WORKINGDIR;/tests .
+
+    geant4star -q -b --seed=${JOBINDEX} --output=stress.${JOBINDEX}.10tracks.geant.root macros/test_stress_acceptance.C\(&NEVENT;,10\)     &gt;&amp; stress.${JOBINDEX}.10tracks.log
+    geant4star -q -b --seed=${JOBINDEX} --output=stress.${JOBINDEX}.100tracks.geant.root macros/test_stress_acceptance.C\(&NEVENT;,100\)   &gt;&amp; stress.${JOBINDEX}.100tracks.log
+    geant4star -q -b --seed=${JOBINDEX} --output=stress.${JOBINDEX}.1000tracks.geant.root macros/test_stress_acceptance.C\(&NEVENT;,1000\) &gt;&amp; stress.${JOBINDEX}.1000tracks.log
+
+    cp *.log &OUTPUTDIR;/&LOGDIR;
+  
+  </command>
+
+  <stdout URL="file:&OUTPUTDIR;/&LOGDIR;/$JOBID.out" />
+  <stderr URL="file:&OUTPUTDIR;/&LOGDIR;/$JOBID.err" />
+
+  <Generator><Location>./jobs/</Location></Generator>
+
+  <output fromScratch="*.{fzd,root}"	  toURL="&OUTPUTDIR;/&OUTDIR;/" />
+
+ 
+</job>
