@@ -324,7 +324,7 @@ struct SD2Table_VPD {
       int idtruth = hit->idtruth;
       g2t_track_st* trk = (g2t_track_st*)track->At(idtruth-1);
 
-      trk->n_tof_hit++;
+      trk->n_vpd_hit++;
       
     }
   } 
