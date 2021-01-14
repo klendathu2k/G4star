@@ -2,7 +2,7 @@
 
 geant4star VMC application  
 
-##HOWTO run geant4star against precompiled library in EVAL
+## HOWTO run geant4star against precompiled library in EVAL
 
 > setup 64b
 > starver eval
@@ -15,7 +15,7 @@ geant4star VMC application
 > geant4star -q -b --seed=1234 --output=geant4.geant.root tests/unit_test_output.C
 
 
-##HOWTO clone the repository and build the code
+## HOWTO clone the repository and build the code
 
 > setup 64b
 > starver eval
