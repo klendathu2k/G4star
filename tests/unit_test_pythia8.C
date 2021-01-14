@@ -5,7 +5,7 @@
 #include <TTable.h>
 
 
-void unit_test_pythia8() {
+void unit_test_pythia8( int n=1 ) {
 
   gROOT->ProcessLine("initChain();");
 
@@ -19,9 +19,10 @@ void unit_test_pythia8() {
 
   auto* chain = StMaker::GetChain();
 
-  chain->ls(5);
-  chain->Clear();
-  chain->Make();
+  for ( int i=0;i<n;i++) {
+    chain->Clear();
+    chain->Make();
+  }
   chain->Finish();
 
 
