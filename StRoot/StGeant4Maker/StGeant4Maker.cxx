@@ -59,6 +59,7 @@
 //________________________________________________________________________________________________
 //#include "StMcHitFiller.h"
 //________________________________________________________________________________________________
+#include "tables/St_g2t_event_Table.h"
 #include "tables/St_g2t_vertex_Table.h"
 #include "tables/St_g2t_track_Table.h"
 //________________________________________________________________________________________________
@@ -417,6 +418,8 @@ StGeant4Maker::StGeant4Maker( const char* nm ) :
   SetAttr( "Application:Zmax", DBL_MAX );
   SetAttr( "Application:Rmax", DBL_MAX );
 
+  SetAttr( "runnumber", 1 );
+
 
   // Setup default cuts
   SetAttr("CUTGAM", 0.001);
@@ -635,16 +638,15 @@ struct A { };
 struct B { };
 int StGeant4Maker::Make() {
 
-  static int runNumber    = 12345;
-
   static int eventNumber  = 1;
+  const  int runnumber   = IAttr("runnumber");
 
   // Process one single event.  Control handed off to VMC application.
   gG4 -> ProcessRun( 1 );
 
   // Update event header.  Note that event header's SetRunNumber method sets the run number AND updates the previous run number.
 
-  if ( runNumber != mEventHeader->GetRunNumber() ) mEventHeader -> SetRunNumber( runNumber );
+  if ( runnumber != mEventHeader->GetRunNumber() ) mEventHeader -> SetRunNumber( runnumber );
   mEventHeader -> SetEventNumber( eventNumber );
   mEventHeader -> SetProdDateTime();
 
@@ -769,6 +771,11 @@ void StGeant4Maker::FinishEvent(){
 
   LOG_INFO << "End of Event" << endm;
 
+  // Event information is (for the time being) zeroed out
+  St_g2t_event*  g2t_event  = new St_g2t_event("g2t_event",1);          AddData(g2t_event);
+  g2t_event_st event = {0};
+  g2t_event->AddAt( &event );
+
   StMCParticleStack* stack    = (StMCParticleStack *)TVirtualMC::GetMC()->GetStack();
   auto&              vertex   = stack->GetVertexTable();
   auto&              particle = stack->GetParticleTable();
@@ -780,6 +787,9 @@ void StGeant4Maker::FinishEvent(){
 
   St_g2t_vertex* g2t_vertex = new St_g2t_vertex("g2t_vertex",nvertex);  AddData(g2t_vertex);
   St_g2t_track*  g2t_track  = new St_g2t_track ("g2t_track", ntrack);   AddData(g2t_track);
+
+
+  
 
   // Add tracks and vertices to the data structures...
 
@@ -841,10 +851,18 @@ void StGeant4Maker::FinishEvent(){
   itrack = 1; // track numbering starts from 1
   for ( auto t : particle ) {
 
+    auto* pdgdata = particleData.GetParticle( t->GetPdg() );
+    
     // partial fill of track table _______________________
     g2t_track_st mytrack;   memset(&mytrack, 0, sizeof(g2t_track_st));    
     mytrack.id       = itrack;
     mytrack.eg_pid   = t->GetPdg();
+    if ( pdgdata ) {
+      mytrack.ge_pid = pdgdata->TrackingCode();
+    }
+    else {
+      LOG_WARN << Form("Particle w/ pdgid = %i has no G3 ID (assign 0 to g2t_track::ge_pid)",t->GetPdg()) << endm;
+    }
     mytrack.p[0]     = t->px();
     mytrack.p[1]     = t->py();
     mytrack.p[2]     = t->pz();
