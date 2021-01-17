@@ -21,6 +21,7 @@
 class AgMLVolumeIdFactory {
 public:
 
+  // TODO: Identify what the test flag is for and (probably) remove it 
   static AgMLVolumeId* Create( TString name, bool test=false ) { 
 
     static std::map<TString,AgMLVolumeId*> VolumeId;
