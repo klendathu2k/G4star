@@ -889,7 +889,7 @@ void StGeant4Maker::FinishEvent(){
   AddHits<St_g2t_fts_hit>( "STGH", {"TGCG"}, "g2t_stg_hit", sd2table_stgc );
   AddHits<St_g2t_emc_hit>( "PREH", {"PSCI"}, "g2t_pre_hit", sd2table_emc  );
   AddHits<St_g2t_emc_hit>( "WCAH", {"WSCI"}, "g2t_wca_hit", sd2table_emc  );
-  AddHits<St_g2t_emc_hit>( "HCAH", {"HSCI"}, "g2t_hca_hit", sd2table_emc  ); 
+  AddHits<St_g2t_emc_hit>( "HCAH", {"HSCI"}, "g2t_hca_hit", sd2table_emc  ); // HCA should have its own copier
 
   AddHits<St_g2t_ctf_hit>( "BTOH", {"BRSG"}, "g2t_tfr_hit", sd2table_ctf  );
   AddHits<St_g2t_vpd_hit>( "VPDH", {"VRAD"}, "g2t_vpd_hit", sd2table_vpd  );
