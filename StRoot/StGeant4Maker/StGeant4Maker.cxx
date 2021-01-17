@@ -214,6 +214,7 @@ struct SD2Table_FST {
     }
   } 
 } sd2table_fst; 
+
 // Generic EMC copy (no increment on track hits)
 struct SD2Table_EMC {
   void operator()( StSensitiveDetector* sd, St_g2t_emc_hit* table, St_g2t_track* track ) {
@@ -254,6 +255,44 @@ struct SD2Table_EMC {
     }
   } 
 } sd2table_emc; 
+
+struct SD2Table_HCA {
+  void operator()( StSensitiveDetector* sd, St_g2t_hca_hit* table, St_g2t_track* track ) {
+    
+    TString sdname = sd->GetName();
+
+    // Retrieve the hit collection 
+    StCalorimeterHitCollection* collection = (StCalorimeterHitCollection *)sd->hits();
+    // Iterate over all hits
+    for ( auto hit : collection->hits() ) {
+
+      g2t_hca_hit_st g2t_hit; memset(&g2t_hit,0,sizeof(g2t_hca_hit_st)); 
+      
+      g2t_hit.id        = hit->id;
+      // TODO: add pointer to next hit on the track 
+      g2t_hit.track_p   = hit->idtruth;
+      g2t_hit.volume_id = hit->volId;
+      g2t_hit.de        = hit->de;
+      if ( hit->user.size()>=1 ) g2t_hit.deA       = hit->user[0];   else g2t_hit.deA = -1;
+      if ( hit->user.size()>=2 ) g2t_hit.deB       = hit->user[1];   else g2t_hit.deB = -2;
+      if ( hit->user.size()>=3 ) g2t_hit.deC       = hit->user[2];   else g2t_hit.deC = -3;
+      if ( hit->user.size()>=4 ) g2t_hit.deD       = hit->user[3];   else g2t_hit.deD = -4;
+      g2t_hit.x         = hit->position_in[0];
+      g2t_hit.y         = hit->position_in[1];
+      g2t_hit.z         = hit->position_in[2];
+      
+      table -> AddAt( &g2t_hit );     
+
+      int idtruth = hit->idtruth;
+      g2t_track_st* trk = (g2t_track_st*)track->At(idtruth-1);
+
+      trk->n_hca_hit++;
+
+    }
+  } 
+} sd2table_hca; 
+
+
 struct SD2Table_CTF {
   void operator()( StSensitiveDetector* sd, St_g2t_ctf_hit* table, St_g2t_track* track ) {
     
@@ -889,7 +928,7 @@ void StGeant4Maker::FinishEvent(){
   AddHits<St_g2t_fts_hit>( "STGH", {"TGCG"}, "g2t_stg_hit", sd2table_stgc );
   AddHits<St_g2t_emc_hit>( "PREH", {"PSCI"}, "g2t_pre_hit", sd2table_emc  );
   AddHits<St_g2t_emc_hit>( "WCAH", {"WSCI"}, "g2t_wca_hit", sd2table_emc  );
-  AddHits<St_g2t_emc_hit>( "HCAH", {"HSCI"}, "g2t_hca_hit", sd2table_emc  ); // HCA should have its own copier
+  AddHits<St_g2t_hca_hit>( "HCAH", {"HSCI"}, "g2t_hca_hit", sd2table_hca  ); // HCA should have its own copier
 
   AddHits<St_g2t_ctf_hit>( "BTOH", {"BRSG"}, "g2t_tfr_hit", sd2table_ctf  );
   AddHits<St_g2t_vpd_hit>( "VPDH", {"VRAD"}, "g2t_vpd_hit", sd2table_vpd  );
