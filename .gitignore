@@ -6,4 +6,5 @@
 .*.swp 
 temp_gccflags.c
 StRoot/StBFChain/doc/* 
+StarVMC/StarGeometry/* 
 
