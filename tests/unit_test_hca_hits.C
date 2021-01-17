@@ -2189,10 +2189,35 @@ void unit_test_hca_hits( const int mode=2 ) {
 	return result;
       });
 
-    }
-      
 
-  };
+      check_hca_hit( "The highest energy hit has nonzero energy deposit", [=](const g2t_hca_hit_st* h){
+	  double emax = -999;
+	  double dex[4] = {0,0,0,0};
+	  int nhits = hit_table->GetNRows();
+	  int volid = 0;
+	  for ( int i=0; i<nhits; i++ ) {
+	    auto* voidhit=hit_table->At(i);
+	    const g2t_hca_hit_st* h = static_cast<const g2t_hca_hit_st*>( voidhit );
+	    if ( h->de > emax ) {
+	      volid = h->volume_id;
+	      emax = h->de;
+	      dex[0]=h->deA;
+	      dex[1]=h->deB;
+	      dex[2]=h->deC;
+	      dex[3]=h->deD;
+	    }
+	  }
+	  std::string result = PASS;
+	  if ( emax <= 0 ) result = FAIL;
+
+	  result = Form("volume id=%i | dE=%f %f %f %f %f ",volid,emax,dex[0],dex[1],dex[2],dex[3]) + result;
+
+	  return result;
+	});
+
+    }// for loop
+
+  };// testCalos
   
   if ( mode==2 || mode==3 ) testCalos( hcal, false );
 
