@@ -2155,12 +2155,7 @@ void unit_test_fcs_hits( const int mode=3 ) {
       	return result;
        });
       
-      // check_track( "The track should have PRE hits" ,                [=](const g2t_track_st* t){
-    //  	std::string result          = PASS;
-    //  	if ( t->n_pre_hit < 1 ) result = FAIL;
-    //   	return result;
-    //    });
-
+      // Is the EMC hit structure appropriate for HCAL?
       
       check_emc_hit( Form("The hit has the expected volume ID %s",(dowcal)?"WCAL":"HCAL"), [=](const g2t_emc_hit_st* h){
 	int volumeId = h->volume_id;
