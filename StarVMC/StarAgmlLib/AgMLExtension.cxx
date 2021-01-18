@@ -19,7 +19,8 @@ void AgMLExtension::Print( const char* opts ) {
 
   LOG_INFO << mModuleName.Data() << ":"
 	   << mFamilyName.Data() << ":"
-	   << mVolumeName.Data() << " sens="
+	   << mVolumeName.Data() << " this="
+	   << this << " sens="
 	   << mSensitive << " tracking="
 	   << mTracking << " nbranch="
 	   << mBranchings << " nuser="
