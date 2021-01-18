@@ -22,7 +22,7 @@ void AgMLExtension::Print( const char* opts ) {
 	   << mVolumeName.Data() << " sens="
 	   << mSensitive << " tracking="
 	   << mTracking << " nbranch="
-	   << mBranchings << " nuser"
+	   << mBranchings << " nuser="
 	   << mHitScoring.size() << " "
 	   << endm;
 
