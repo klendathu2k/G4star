@@ -162,7 +162,17 @@ AgModule::~AgModule()
 }
 //______________________________________________________________________________________________
 void AgModule::AddHitScoring( TString name, AgMLScoring* sc ) {
+  TString key (name(0,4));
+  //  LOG_INFO << "Add hit scoring " << key.Data() << endm;
   mHitScoring[name] = sc;
+  auto* volume = gGeoManager->FindVolumeFast(key);
+  if (0==volume) {
+    LOG_WARN << "Volume " << key.Data() << " has not been created yet, no user hits defined " << name.Data() << endm;
+  }
+  else {
+    auto* ext = dynamic_cast<AgMLExtension*>(volume->GetUserExtension());
+    ext->AddHitScoring(sc);
+  }
 }
 //______________________________________________________________________________________________
 
