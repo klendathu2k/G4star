@@ -4,6 +4,11 @@
 #include "TObjectSet.h"
 #include "TGenericTable.h"
 
+#include "TGeoManager.h"
+#include "TGeoVolume.h"
+#include "AgMLExtension.h"
+
+
 ClassImp(AgModule);
 
 TDataSet *AgModule::mGeomSet = 0;
@@ -155,7 +160,11 @@ AgModule::~AgModule()
 {
   _module = NULL;
 }
-
+//______________________________________________________________________________________________
+void AgModule::AddHitScoring( TString name, AgMLScoring* sc ) {
+  mHitScoring[name] = sc;
+}
+//______________________________________________________________________________________________
 
 
 

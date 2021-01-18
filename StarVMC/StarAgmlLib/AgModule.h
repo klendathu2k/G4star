@@ -7,6 +7,7 @@
 #include <string>
 #include <StarVMC/StarAgmlLib/AgMLExtension.h>
 using namespace std;
+#include <StMessMgr.h>
 
 class TDataSet;
 
@@ -45,7 +46,7 @@ class AgModule : public AgBlock
   void SetTrackingFlag( int flag ){ mTrackingFlag = flag; }
   int  GetTrackingFlag(){ return mTrackingFlag; }
 
-  void AddHitScoring( TString name, AgMLScoring* sc ){ mHitScoring[name] = sc; }
+  void AddHitScoring( TString name, AgMLScoring* sc );
   std::map<TString,AgMLScoring*> GetHitScoring(){ return mHitScoring; }
 
  private:
