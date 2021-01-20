@@ -228,6 +228,12 @@ class StMCParticleStack : public TVirtualMCStack
 
   int GetIdTruth( StarMCParticle* part ){ return mIdTruthFromParticle[part]; }
 
+  void SetScoring( const float rmax, const float zmax, const float emin ){
+    mScoringRmax=rmax;
+    mScoringZmax=zmax;
+    mScoringEmin=emin;
+  };
+
  private:
  protected:
 
@@ -250,7 +256,10 @@ class StMCParticleStack : public TVirtualMCStack
 
   std::map<StarMCParticle*, int> mIdTruthFromParticle;
 
-
+  float mScoringRmax;
+  float mScoringZmax;
+  float mScoringEmin;
+  
   //  ClassDef(StMCParticleStack,0);
     
 };

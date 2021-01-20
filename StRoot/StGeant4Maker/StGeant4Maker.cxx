@@ -26,6 +26,7 @@
 #include "TString.h"
 
 #include "StChain/StEvtHddr.h"
+#include "TH2F.h"
 
 //_______________________________________________________________________________________________
 #include <AgMLVolumeIdFactory.h>
@@ -457,6 +458,12 @@ StGeant4Maker::StGeant4Maker( const char* nm ) :
   SetAttr( "Application:Zmax", DBL_MAX );
   SetAttr( "Application:Rmax", DBL_MAX );
 
+  SetAttr("Scoring:Transit",0);
+  SetAttr("Scoring:Rmax",450.0);
+  SetAttr("Scoring:Zmax",2000.0);
+  SetAttr("Scoring:Emin",0.01);
+
+
   SetAttr( "runnumber", 1 );
 
 
@@ -581,9 +588,12 @@ int StGeant4Maker::Init() {
 
   for ( auto cmd : g4cmd )   gG4->ProcessGeantCommand( cmd );
 
-
   LOG_INFO << "Initialize GEANT4 Physics" << endm;
   gG4 -> BuildPhysics();
+
+  // Create histograms
+  TH1* h;
+  AddHist( h = new TH2F("MC:vertex:RvsZ","MC vertex;z [cm];R [cm]",1801,-900.5,900.5,501,-0.5,500.5) );
 
   return StMaker::Init();
 }
@@ -679,6 +689,13 @@ int StGeant4Maker::Make() {
 
   static int eventNumber  = 1;
   const  int runnumber   = IAttr("runnumber");
+  
+  // One time initialization
+  if ( 1 == eventNumber ) {
+
+    mMCStack->SetScoring( DAttr("Scoring:Rmax"), DAttr("Scoring:Zmax"), DAttr("Scoring:Emin") );
+
+  }
 
   // Process one single event.  Control handed off to VMC application.
   gG4 -> ProcessRun( 1 );
@@ -872,6 +889,16 @@ void StGeant4Maker::FinishEvent(){
     myvertex.ge_medium = v->medium();
     myvertex.ge_proc   = v->process();
     myvertex.is_itrmd  = v->intermediate();
+
+    // Fill histograms
+    {
+      float& x = myvertex.ge_x[0];
+      float& y = myvertex.ge_x[1];
+      float& z = myvertex.ge_x[2];
+      float  r2 = x*x + y*y;
+      float  r = sqrt(r2);
+      GetHist("MC:vertex:RvsZ")->Fill(z,r);
+    }
 
     // TODO: map ROOT mechanism to G3 names
 
@@ -1097,7 +1124,8 @@ void StGeant4Maker::Stepping(){
   }
 
   // Score interaction vertices on entrance / exit of a tracking region
-  if ( 2==mCurrentTrackingRegion || 0!=transit ) {
+  bool transitCheck = (0!=transit)&&IAttr("Scoring:Transit");
+  if ( 2==mCurrentTrackingRegion || transitCheck ) {
 
     int nsec  = mc->NSecondaries();
 

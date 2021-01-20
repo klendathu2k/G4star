@@ -15,6 +15,7 @@ using namespace std;
 
 #include <StarVMC/StarAgmlLib/AgMLExtension.h>
 #include <GeometryUtils.h>
+#include <StMaker.h>
 
 const int kDefaultStackSize = 400;
 const int kDefaultArraySize = 4000;
@@ -80,7 +81,10 @@ StMCParticleStack::StMCParticleStack( const Char_t *name ) :
   mParticleTable(),
   mVertexTable(),
   mStackToTable(),
-  mIdTruthFromParticle()
+  mIdTruthFromParticle(),
+  mScoringRmax(450.0),
+  mScoringZmax(2000.0),
+  mScoringEmin(0.01)
 {
 
   mArray     = new TClonesArray("TParticle", kDefaultArraySize );
@@ -151,10 +155,17 @@ void StMCParticleStack::PushTrack( int toDo, int parent, int pdg,
   // Increment mArraySize
   mArraySize++;
 
+
+  double Rmax2=mScoringRmax*mScoringRmax;
+  double vr2 = vx*vx+vy*vy;
+
+  bool tracing = (vr2<Rmax2) && (TMath::Abs(vz)<mScoringZmax) && energy > mScoringEmin;
+  
+
   //
   // And handle region-based track persistence
   //
-  if ( agmlreg == 2 ) {
+  if ( agmlreg == 2 && tracing ) {
 
     StarMCVertex* vertex = GetVertex( vx, vy, vz, vt, mech );
 
