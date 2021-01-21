@@ -123,10 +123,10 @@ void add_particle( const char* part, double eta, double phid, double pT = 25.0, 
   particle->SetEnergy(ener);                                
 }
 //___________________________________________________________________
-std::string check_requirement( std::string message, std::function<std::string()> f) {
-  std::string result = "\u001b[37m [" + message + "] " + f(something);
-  return result;
-}
+// std::string check_requirement( std::string message, std::function<std::string()> f) {
+//   std::string result = "\u001b[37m [" + message + "] " + f();
+//   return result;
+// }
 //___________________________________________________________________
 std::string check_track_table( std::string message, std::function<std::string(g2t_track_st* begin_, g2t_track_st* end_)> f) {
   g2t_track_st* first = static_cast<g2t_track_st*>( track_table->GetArray() );
