@@ -6,15 +6,15 @@ geant4star VMC application
 
 ## HOWTO run geant4star against precompiled library in EVAL
 
-`setup 64b`
-`starver eval`
-`setup root 6.16.00`
-`source /star/simu/simu/geant4.10.3.3/bin/geant4.csh`
-`setenv ROOT_INCLUDE_PATH $STAR/.$STAR_HOST_SYS/include/:$STAR/StRoot/StStarLogger/`
+`setup 64b
+starver eval
+setup root 6.16.00
+source /star/simu/simu/geant4.10.3.3/bin/geant4.csh
+setenv ROOT_INCLUDE_PATH $STAR/.$STAR_HOST_SYS/include/:$STAR/StRoot/StStarLogger/
 
-`cp -R $STAR/macros $STAR/tests .`
+cp -R $STAR/macros $STAR/tests .
 
-`geant4star -q -b --seed=1234 --output=geant4.geant.root tests/unit_test_output.C`
+geant4star -q -b --seed=1234 --output=geant4.geant.root tests/unit_test_output.C`
 
 ### Run pythia 8 example
 
