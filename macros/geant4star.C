@@ -156,16 +156,19 @@ void loadStar(const Char_t *mytag="dev2021", Bool_t agml = true  )
 
     TString arg = gApplication->Argv(i);
     if ( arg.Contains("--web") || arg.Contains("notebook") ) continue;
+
     // Parse "--" style options for ourselves
     if ( arg.Contains("--") ) {
-      arg.ReplaceAll("--"," ");
+      arg.ReplaceAll("--",""); // n.b. here we remove the space to get a match
 
       // If the option matches key=value, treat this as an attribute to be
       // set on the G4 maker...                                        
       if ( arg.Contains("=") ) {
 
 	TString key = arg.Tokenize("=")->At(0)->GetName();
-	TString val = arg.Tokenize("=")->At(0)->GetName();
+	TString val = arg.Tokenize("=")->At(1)->GetName();
+
+	std::cout << "geant4star commandline option " << key.Data() << " = " << val.Data() << std::endl;
 
 	// Process RNG seed
 	if ( key=="seed" ) {
@@ -219,6 +222,7 @@ void loadStar(const Char_t *mytag="dev2021", Bool_t agml = true  )
 bool __initialized = false;
 
 bool initChain( std::vector<std::string> _cmds={ "std::cout << \"Chain has been initialized.\" << std::endl;" } ) {
+  std::cout << "initChain is called seed = " << __rngSeed << std::endl;
   if ( !__initialized ) { 
 
     if ( __rngSeed > -1 ) {
@@ -292,5 +296,13 @@ void particleGun( const char* particle="mu+", double px=1.0/sqrt(2), double py=1
 
 
 void geant4star(){ 
+
+  TString cmdline="geant4star:";
+  for ( int i=0;i<gApplication->Argc();i++ ) {
+    cmdline+=" ";
+    cmdline+=gApplication->Argv(i); 
+  }
+  std::cout << cmdline.Data() << std::endl;
+
   loadStar(); 
 }
