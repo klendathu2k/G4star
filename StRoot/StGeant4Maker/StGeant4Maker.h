@@ -84,10 +84,10 @@ public:
   virtual void FinishEvent();
 
   /// Define maximum radius for tracking (optional)
-  virtual double TrackingRmax() const { return mRmax; }
+  virtual double TrackingRmax() const;
 
   /// Define maximum z for tracking (optional)
-  virtual double TrackingZmax() const { return mZmax; }
+  virtual double TrackingZmax() const;
 
   /// Calculate user field \a b at point \a x
   virtual void Field(const double* x, double* b) const { StarMagField::Instance()->BField(x,b); }

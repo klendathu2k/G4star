@@ -679,6 +679,13 @@ int  StGeant4Maker::InitGeom() {
   return kStOK;
 }
 //________________________________________________________________________________________________
+double StarVMCApplication::TrackingRmax() const {
+  return mRmax;
+}
+double StarVMCApplication::TrackingZmax() const {
+  return mRmax;
+}
+//________________________________________________________________________________________________
 int StGeant4Maker::InitHits() {
   return kStOK;
 }
