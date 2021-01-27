@@ -683,7 +683,7 @@ double StarVMCApplication::TrackingRmax() const {
   return mRmax;
 }
 double StarVMCApplication::TrackingZmax() const {
-  return mRmax;
+  return mZmax;
 }
 //________________________________________________________________________________________________
 int StGeant4Maker::InitHits() {
