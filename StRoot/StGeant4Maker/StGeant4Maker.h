@@ -29,7 +29,7 @@ class StEvtHddr;
 //______________________________________________________________________________________
 class StarMagFieldAdaptor : public TVirtualMagField {
 public:
-  void Field( const Double_t *x, Double_t *B )
+  void Field( const double *x, double *B )
   { 
     StarMagField::Instance()->BField(x,B); 
   }
@@ -37,7 +37,7 @@ public:
 //______________________________________________________________________________________
 class StarVMCApplication : public TVirtualMCApplication {
 public:
-  StarVMCApplication( const Char_t *name = "starsim", const Char_t *title="STAR VMC simulation", double zmax=DBL_MAX, double rmax=DBL_MAX );
+  StarVMCApplication( const char *name = "starsim", const char *title="STAR VMC simulation", double zmax=DBL_MAX, double rmax=DBL_MAX );
  ~StarVMCApplication(){ /* nada */ };
 
   /// Geometry construction is the responsability of the STAR chain
@@ -45,7 +45,7 @@ public:
   virtual void ConstructSensitiveDetectors();
 
   /// Misalignment of geometry.  Default false.
-  virtual Bool_t MisalignGeometry(){ return false; }
+  virtual bool MisalignGeometry(){ return false; }
 
   /// Define parameters for optical processes (optional)
   virtual void ConstructOpGeometry() { LOG_INFO << "VMC APP ConstructOpGeometry()" << endm; }
@@ -84,13 +84,13 @@ public:
   virtual void FinishEvent();
 
   /// Define maximum radius for tracking (optional)
-  virtual Double_t TrackingRmax() const { return mRmax; }
+  virtual double TrackingRmax() const { return mRmax; }
 
   /// Define maximum z for tracking (optional)
-  virtual Double_t TrackingZmax() const { return mZmax; }
+  virtual double TrackingZmax() const { return mZmax; }
 
   /// Calculate user field \a b at point \a x
-  virtual void Field(const Double_t* x, Double_t* b) const { StarMagField::Instance()->BField(x,b); }
+  virtual void Field(const double* x, double* b) const { StarMagField::Instance()->BField(x,b); }
 
   /// Define action at each step for Geane
   virtual void GeaneStepping() {;}    
