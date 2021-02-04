@@ -68,7 +68,7 @@ public:
   //void  addHit(){ mNumHits++; } 
 
   const long long numberOfHits(){ return mHits.size(); } 
-  void  addHit( DetectorHit* hit ){ mHits.push_back(hit); } 
+  void  addHit( DetectorHit* hit );//{ mHits.push_back(hit); } 
 
   std::vector<DetectorHit*>& hits(){ return mHits; }
   

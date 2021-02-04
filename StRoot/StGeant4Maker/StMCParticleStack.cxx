@@ -359,6 +359,10 @@ StarMCParticle::StarMCParticle( TParticle* part, StarMCVertex* vert ) :
   
 }
 //___________________________________________________________________________________________________________________						
+void StarMCParticle::addHit( DetectorHit* hit ) {
+  mHits.push_back( hit );
+}
+//___________________________________________________________________________________________________________________						
 StarMCVertex::StarMCVertex() : mVertex{0,0,0,0},
 			       mParent(0),
 			       mDaughters(),			   					   
