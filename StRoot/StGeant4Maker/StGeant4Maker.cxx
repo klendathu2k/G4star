@@ -1125,9 +1125,9 @@ void StGeant4Maker::Stepping(){
 
     } 
 
-    LOG_INFO << "Stopping track at z=" << vz << endm;
-    mPreviousVolume->Print();
-    mCurrentVolume->Print();
+    //    LOG_INFO << "Stopping track at z=" << vz << endm;
+    //    mPreviousVolume->Print();
+    //    mCurrentVolume->Print();
     mc->StopTrack();
     
   }
