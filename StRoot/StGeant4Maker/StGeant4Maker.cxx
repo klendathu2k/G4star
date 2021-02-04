@@ -1069,6 +1069,8 @@ int StGeant4Maker::regionTransition( int curr, int prev ) {
   //     1      2      -1     into calorimeter from tracking
   //     1      1       0     no transition
 
+  return result;
+
 }
 //________________________________________________________________________________________________
 void StarVMCApplication::Stepping(){ _g4maker -> Stepping(); }
