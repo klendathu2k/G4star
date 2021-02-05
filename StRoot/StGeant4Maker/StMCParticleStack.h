@@ -224,7 +224,7 @@ class StMCParticleStack : public TVirtualMCStack
 
   StarMCVertex* GetVertex( double vx, double vy, double vz, double vt, int proc=-1 );
 
-  StarMCParticle* GetPersistentTrack( int stackIndex ) {    return mStackToTable[ stackIndex ];  }
+  StarMCParticle* GetPersistentTrack( int stackIndex );
 
   int GetIdTruth( StarMCParticle* part ){ return mIdTruthFromParticle[part]; }
 
