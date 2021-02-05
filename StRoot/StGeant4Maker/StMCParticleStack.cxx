@@ -138,10 +138,8 @@ void StMCParticleStack::PushTrack( int toDo, int parent, int pdg,
   particle->SetWeight(weight);
   particle->SetUniqueID(mech);
 
-  // Increment primary track count
-  if ( parent<0 )    {
-      mNumPrimary++;
-    }
+  bool isPrimary = parent<0;
+  mNumPrimary += isPrimary;
 
   // Add to the stack of particles
   if ( toDo )    {
@@ -165,7 +163,7 @@ void StMCParticleStack::PushTrack( int toDo, int parent, int pdg,
   //
   // And handle region-based track persistence
   //
-  if ( agmlreg == 2 && tracing ) {
+  if ( agmlreg == 2 && tracing || isPrimary ) {
 
     StarMCVertex* vertex = GetVertex( vx, vy, vz, vt, mech );
 
@@ -194,6 +192,12 @@ void StMCParticleStack::PushTrack( int toDo, int parent, int pdg,
   }
 
 
+}
+//___________________________________________________________________________________________________________________
+StarMCParticle* StMCParticleStack::GetPersistentTrack( int stackIndex ) {    
+  auto track = mStackToTable[ stackIndex ];
+  assert(track);
+  return track;
 }
 //___________________________________________________________________________________________________________________
 StarMCVertex* StMCParticleStack::GetVertex( double vx, double vy, double vz, double vt, int proc ) {
