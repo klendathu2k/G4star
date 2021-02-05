@@ -110,8 +110,14 @@ void StMCParticleStack::PushTrack( int toDo, int parent, int pdg,
 
   // Determine whether we are in a tracking region or calorimeter region
   static auto* navigator    = gGeoManager->GetCurrentNavigator();
-         auto* node         = navigator->FindNode( vx, vy, vz );   assert(node);
-         auto* volume       = node->GetVolume();                   assert(volume);
+         auto* node         = navigator->FindNode( vx, vy, vz );   
+         auto* volume       = (node) ? node->GetVolume() : 0;
+
+	 if ( 0 == volume ) {
+	   LOG_INFO << "Attempt to push a track @ v="<< vx << "," << vy << "," << vz << " ... no node found (FindNode)" << endm;
+	   LOG_INFO << "... current path = " << navigator->GetPath() << endm;
+	   return; // drop track on the ground
+	 }
 
   // AgMLExtension* agmlext = dynamic_cast<AgMLExtension*>( node->GetUserExtension() );
   // if ( 0==agmlext ) {
