@@ -10,6 +10,8 @@
 
 #include <StarVMC/StarAgmlLib/AgMLExtension.h>
 
+#include <cassert>
+
 //____________________________________________________________________________________________
 ostream&  operator<<(ostream& os,  const TrackerHit& hit) {
 
