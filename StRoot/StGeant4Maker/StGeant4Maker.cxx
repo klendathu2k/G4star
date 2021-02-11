@@ -932,6 +932,7 @@ void StGeant4Maker::FinishEvent(){
     mytrack.eg_pid   = t->GetPdg();
     if ( pdgdata ) {
       mytrack.ge_pid = pdgdata->TrackingCode();
+      mytrack.charge = pdgdata->Charge()/3.0;
     }
     else {
       LOG_WARN << Form("Particle w/ pdgid = %i has no G3 ID (assign 0 to g2t_track::ge_pid)",t->GetPdg()) << endm;
