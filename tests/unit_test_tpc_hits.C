@@ -72,8 +72,9 @@ void unit_test_tpc_hits( int longtest=0 ) {
   
   for ( int sector=1; sector<=24; sector++ ) {
 
+    double charge = 1;
     timer.Start();
-    throw_muon_in_tpc_sector( sector );
+    throw_muon_in_tpc_sector( sector, 1 );
     time( timer.CpuTime() );
     timer.Reset();
 
@@ -84,6 +85,9 @@ void unit_test_tpc_hits( int longtest=0 ) {
     check_track( "A muon must have been processed by geant",       [=](const g2t_track_st* t){
 	std::string result = Form("sector=%i ", sector);
 	return result+PASS; 
+      });
+    check_track( "The track should carry the expected charge",     [=](const g2t_track_st* t){
+	return (t->charge == charge ) ? PASS : FAIL;
       });
     check_track( "The track should have a start vertex",           [=](const g2t_track_st* t){
       return (t->start_vertex_p>0)?PASS:FAIL;      
