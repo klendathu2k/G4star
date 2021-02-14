@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8" ?> 
+
+<!DOCTYPE note [
+<!ENTITY WORKINGDIR "/star/u/jwebb/work/2021/01-04-2021-g4star-eval/G4star.asan" >
+<!ENTITY OUTPUTDIR  "/star/simu/simu/jwebb/geant4star/pythia-test-sample/" >
+<!ENTITY OUTDIR     "out2">
+<!ENTITY LOGDIR     "log2">
+<!ENTITY NEVENT     "25"> 
+<!ENTITY NJOBS      "400">
+<!ENTITY VERTEX     "--vertex:x=0.1 --vertex:y=-0.1 --vertex:sigmaz=20.0" >
+<!ENTITY DATETIME   "20201220">
+]>
+
+<job name="geant4star_stress" 
+     nProcesses="&NJOBS;"
+     maxFilesPerProcess="1"
+     filesPerHour="10"
+     simulateSubmission="false">
+
+  <command>
+
+    setup 64b
+    starver eval
+#   source /star/simu/simu/root6.16.00/bin/thisroot.csh 
+    setup root 6.16.00
+    source /star/simu/simu/geant4.10.3.3/bin/geant4.csh /star/simu/simu/geant4.10.3.3/bin
+    setenv ROOT_INCLUDE_PATH $STAR/.$STAR_HOST_SYS/include/:$STAR/StRoot/StStarLogger/
+    setenv ASAN_OPTIONS abort_on_error=true
+
+    hostname 
+
+    cp -R &WORKINGDIR;/geant4star .
+    cp -R &WORKINGDIR;/macros .
+    cp -R &WORKINGDIR;/tests .
+    cp -R &WORKINGDIR;/.$STAR_HOST_SYS .
+
+    geant4star -q -b &VERTEX; --sdt&DATETIME; --seed=${JOBINDEX} --output=pythia8_minb_${JOBINDEX}_&NEVENT;evts.geant.root macros/pythia8.C tests/unit_test_pythia8.C\(&NEVENT;\)     &gt;&amp; pythia8_minb_${JOBINDEX}_&NEVENT;evts.g4star.log
+
+    cp *.log &OUTPUTDIR;/&LOGDIR;
+  
+  </command>
+
+  <stdout URL="file:&OUTPUTDIR;/&LOGDIR;/$JOBID.out" />
+  <stderr URL="file:&OUTPUTDIR;/&LOGDIR;/$JOBID.err" />
+
+  <Generator><Location>./jobs/</Location></Generator>
+
+  <output fromScratch="*.{fzd,root}"	  toURL="&OUTPUTDIR;/&OUTDIR;/" />
+
+ 
+</job>
