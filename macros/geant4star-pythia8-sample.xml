@@ -3,10 +3,10 @@
 <!DOCTYPE note [
 <!ENTITY WORKINGDIR "/star/u/jwebb/work/2021/01-04-2021-g4star-eval/G4star.asan" >
 <!ENTITY OUTPUTDIR  "/star/simu/simu/jwebb/geant4star/pythia-test-sample/" >
-<!ENTITY OUTDIR     "out2">
-<!ENTITY LOGDIR     "log2">
-<!ENTITY NEVENT     "25"> 
-<!ENTITY NJOBS      "400">
+<!ENTITY OUTDIR     "v0.9-alpha-2/out">
+<!ENTITY LOGDIR     "v0.9-alpha-2/log">
+<!ENTITY NEVENT     "500"> 
+<!ENTITY NJOBS      "2000">
 <!ENTITY VERTEX     "--vertex:x=0.1 --vertex:y=-0.1 --vertex:sigmaz=20.0" >
 <!ENTITY DATETIME   "20201220">
 ]>
