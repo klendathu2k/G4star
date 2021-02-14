@@ -634,7 +634,7 @@ int StGeant4Maker::InitRun( int /* run */ ){
   StarPrimaryMaker* primarymk   = dynamic_cast<StarPrimaryMaker*> (GetMaker("PrimaryMaker"));
   if (primarymk) { 
     primarymk->SetVertex( DAttr("vertex:x"), DAttr("vertex:y"), DAttr("vertex:z") );
-    primarymk->SetVertex( DAttr("vertex:sigmax"), DAttr("vertex:sigmay"), DAttr("vertex:sigmaz") );
+    primarymk->SetSigma ( DAttr("vertex:sigmax"), DAttr("vertex:sigmay"), DAttr("vertex:sigmaz") );
   }
   else {
     LOG_FATAL << "Primary event generator not registered" << endm;
