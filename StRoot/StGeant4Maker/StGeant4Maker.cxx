@@ -463,6 +463,13 @@ StGeant4Maker::StGeant4Maker( const char* nm ) :
   SetAttr("Scoring:Zmax",2000.0);
   SetAttr("Scoring:Emin",0.01);
 
+  SetAttr("vertex:x",0.0);
+  SetAttr("vertex:y",0.0);
+  SetAttr("vertex:z",0.0);
+  SetAttr("vertex:sigmax",0.0);
+  SetAttr("vertex:sigmay",0.0);
+  SetAttr("vertex:sigmaz",0.0);
+
 
   SetAttr( "runnumber", 1 );
 
@@ -600,12 +607,14 @@ int StGeant4Maker::Init() {
 //________________________________________________________________________________________________
 int StGeant4Maker::InitRun( int /* run */ ){
 
+  auto result = kStOK;
+
   // Get magnetic field scale
   double field = DAttr("field"); /* kG */ 
 
   if ( 0 == StarMagField::Instance() ) new StarMagField( StarMagField::kMapped, field / 5.0 );
 
-  if ( 0.0 == field ) { 
+  if ( 0.0 == field ) { // TODO: Not sure about the logic here... 
     // field = St_MagFactorC::instance()->ScaleFactor();
     // if ( TMath::Abs(field)<1E-3 ) field = 1E-3;  
     StarMagField::Instance()->SetFactor(field);
@@ -621,7 +630,19 @@ int StGeant4Maker::InitRun( int /* run */ ){
     SetOutput(mEventHeader);                      // Declare this event header for output
   }
 
-  return kStOK;
+  // Obtain pointer to the primary maker
+  StarPrimaryMaker* primarymk   = dynamic_cast<StarPrimaryMaker*> (GetMaker("PrimaryMaker"));
+  if (primarymk) { 
+    primarymk->SetVertex( DAttr("vertex:x"), DAttr("vertex:y"), DAttr("vertex:z") );
+    primarymk->SetVertex( DAttr("vertex:sigmax"), DAttr("vertex:sigmay"), DAttr("vertex:sigmaz") );
+  }
+  else {
+    LOG_FATAL << "Primary event generator not registered" << endm;
+    result = kStFatal;
+  }
+  
+
+  return result;
 }
 //________________________________________________________________________________________________
 void StarVMCApplication::ConstructGeometry(){ 
