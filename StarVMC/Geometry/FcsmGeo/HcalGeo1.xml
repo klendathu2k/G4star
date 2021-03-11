@@ -274,7 +274,7 @@
     <Par name="BIRK1" value="1."  />
     <Par name="BIRK2" value="0.013"  />
     <Par name="BIRK3" value="9.6E-6"  />
-    <Instrument block="HSCI" user="1" >
+    <Instrument block="HSCI" >
       <Hit meas="birk" nbits="0" min="0" max="6.0"  />
       <Hit meas="HSCA" nbits="0" min="0" max="0.6"  />
       <Hit meas="HSCB" nbits="0" min="0" max="3.0"  />
@@ -335,50 +335,6 @@
       Set EmCuts (HCUT)
     </Export>
   </Block>
-
-  <UserHit name="HSCA">
-    <Use struct="HGEO" />
-
-    auto dx = hgeo.dxsci / 2.0;
-    auto dy = hgeo.dysci / 2.0;
-    auto dz = hgeo.nlayer * hgeo.dzlay / 2.0;
-
-    return 1.0;
-    
-  </UserHit>
-
-  <UserHit name="HSCB">
-    <Use struct="HGEO" />
-
-    auto dx = hgeo.dxsci / 2.0;
-    auto dy = hgeo.dysci / 2.0;
-    auto dz = hgeo.nlayer * hgeo.dzlay / 2.0;
-
-    return 2.0;    
-    
-  </UserHit>
-
-  <UserHit name="HSCC">
-    <Use struct="HGEO" />
-
-    auto dx = hgeo.dxsci / 2.0;
-    auto dy = hgeo.dysci / 2.0;
-    auto dz = hgeo.nlayer * hgeo.dzlay / 2.0;
-    
-    return 3.0;
-
-  </UserHit>
-
-  <UserHit name="HSCD">
-    <Use struct="HGEO" />
-
-    auto dx = hgeo.dxsci / 2.0;
-    auto dy = hgeo.dysci / 2.0;
-    auto dz = hgeo.nlayer * hgeo.dzlay / 2.0;
-
-    return 4.0;
-    
-  </UserHit>
   
 </Module>
 

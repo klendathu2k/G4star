@@ -151,7 +151,7 @@
       <Component name="Sodium"    a="22.99"   z="11" w="0.01"   />
       <Component name="Aluminium" a="26.98"   z="13" w="0.03"   />
       <Component name="Potassium" a="39.098"  z="19" w="0.01"   />
-      <Component name="Calcium"   a="40.078"  z="20" w="0.20"    />
+      <Component name="Calcium"   a="40.078"  z="20" w="0.2"    />
       <Component name="Iron"      a="55.85"   z="26" w="0.014"  />
     </Mixture>
             

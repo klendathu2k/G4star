@@ -72,15 +72,6 @@
 
     </Setup>
 
-    <Setup  name   = "SCON14a"  simu="2"
-	    comment= "Default configuration for the SVT support cone"
-	    module = "SconGeo"
-	    onoff  = "on" > 
-
-      <Init struct="svtg" var="conever" value="4.0" />      
-
-    </Setup>
-
 
 
 
