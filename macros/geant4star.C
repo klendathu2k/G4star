@@ -46,8 +46,10 @@ bool hasRuntimeArg( const char* arg_ ) {
   return result;
 }
 
-void loadStar(const Char_t *mytag="dev2021", Bool_t agml = true  )
+void loadStar(const Char_t *_mytag="dev2021", Bool_t agml = true  )
 {
+
+  TString mytag = _mytag;
 
   gROOT->ProcessLine("chain = new StBFChain();");
   gROOT->ProcessLine("chain->cd();");
@@ -80,7 +82,6 @@ void loadStar(const Char_t *mytag="dev2021", Bool_t agml = true  )
   // Set the chain options
   gROOT->ProcessLine(Form("chain->SetFlags(\"%s\");",chainOpts.Data()));
 
-  // Find the output filename, if given, and set as the output
   TString output = "";
   for ( int i=0; i<gApplication->Argc();i++ ) {
     TString arg = gApplication->Argv(i);  
@@ -92,11 +93,15 @@ void loadStar(const Char_t *mytag="dev2021", Bool_t agml = true  )
       if ( arg.Contains("=") ) {
 	TString key = arg.Tokenize("=")->At(0)->GetName();
 	TString val = arg.Tokenize("=")->At(1)->GetName();
-	std::cout << " key = [" << key.Data() << "] value = " << val.Data() << std::endl;
+	//	std::cout << " key = [" << key.Data() << "] value = " << val.Data() << std::endl;
+	// Find the output filename, if given, and set as the output
 	if ( key=="output" ){
 	  output = val;
 	  gROOT->ProcessLine(Form("chain->Set_IO_Files(\"\",\"%s\");",output.Data()));
-	  break;
+	  //break; 
+	}
+	if ( key=="geometry" ) {
+	  mytag = val;
 	}
       }
     }
@@ -168,7 +173,10 @@ void loadStar(const Char_t *mytag="dev2021", Bool_t agml = true  )
 	TString key = arg.Tokenize("=")->At(0)->GetName();
 	TString val = arg.Tokenize("=")->At(1)->GetName();
 
-	std::cout << "geant4star commandline option " << key.Data() << " = " << val.Data() << std::endl;
+	if ( key=="geometry" ) continue; // action already taken
+	if ( key=="output"   ) continue; // ... ditto
+
+	//	std::cout << "geant4star commandline option " << key.Data() << " = " << val.Data() << std::endl;
 
 	// Process RNG seed
 	if ( key=="seed" ) {
@@ -180,12 +188,6 @@ void loadStar(const Char_t *mytag="dev2021", Bool_t agml = true  )
 	if ( key=="rng" ) {
 	  __rngName = val;
 	  gMessMgr->Info() << "Setting RNG --rng=" << __rngName.Data() << endm;	  
-	  continue;
-	}
-
-	// Process output file
-	if ( arg.Contains("output") ) {
-	  /* nada */ 
 	  continue;
 	}
 
@@ -205,17 +207,21 @@ void loadStar(const Char_t *mytag="dev2021", Bool_t agml = true  )
   const char* cmds[] = { 
 
     // Geometry instantiation
-    "TString __geometry_tag = \"dev2021\";"
+    //"TString __geometry_tag = \"dev2021\";"
     "AgModule::SetStacker( new StarTGeoStacker() );"
     "StarGeometry::Construct(__geometry_tag);"
-    "gGeoManager->Export(\"y2014x.root\");"
-    "gGeoManager->Export(\"y2014x.C\");"
+    //    "gGeoManager->Export(\"y2014x.root\");"
+    //    "gGeoManager->Export(\"y2014x.C\");"
 
   };
 
+  gROOT->ProcessLine( Form("TString __geometry_tag = \"%s\";", mytag.Data() ) );
   for ( auto cmd : cmds ) {
     gROOT->ProcessLine( cmd );
   }
+
+  
+
 
 }
 
