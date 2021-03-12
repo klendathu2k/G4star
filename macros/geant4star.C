@@ -50,6 +50,7 @@ void loadStar(const Char_t *_mytag="dev2021", Bool_t agml = true  )
 {
 
   TString mytag = _mytag;
+  bool  __export = false;
 
   gROOT->ProcessLine("chain = new StBFChain();");
   gROOT->ProcessLine("chain->cd();");
@@ -62,6 +63,7 @@ void loadStar(const Char_t *_mytag="dev2021", Bool_t agml = true  )
   for ( int i=0; i<gApplication->Argc();i++ ) {
     TString arg = gApplication->Argv(i);
     if ( arg.Contains("--web") || arg.Contains("notebook") ) continue;
+    if ( arg=="--export" ) { __export = true; continue; } // exports geometry
     // Parse "--" style options for ourselves
     if ( arg.Contains("--") ) {
       arg.ReplaceAll("--"," "); // n.b. the space pads out the chain options
@@ -133,8 +135,7 @@ void loadStar(const Char_t *_mytag="dev2021", Bool_t agml = true  )
     auto s = ( dynamic_cast<TObjString*>( _s ) ) -> String() ; // annoying
     if ( _generatorMap[s] != "" ) {
       addGenerator( s, _generatorMap[s] );
-    }
-    
+    }    
   }
   
 
@@ -218,6 +219,10 @@ void loadStar(const Char_t *_mytag="dev2021", Bool_t agml = true  )
   gROOT->ProcessLine( Form("TString __geometry_tag = \"%s\";", mytag.Data() ) );
   for ( auto cmd : cmds ) {
     gROOT->ProcessLine( cmd );
+  }
+
+  if ( __export ) {
+    gROOT->ProcessLine(Form( "gGeoManager->Export(\"%s.root\");", mytag.Data() ));
   }
 
   
