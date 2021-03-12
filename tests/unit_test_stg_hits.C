@@ -101,8 +101,16 @@ void unit_test_stg_hits() {
       double delta = abs(t->eta-_eta);	
       return abs(t->eta-_eta)<1E-5 ?PASS:FAIL;      
     });
-  check_track( "Expect 4 hits in the dev2021 geometry",          [=](const g2t_track_st* t){
+  check_track( "Expect 4 hits on the track",                     [=](const g2t_track_st* t){
       int n = t->n_stg_hit;
+      std::string  result = FAIL;
+      if ( n==4 ) result = PASS;
+      result = Form(" n=%i ",n) + result;
+      return result;
+    });
+
+  check_track( "Expect 4 hits in the hits table",                [=](const g2t_track_st* t){
+      int n = hit_table->GetNRows();
       std::string  result = FAIL;
       if ( n==4 ) result = PASS;
       result = Form(" n=%i ",n) + result;
