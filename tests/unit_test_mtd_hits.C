@@ -303,6 +303,7 @@ void unit_test_mtd_hits( int longtest=0, double _pt=25.0 ) {
   std::cout << std::endl << std::endl;
 
   // Print out energy deposition
+  if (0)
   {
   
     double _mean          = boost::accumulators::mean(edep);
@@ -320,6 +321,7 @@ void unit_test_mtd_hits( int longtest=0, double _pt=25.0 ) {
   }
 
   // Print out step sizes
+  if (0) 
   {
   
     double _mean          = boost::accumulators::mean(step);
@@ -336,6 +338,7 @@ void unit_test_mtd_hits( int longtest=0, double _pt=25.0 ) {
   }
 
   // Print out time per track
+  if (0)
   {
   
     double _mean          = boost::accumulators::mean(time);
