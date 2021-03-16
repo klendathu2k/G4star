@@ -452,6 +452,8 @@ StGeant4Maker::StGeant4Maker( const char* nm ) :
   //  SetAttr( "G4VmcOpt:Process", "stepLimiter+stackPopper" ); // special process
   SetAttr( "AgMLOpt:TopVolume", "HALL" );
   SetAttr( "Stepping:Punchout:Stop", 1 ); // 0=no action, 1=track stopped, 2=track stopped and re-injected            
+  SetAttr( "Stepping:Punchout:Rmin", 223.49 ); // min radius applied to punchout logic
+  SetAttr( "Stepping:Punchout:Zmin", 268.75 ); // min radius applied to punchout logic
   SetAttr( "Random:G4", 12345); 
   SetAttr( "field", -5.0 );
 
@@ -1031,6 +1033,8 @@ void StGeant4Maker::PostTrack()
 void StGeant4Maker::UpdateHistory() {
 
   static auto* navigator    = gGeoManager->GetCurrentNavigator();
+  static auto* mc           = TVirtualMC::GetMC();
+
 
   mPreviousNode   = mCurrentNode;
   mPreviousVolume = mCurrentVolume;
@@ -1062,13 +1066,13 @@ void StGeant4Maker::UpdateHistory() {
 
   if ( aprev ) {     
     mPreviousTrackingRegion = aprev->GetTracking(); 
-    // HACK override for CAVE
-    if ( aprev->GetVolumeName() == "CAVE") mPreviousTrackingRegion = 2;
+    // HACK override for CAVE, SCON
+    if ( aprev->GetVolumeName() == "CAVE" ) mPreviousTrackingRegion = 2;
   }
   if ( acurr ) { 
     mCurrentTrackingRegion  = acurr->GetTracking(); 
     // HACK override for CAVE
-    if ( acurr->GetVolumeName() == "CAVE") mCurrentTrackingRegion = 2;
+    if ( acurr->GetVolumeName() == "CAVE" ) mCurrentTrackingRegion = 2;
   }
 
 }
@@ -1077,12 +1081,19 @@ int StGeant4Maker::regionTransition( int curr, int prev ) {
   TString previous = (mPreviousNode) ? mPreviousNode->GetName() : "";
   int result = 0;
 
+  static auto mc = TVirtualMC::GetMC();
+  static double Rmin = DAttr("Stepping:Punchout:Rmin");
+  static double Zmin = DAttr("Stepping:Punchout:Zmin");
+
+
+
   // TODO:  This is a hack.  We need to update the geometry and group these three
   //        detectors underneath a single integration volume / region.
   if ( previous == "PMOD" || 
        previous == "WMOD" || 
-       previous == "HMOD" )
+       previous == "HMOD" ) {
     result = 0;
+  }
   else
     result = curr - prev;
 
@@ -1090,6 +1101,14 @@ int StGeant4Maker::regionTransition( int curr, int prev ) {
   //     2      1       1     into tracking from calorimeter
   //     1      2      -1     into calorimeter from tracking
   //     1      1       0     no transition
+
+
+ 
+ 
+ 
+    
+
+ 
 
   return result;
 
@@ -1119,8 +1138,33 @@ void StGeant4Maker::Stepping(){
   mc->TrackPosition( vx,vy,vz );
   tof = mc->TrackTime(); // because consistent interface ala TrackMomentum is hard...
 
+  bool stopped = false;
+
+  static double Rmin = DAttr("Stepping:Punchout:Rmin");
+  static double Zmin = DAttr("Stepping:Punchout:Zmin");
+
+  // Defines a tracking region which overrides the geometry module region assignment
+  auto trackingRegion = [=]()->bool {
+       
+    bool result = false;
+    
+    double x,y,z,r;
+    mc->TrackPosition( x, y, z );
+    r = TMath::Sqrt( x*x + y*y );
+    z = TMath::Abs(z);
+
+    bool tpcFiducial = r < Rmin && z < Zmin;
+    bool fwdFiducial = r < 90.0;             // 90cm is poletip donut hole
+
+    bool fcsFiducial = z > 700 && z < 1000 && TMath::Abs(x) < 150 && TMath::Abs(y) < 101.0;
+
+
+    return tpcFiducial || fwdFiducial || fcsFiducial;
+
+  };
+
   // Check if option to stop punchout tracks is enabled
-  if ( IAttr("Stepping:Punchout:Stop") && 1==transit) {
+  if ( IAttr("Stepping:Punchout:Stop") && 1==transit && !trackingRegion() ) {
     
     if ( 2==IAttr("Stepping:Punchout:Stop") ) {
 
@@ -1151,6 +1195,7 @@ void StGeant4Maker::Stepping(){
     //    mPreviousVolume->Print();
     //    mCurrentVolume->Print();
     mc->StopTrack();
+    stopped = true;
     
   }
 
@@ -1208,6 +1253,11 @@ void StGeant4Maker::Stepping(){
       
     }
 
+  }
+
+  if ( stopped ) {
+    LOG_INFO << Form("track stopped x=%f y=%f z=%f ds=%f transit=%d %d stopped=%s  %s",
+		     vx,vy,vz,mc->TrackStep(), mCurrentTrackingRegion, mPreviousTrackingRegion, (stopped)?"T":"F", mc->CurrentVolPath() ) << endm;
   }
 
 
